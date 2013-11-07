@@ -5,12 +5,23 @@ module Bot
 
   require './bot/adapter'
 
-  $logger = Logger.new(STDOUT)
-  $logger.formatter = proc do |severity, datetime, progname, message|
-    "#{severity[0]} #{datetime} | #{message}\n"
+  class << self
+    attr_accessor :log
+
+    def log
+      if !@log
+        @log = Logger.new(STDOUT)
+        @log.formatter = -> severity, datetime, progname, message do
+          "#{severity[0]} #{datetime} | #{message}\n"
+        end
+      end
+      @log
+    end
   end
 
   class Core
+    attr_reader :adapters, :plugins
+
     def initialize(bot_settings_file)
       @START_TIME = DateTime.new
       @adapters = {}
@@ -19,15 +30,14 @@ module Bot
       begin
         @settings = JSON.parse(File.read(bot_settings_file), symbolize_names: true)
       rescue => e
-        $logger.fatal "Failed to load bot settings from file #{bot_settings_file}. Check that file exists and permissions are set.\n"
-        $logger.fatal "\n\n\t#{e}\n\n\tBacktrace:\n\t#{e.backtrace.join("\n\t")}"
+        Bot.log.fatal "Failed to load bot settings from file #{bot_settings_file}. Check that file exists and permissions are set.\n"
+        Bot.log.fatal "\n\n\t#{e}\n\n\tBacktrace:\n\t#{e.backtrace.join("\n\t")}"
         abort
       end
 
-      load_objects(Proc.new { |a| load_adapter(a) }, @settings[:adapters_dir])
-      $logger.info "#{@adapters.length} adapter(s) loaded"
-      load_objects(Proc.new { |a| load_plugin(a) }, @settings[:plugins_dir])
-      $logger.info "#{@plugins.length} plugin(s) loaded"
+      load_objects(-> a { load_adapter(a) }, @settings[:adapters_dir])
+      load_objects(-> p { load_plugin(a) }, @settings[:plugins_dir])
+      Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
     end
 
     def load_objects(proc, directory)
@@ -39,7 +49,7 @@ module Bot
     end
 
     def load_adapter(adapter)
-      $logger.info "Loading adapter #{adapter}..."
+      Bot.log.info "Loading adapter #{adapter}..."
       load File.join(ROOT_DIR, @settings[:adapters_dir], adapter, "#{adapter}.rb")
       @adapters[adapter] = Bot::Adapters.const_get(adapter).new
     rescue => e
@@ -47,7 +57,7 @@ module Bot
     end
 
     def load_plugin(plugin)
-      $logger.info "Loading plugin #{plugin}..."
+      Bot.log.info "Loading plugin #{plugin}..."
       load File.join(ROOT_DIR, @settings[:plugins_dir], plugin, "#{plugin}.rb")
       @plugins[plugin] = Bot::Plugins.const_get(plugin).new
     rescue => e
