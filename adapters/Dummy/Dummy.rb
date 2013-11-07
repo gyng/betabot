@@ -1,10 +1,5 @@
-module Bot
-  module Adapters
-    class Dummy < Bot::Adapter
-      def initialize
-        @name = 'test'
-        Bot.log.info("Loaded adapter #{self.class.name}")
-      end
-    end
+class Dummy < Bot::Adapter
+  def initialize
+    super
   end
 end
