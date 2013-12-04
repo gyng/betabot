@@ -1,0 +1,17 @@
+{
+    "adapters_dir": "adapters",
+    "plugins_dir": "plugins",
+
+    "whitelist_adapters": true,
+    "whitelist_plugins": true,
+    "blacklist_adapters": false,
+    "blacklist_plugins": false,
+
+    "enabled_adapters": [
+        "dummy"
+    ],
+
+    "enabled_plugins": [
+        "dummy"
+    ]
+}

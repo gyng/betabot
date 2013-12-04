@@ -1,10 +1,7 @@
 module Fixtures
   module Bot
     def settings_fixture
-      '{
-        "adapters_dir": "adapters",
-        "plugins_dir": "plugins"
-      }'
+      File.absolute_path "spec/fixtures/data/bot_settings_fixture.json"
     end
   end
 end
