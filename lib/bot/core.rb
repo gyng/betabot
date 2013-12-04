@@ -3,8 +3,8 @@ module Bot
   require 'date'
   require 'logger'
 
-  require './bot/adapter'
-  require './bot/plugin'
+  require_relative './adapter'
+  require_relative './plugin'
 
 
   class << self

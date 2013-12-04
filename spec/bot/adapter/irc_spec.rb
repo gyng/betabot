@@ -1,6 +1,9 @@
+require 'spec_helper'
+require 'bot/core'
 require 'bot/adapter'
+require 'adapters/Dummy/Dummy'
 
-describe Bot::Adapter::IRC do
+describe Dummy do
   it 'connects to an IRC server' do
   end
 

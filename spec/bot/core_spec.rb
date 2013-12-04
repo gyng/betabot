@@ -1,4 +1,6 @@
+require 'spec_helper'
 require 'bot/core'
+require 'fixtures/bot'
 
 describe Bot::Core do
   include Fixtures::Bot
