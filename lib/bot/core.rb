@@ -33,7 +33,8 @@ module Bot
         Bot.const_set("ROOT_DIR", File.join(Dir.pwd, "lib")) unless defined?(Bot::ROOT_DIR)
         @settings = JSON.parse(File.read(bot_settings_file), symbolize_names: true)
       rescue => e
-        Bot.log.fatal "Failed to load bot settings from file #{bot_settings_file}. Check that file exists and permissions are set."
+        Bot.log.fatal "Failed to load bot settings from file #{bot_settings_file}. \
+                       Check that file exists and permissions are set."
         raise e
       end
 
@@ -50,12 +51,14 @@ module Bot
       end
     end
 
+    # Some redundancy between load_adapter and load_plugin but dynamically defining
+    # the methods is overkill for the limited number of object types
     def load_adapter(adapter)
       Bot.log.info "Loading adapter #{adapter}..."
       load File.join(ROOT_DIR, @settings[:adapters_dir], adapter.to_s, "#{adapter}.rb")
       @adapters[adapter.to_sym] = Bot::Adapter.const_get(adapter.capitalize).new
     rescue => e
-        puts "Failed to load #{adapter} - #{e}\n\t#{e.backtrace.join("\n\t")}"
+      Bot.log.warn "Failed to load #{adapter} - #{e}\n\t#{e.backtrace.join("\n\t")}"
     end
 
     def load_plugin(plugin)
@@ -63,7 +66,7 @@ module Bot
       load File.join(ROOT_DIR, @settings[:plugins_dir], plugin.to_s, "#{plugin}.rb")
       @plugins[plugin.to_sym] = Bot::Plugin.const_get(plugin.capitalize).new
     rescue => e
-        puts "Failed to load #{plugin} - #{e}\n\t#{e.backtrace.join("\n\t")}"
+      Bot.log.warn "Failed to load #{plugin} - #{e}\n\t#{e.backtrace.join("\n\t")}"
     end
   end
 end
