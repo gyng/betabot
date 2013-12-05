@@ -28,25 +28,29 @@ module Bot
     attr_reader :adapters, :plugins
     START_TIME = Time.now
 
-    def initialize(bot_settings_file)
+    def initialize(bot_settings_filename)
       @adapters = {}
       @plugins = {}
+      @settings = nil
+      @settings_filename = bot_settings_filename
+      Bot.const_set("ROOT_DIR", File.join(Dir.pwd, "lib")) unless defined?(Bot::ROOT_DIR)
 
-      begin
-        Bot.const_set("ROOT_DIR", File.join(Dir.pwd, "lib")) unless defined?(Bot::ROOT_DIR)
-        @settings = JSON.parse(File.read(bot_settings_file), symbolize_names: true)
-      rescue => e
-        Bot.log.fatal "Failed to load bot settings from file #{bot_settings_file}. \
-                       Check that file exists and permissions are set."
-        raise e
-      end
-
+      load_settings
       load_objects('adapter')
       load_objects('plugin')
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
     end
 
+    def load_settings
+      @settings = JSON.parse(File.read(@settings_filename), symbolize_names: true)
+    rescue => e
+      Bot.log.fatal "Failed to load bot settings from file #{@settings_filename}. \
+                     Check that file exists and permissions are set."
+      raise e
+    end
+
     def reload(type, name=nil)
+      load_settings
       if (type == nil)
         load_objects('adapter')
         load_objects('plugin')
