@@ -5,35 +5,33 @@ require 'fixtures/bot'
 describe Bot::Core do
   include Fixtures::Bot
 
-  context 'Adapters' do
+  context 'Objects' do
     before(:all) do
       @bot = Bot::Core.new(settings_fixture)
     end
 
-    it 'loads an adapter' do
-      @bot.load_adapter(:dummy)
-      expect(@bot.adapters).to have_key(:dummy)
+    context 'Adapters' do
+      it 'loads an adapter' do
+        @bot.load_adapter(:dummy)
+        expect(@bot.adapters).to have_key(:dummy)
+      end
+
+      it 'skips bad adapters' do
+        expect { @bot.load_adapter(:nothing) }.to raise_error
+        expect(@bot.adapters).to_not have_key(:nothing)
+      end
     end
 
-    it 'skips bad adapters' do
-      expect { @bot.load_adapter(:nothing) }.to raise_error
-      expect(@bot.adapters).to_not have_key(:nothing)
-    end
-  end
+    context 'Plugins' do
+      it 'loads a plugin' do
+        @bot.load_plugin(:dummy)
+        expect(@bot.plugins).to include :dummy
+      end
 
-  context 'Plugins' do
-    before(:all) do
-      @bot = Bot::Core.new(settings_fixture)
-    end
-
-    it 'loads a plugin' do
-      @bot.load_plugin(:dummy)
-      expect(@bot.plugins).to include :dummy
-    end
-
-    it 'skips bad plugins' do
-      expect { @bot.load_plugin(:nothing) }.to raise_error
-      expect(@bot.adapters).to_not have_key(:nothing)
+      it 'skips bad plugins' do
+        expect { @bot.load_plugin(:nothing) }.to raise_error
+        expect(@bot.adapters).to_not have_key(:nothing)
+      end
     end
   end
 

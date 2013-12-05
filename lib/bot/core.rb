@@ -38,35 +38,63 @@ module Bot
         raise e
       end
 
-      load_objects(-> a { load_adapter(a) }, @settings[:adapters_dir])
-      load_objects(-> p { load_plugin(p) }, @settings[:plugins_dir])
+      load_objects('adapter')
+      load_objects('plugin')
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
     end
 
-    def load_objects(proc, directory)
-      directory = File.join(Bot::ROOT_DIR, directory)
-      Dir.foreach(directory) do |f|
+    def get_objects_dir(type)
+      File.join(Bot::ROOT_DIR, @settings["#{type}s_dir".to_sym])
+    end
+
+    def load_objects(type)
+      objects_dir = get_objects_dir(type)
+      Dir.foreach(objects_dir) do |f|
         next if f == '.' || f == '..'
-        proc.call(f) if File.directory? File.join(directory, f)
+        load_curry(type).call(f) if File.directory?(File.join(objects_dir, f))
       end
     end
 
-    # Some redundancy between load_adapter and load_plugin but dynamically defining
-    # the methods is overkill for the limited number of object types
+    # Loads object type and adds a reference to it
+    def load_curry(type)
+      Proc.new do |f|
+        begin
+          Bot.log.info "Loading #{type} #{f}..."
+          path =  File.join(get_objects_dir(type), f.to_s)
+          load File.join(path, "#{f}.rb")
+          # Initialize the loaded object
+          object = Bot.module_eval("#{type.capitalize}").const_get(f.capitalize).new
+          # And store a reference to that object in @types (eg. @plugins)
+          instance_eval("@#{type}s")[f.to_sym] = object
+        rescue => e
+          Bot.log.warn "Failed to load #{f} - #{e}\n\t#{e.backtrace.join("\n\t")}"
+        end
+      end
+    end
+
     def load_adapter(adapter)
-      Bot.log.info "Loading adapter #{adapter}..."
-      load File.join(ROOT_DIR, @settings[:adapters_dir], adapter.to_s, "#{adapter}.rb")
-      @adapters[adapter.to_sym] = Bot::Adapter.const_get(adapter.capitalize).new
-    rescue => e
-      Bot.log.warn "Failed to load #{adapter} - #{e}\n\t#{e.backtrace.join("\n\t")}"
+      load_curry('adapter').call(adapter)
     end
 
     def load_plugin(plugin)
-      Bot.log.info "Loading plugin #{plugin}..."
-      load File.join(ROOT_DIR, @settings[:plugins_dir], plugin.to_s, "#{plugin}.rb")
-      @plugins[plugin.to_sym] = Bot::Plugin.const_get(plugin.capitalize).new
-    rescue => e
-      Bot.log.warn "Failed to load #{plugin} - #{e}\n\t#{e.backtrace.join("\n\t")}"
+      load_curry('plugin').call(plugin)
+    end
+
+    def reload(type, name=nil)
+      if (type == nil)
+        load_objects('adapter')
+        load_objects('plugin')
+      elsif (name == nil)
+        load_objects(type)
+      else
+        load_curry(type).call(name)
+      end
+    end
+
+    def restart
+    end
+
+    def shutdown
     end
   end
 end
