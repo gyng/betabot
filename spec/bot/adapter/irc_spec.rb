@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'bot/core'
 require 'bot/adapter'
-require 'adapters/Dummy/Dummy'
+require 'adapters/irc/irc'
 
 describe Dummy do
   it 'connects to an IRC server' do

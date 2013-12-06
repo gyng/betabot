@@ -11,7 +11,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def send_data(data)
-    Bot.log.info "#{self.class.name}\n\t-> #{data}"
+    Bot.log.info "#{self.class.name}\n\t#{'->'.green} #{data}"
     super data + "\n"
   end
 
@@ -21,7 +21,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     @buffer << data
 
     while line = @buffer.slice!(/(.+)\r?\n/)
-      Bot.log.info "#{self.class.name}\n\t<- #{line.chomp}"
+      Bot.log.info "#{self.class.name}\n\t#{'<-'.cyan} #{line.chomp}"
       handle_message(parse_data(line))
     end
   end
@@ -33,7 +33,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     privm_regex = /^:(?<sender>.+)!(?<real_name>.+)@(?<hostname>.+)/
     origin      = self
     raw         = data
-    text     = data.split(' :').last.chomp
+    text        = data.split(' :').last.chomp
     data        = data.split(' ')
 
     if data[0] == 'PING'

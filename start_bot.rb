@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'bundler/setup'
-Bundler.require(:default)
+# Bundler.require(:default)
 
 require 'eventmachine'
 require './lib/bot/core'

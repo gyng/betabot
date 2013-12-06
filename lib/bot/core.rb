@@ -2,6 +2,11 @@ module Bot
   require 'json'
   require 'date'
   require 'logger'
+  require 'colorize'
+
+  # require 'rbconfig'
+  # if (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
+  # end
 
   require_relative './adapter'
   require_relative './plugin'
@@ -14,7 +19,15 @@ module Bot
         @log = Logger.new(STDOUT)
         @log.level = Logger::WARN if ENV['TEST'] # Set in spec_helper.rb
         @log.formatter = -> severity, datetime, progname, message do
-          "#{severity[0]} #{datetime} | #{message}\n"
+          color = case severity
+            when "FATAL";   :red
+            when "ERROR";   :red
+            when "WARN";    :red
+            when "INFO";    :default
+            when "DEBUG";   :default
+            when "UNKNOWN"; :default
+          end
+          "#{(severity[0] + ' ' + datetime.to_s + ' | ').colorize(color)}#{message}\n"
         end
       end
       @log
