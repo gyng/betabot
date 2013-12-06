@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'eventmachine'
 require 'bot/core'
 require 'fixtures/bot'
 
@@ -6,46 +7,54 @@ describe Bot::Core do
   include Fixtures::Bot
 
   context 'Objects' do
-    before(:all) do
-      @bot = Bot::Core.new(settings_fixture)
-    end
-
     context 'Adapters' do
       it 'loads an adapter' do
-        @bot.load_adapter(:dummy)
-        expect(@bot.adapters).to have_key(:dummy)
+        EM.run do
+          bot = Bot::Core.new(settings_filename_fixture)
+          bot.load_adapter(:dummy)
+          expect(bot.adapters).to have_key(:dummy)
+          EM.stop
+        end
       end
 
       it 'skips bad adapters' do
-        expect { @bot.load_adapter(:nothing) }.to raise_error
-        expect(@bot.adapters).to_not have_key(:nothing)
+        EM.run do
+          bot = Bot::Core.new(settings_filename_fixture)
+          expect { bot.load_adapter(:nothing) }.to raise_error
+          expect(bot.adapters).to_not have_key(:nothing)
+          EM.stop
+        end
       end
     end
 
     context 'Plugins' do
       it 'loads a plugin' do
-        @bot.load_plugin(:dummy)
-        expect(@bot.plugins).to include :dummy
+        EM.run do
+          bot = Bot::Core.new(settings_filename_fixture)
+          bot.load_plugin(:dummy)
+          expect(bot.plugins).to have_key(:dummy)
+          EM.stop
+        end
       end
 
       it 'skips bad plugins' do
-        expect { @bot.load_plugin(:nothing) }.to raise_error
-        expect(@bot.adapters).to_not have_key(:nothing)
+        EM.run do
+          bot = Bot::Core.new(settings_filename_fixture)
+          expect { bot.load_plugin(:nothing) }.to raise_error
+          expect(bot.adapters).to_not have_key(:nothing)
+          EM.stop
+        end
       end
     end
   end
 
   context 'Settings' do
-    before do
-      @bot = Bot::Core.new(settings_fixture)
-    end
-
     it 'loads settings' do
-      expect(@bot.settings.to_json).to eq settings_fixture
-    end
-
-    it 'connects to enabled adapters' do
-      expect(@bot.active_adapters[0].class).to eq Bot::Adapter::Dummy
+      EM.run do
+        bot = Bot::Core.new(settings_filename_fixture)
+        expect(bot.settings).to eq settings_fixture
+        EM.stop
+      end
     end
 
     pending 'does not load adapters in blacklist' do
@@ -56,18 +65,15 @@ describe Bot::Core do
   end
 
   context 'Reload' do
-    it 'reloads plugins' do
-      bot = Bot::Core.new(settings_fixture)
+    pending 'reloads plugins' do
+      bot = Bot::Core.new(settings_filename_fixture)
       plugins = bot.plugins
-      bot.settings = extra_plugin_settings_fixture
+      bot.settings = settings_fixture
       bot.reload
       expect(bot.plugins.length).to be eq plugins.length + 1
     end
 
-    # pending 'reloads adapters' do
-    # end
+    pending 'reloads adapters' do
+    end
   end
-
-  # context 'Shutdown' do
-  # end
 end

@@ -1,7 +1,11 @@
 module Fixtures
   module Bot
-    def settings_fixture
+    def settings_filename_fixture
       File.absolute_path "spec/fixtures/data/bot_settings_fixture.json"
+    end
+
+    def settings_fixture
+      JSON.parse(File.read("spec/fixtures/data/bot_settings_fixture.json"), symbolize_names: true)
     end
 
     def whitelist_settings_fixture

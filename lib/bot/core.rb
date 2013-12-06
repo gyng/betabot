@@ -38,7 +38,7 @@ module Bot
     require_relative 'core/object_loader'
     include Bot::Core::ObjectLoader
 
-    attr_reader :adapters, :plugins
+    attr_reader :adapters, :plugins, :settings, :enabled_adapters, :enabled_plugins
     START_TIME = Time.now
 
     def initialize(bot_settings_filename)

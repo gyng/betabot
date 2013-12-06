@@ -1,5 +1,5 @@
 class Bot::Adapter::Irc::Handler < EM::Connection
-  def initialize(ssl)
+  def initialize(ssl=false)
     @ssl = ssl
     @registered = false
     @buffer = ''
@@ -11,7 +11,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def send_data(data)
-    Bot.log.info "#{self.class.name}\n\t#{'->'.green} #{data}"
+    puts 'x'
+    Bot.log.info "#{self.class.name}\n\t#{'->'.magenta} #{data}"
     super data + "\n"
   end
 
