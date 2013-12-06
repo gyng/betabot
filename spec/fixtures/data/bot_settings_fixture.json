@@ -1,17 +1,15 @@
 {
-    "adapters_dir": "adapters",
-    "plugins_dir": "plugins",
+    "adapters": {
+        "dir": "adapters",
+        "load": "all",
+        "whitelist": [],
+        "blacklist": []
+    },
 
-    "whitelist_adapters": true,
-    "whitelist_plugins": true,
-    "blacklist_adapters": false,
-    "blacklist_plugins": false,
-
-    "enabled_adapters": [
-        "dummy"
-    ],
-
-    "enabled_plugins": [
-        "dummy"
-    ]
+    "plugins": {
+        "dir": "plugins",
+        "load": "all",
+        "whitelist": [],
+        "blacklist": []
+    }
 }

@@ -2,6 +2,7 @@ source 'http://rubygems.org'
 
 gem 'nokogiri'
 gem 'mechanize'
+gem 'eventmachine'
 # gem 'linguistics'
 # gem "activesupport-inflector", "~> 0.1.0"
 

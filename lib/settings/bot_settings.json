@@ -1,4 +1,15 @@
 {
-    "adapters_dir": "adapters",
-    "plugins_dir": "plugins"
+    "adapters": {
+        "dir": "adapters",
+        "load": "all",
+        "whitelist": [],
+        "blacklist": []
+    },
+
+    "plugins": {
+        "dir": "plugins",
+        "load": "all",
+        "whitelist": [],
+        "blacklist": []
+    }
 }

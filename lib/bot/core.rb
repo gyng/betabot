@@ -39,6 +39,13 @@ module Bot
       load_objects('adapter')
       load_objects('plugin')
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
+
+      start_adapter('irc')
+    end
+
+    def start_adapter(adapter_regex='.*')
+      to_start = @adapters.select { |k, v| k.to_s.match(/#{adapter_regex}/i) }
+      to_start.each { |k, v| v.connect }
     end
 
     def load_settings
