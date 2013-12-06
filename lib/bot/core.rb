@@ -2,6 +2,7 @@ module Bot
   require 'json'
   require 'date'
   require 'logger'
+  require 'timeout'
   require 'colorize'
 
   # require 'rbconfig'
@@ -61,12 +62,25 @@ module Bot
       to_start.each { |k, v| v.connect }
     end
 
+    def stop_adapters(adapter_regex='.*')
+      to_stop = @adapters.select { |k, v| k.to_s.match(/#{adapter_regex}/i) }
+      to_stop.each { |k, v| v.shutdown }
+    end
+
     def load_settings
       @settings = JSON.parse(File.read(@settings_filename), symbolize_names: true)
     rescue => e
       Bot.log.fatal "Failed to load bot settings from file #{@settings_filename}. \
                      Check that file exists and permissions are set."
       raise e
+    end
+
+    def trigger_plugin(trigger)
+      Bot.log.warn("plugin #{trigger}")
+      case trigger
+      when 'shutdown'; shutdown
+      when 'restart'; restart
+      end
     end
 
     def reload(type, name=nil)
@@ -82,9 +96,14 @@ module Bot
     end
 
     def restart
+      $restart = true
+      shutdown
     end
 
     def shutdown
+      # We don't want this to take too long, but give adapters some time to shutdown
+      # Timeout::timeout(1) { stop_adapters }
+      EM.stop
     end
   end
 end

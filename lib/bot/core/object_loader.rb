@@ -20,7 +20,7 @@ module Bot::Core::ObjectLoader
         path =  File.join(get_objects_dir(type), f.to_s)
         load File.join(path, "#{f}.rb")
         # Initialize the loaded object
-        object = Bot.module_eval("#{type.capitalize}").const_get(f.capitalize).new
+        object = Bot.module_eval("#{type.capitalize}").const_get(f.capitalize).new(self)
         # And store a reference to that object in @types (eg. @plugins)
         instance_eval("@#{type}s")[f.to_sym] = object
       rescue => e

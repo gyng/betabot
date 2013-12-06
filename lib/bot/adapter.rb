@@ -1,7 +1,8 @@
 class Bot::Adapter
-  def initialize
+  def initialize(bot=nil)
+    @bot = bot
     Bot.log.info "Loaded adapter #{self.class.name}"
-    super
+    # super
   end
 
   def connect
@@ -9,5 +10,12 @@ class Bot::Adapter
   end
 
   def disconnect
+  end
+
+  def shutdown
+  end
+
+  def trigger_plugin(trigger)
+    @bot.trigger_plugin(trigger)
   end
 end

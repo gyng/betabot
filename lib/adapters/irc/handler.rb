@@ -1,20 +1,19 @@
 class Bot::Adapter::Irc::Handler < EM::Connection
-  def initialize(adapter, ssl=false)
+  def initialize(adapter, s=Hash.new(false))
     @adapter = adapter
-    @ssl = ssl
+    @s = s
     @registered = false
     @ping_state = :inactive
     @buffer = ''
   end
 
   def connection_completed
-    start_tls if @ssl
+    start_tls if @s[:ssl]
     register
     start_ping_timer(120, 30)
   end
 
   def send_data(data)
-    puts 'x'
     Bot.log.info "#{self.class.name}\n\t#{'->'.magenta} #{data}"
     super data + "\n"
   end
@@ -31,8 +30,6 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def parse_data(data)
-    # register if !@registered
-
     sender, real_name, hostname, type, channel = nil
     privm_regex = /^:(?<sender>.+)!(?<real_name>.+)@(?<hostname>.+)/
     origin      = self
@@ -90,6 +87,18 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     when :"001"
       @registered = true
       send("JOIN #fauxbot")
+    when :privmsg
+      check_trigger(m)
+    end
+  end
+
+  def check_trigger(m)
+    # if m.text.match(/^#{s[:nick]}:.*/)
+    tokens = m.text.split(' ')
+
+    if tokens[0] == @s[:nick] + ':'
+      trigger = tokens[1]
+      @adapter.trigger_plugin(trigger)
     end
   end
 
@@ -98,12 +107,21 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     send "USER WaruiBot 0 * :Watashi wa kawaii desu."
   end
 
+  def quit(text='')
+    send "QUIT #{text}"
+  rescue
+  end
+
   def start_ping_timer(period, timeout)
     EventMachine::PeriodicTimer.new(period) do
       send "PING #{Time.now.to_f}"
       @ping_state = :wait
       EventMachine::Timer.new(timeout) do
-        Bot.log.warn 'PONG not received from server' if @ping_state == :wait
+        if @ping_state == :wait
+          Bot.log.warn "Ping timeout: PONG not received from server within #{timeout}s"
+          quit
+          @adapter.reconnect
+        end
       end
     end
   end
