@@ -1,13 +1,16 @@
 class Bot::Adapter::Irc::Handler < EM::Connection
-  def initialize(ssl=false)
+  def initialize(adapter, ssl=false)
+    @adapter = adapter
     @ssl = ssl
     @registered = false
+    @ping_state = :inactive
     @buffer = ''
   end
 
   def connection_completed
     start_tls if @ssl
     register
+    start_ping_timer(120, 30)
   end
 
   def send_data(data)
@@ -77,10 +80,13 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     end
   end
 
-  def handle_message(message)
-    case message.type
+  def handle_message(m)
+    case m.type
     when :ping
-      send "PONG #{message.sender} #{message.text}"
+      send "PONG #{m.sender} #{m.text}"
+    when :pong
+      @ping_state = :received
+      @adapter.latency = (Time.now.to_f - m.text.to_f) * 1000
     when :"001"
       @registered = true
       send("JOIN #fauxbot")
@@ -90,5 +96,15 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   def register
     send "NICK WaruiBot"
     send "USER WaruiBot 0 * :Watashi wa kawaii desu."
+  end
+
+  def start_ping_timer(period, timeout)
+    EventMachine::PeriodicTimer.new(period) do
+      send "PING #{Time.now.to_f}"
+      @ping_state = :wait
+      EventMachine::Timer.new(timeout) do
+        Bot.log.warn 'PONG not received from server' if @ping_state == :wait
+      end
+    end
   end
 end

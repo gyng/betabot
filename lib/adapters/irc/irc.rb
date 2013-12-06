@@ -1,4 +1,6 @@
 class Bot::Adapter::Irc < Bot::Adapter
+  attr_accessor :latency
+
   def initialize
     require_relative 'message'
     require_relative 'handler'
@@ -12,6 +14,6 @@ class Bot::Adapter::Irc < Bot::Adapter
   end
 
   def connect
-    EM.connect(@hostname, @port, Handler, @ssl)
+    EM.connect(@hostname, @port, Handler, self, @ssl)
   end
 end
