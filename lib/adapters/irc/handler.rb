@@ -14,7 +14,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def send_data(data)
-    Bot.log.info "#{self.class.name}\n\t#{'->'.magenta} #{data}"
+    Bot.log.info "#{self.class.name}\n\t#{'->'.green} #{data}"
     super data + "\n"
   end
 
@@ -98,7 +98,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
 
     if tokens[0] == @s[:nick] + ':'
       trigger = tokens[1]
-      @adapter.trigger_plugin(trigger)
+      @adapter.trigger_plugin(trigger, m)
     end
   end
 

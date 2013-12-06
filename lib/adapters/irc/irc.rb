@@ -59,11 +59,11 @@ class Bot::Adapter::Irc < Bot::Adapter
     connect
   end
 
-  def trigger_plugin(trigger)
+  def trigger_plugin(trigger, m)
     case trigger
     when 'reconnect'; reconnect
     when 'quit'; quit
     end
-    super(trigger)
+    super(trigger, m)
   end
 end

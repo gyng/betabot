@@ -15,7 +15,7 @@ class Bot::Adapter
   def shutdown
   end
 
-  def trigger_plugin(trigger)
-    @bot.trigger_plugin(trigger)
+  def trigger_plugin(trigger, m=nil)
+    @bot.trigger_plugin(trigger, m)
   end
 end

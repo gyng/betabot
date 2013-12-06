@@ -9,8 +9,8 @@ module Bot
   # if (RbConfig::CONFIG['host_os'] =~ /mswin|mingw|cygwin/)
   # end
 
-  require_relative './adapter'
-  require_relative './plugin'
+  require_relative 'adapter'
+  require_relative 'plugin'
 
   class << self
     attr_accessor :log
@@ -36,6 +36,7 @@ module Bot
   end
 
   class Core
+    require_relative 'core/message'
     require_relative 'core/object_loader'
     include Bot::Core::ObjectLoader
 
@@ -54,17 +55,20 @@ module Bot
       load_objects('plugin')
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
 
-      start_adapter('irc')
+      start_adapters('irc')
     end
 
-    def start_adapter(adapter_regex='.*')
-      to_start = @adapters.select { |k, v| k.to_s.match(/#{adapter_regex}/i) }
-      to_start.each { |k, v| v.connect }
+    def start_adapters(regex='.*')
+      send_to_objects(@adapters, :connect, regex)
     end
 
-    def stop_adapters(adapter_regex='.*')
-      to_stop = @adapters.select { |k, v| k.to_s.match(/#{adapter_regex}/i) }
-      to_stop.each { |k, v| v.shutdown }
+    def stop_adapters(regex='.*')
+      send_to_objects(@adapters, :shutdown, regex)
+    end
+
+    def send_to_objects(list, method, regex='.*')
+      selected = list.select { |k, v| k.to_s.match(/#{regex}/i) }
+      selected.each { |k, v| v.send(method) }
     end
 
     def load_settings
@@ -75,16 +79,23 @@ module Bot
       raise e
     end
 
-    def trigger_plugin(trigger)
-      Bot.log.warn("plugin #{trigger}")
+    def trigger_plugin(trigger, m)
       case trigger
-      when 'shutdown'; shutdown
-      when 'restart'; restart
+      when 'shutdown'
+        shutdown
+      when 'restart'
+        restart
+      else
+        # TODO trigger to plugin mapping
+        return @plugins[trigger.to_sym].call(m) if @plugins.has_key?(trigger.to_sym)
       end
+
+      nil
     end
 
     def reload(type, name=nil)
       load_settings
+
       if (type == nil)
         load_objects('adapter')
         load_objects('plugin')
@@ -102,8 +113,10 @@ module Bot
 
     def shutdown
       # We don't want this to take too long, but give adapters some time to shutdown
-      # Timeout::timeout(1) { stop_adapters }
-      EM.stop
+      EM.add_timer(1) do
+        stop_adapters
+        EM.stop
+      end
     end
   end
 end
