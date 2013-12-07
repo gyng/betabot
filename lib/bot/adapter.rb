@@ -18,4 +18,8 @@ class Bot::Adapter
   def trigger_plugin(trigger, m=nil)
     @bot.trigger_plugin(trigger, m)
   end
+
+  def publish(m)
+    @bot.publish(m)
+  end
 end

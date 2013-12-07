@@ -90,10 +90,11 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     when :privmsg
       check_trigger(m)
     end
+
+    @adapter.publish(m)
   end
 
   def check_trigger(m)
-    # if m.text.match(/^#{s[:nick]}:.*/)
     tokens = m.text.split(' ')
 
     if tokens[0] == @s[:nick] + ':'

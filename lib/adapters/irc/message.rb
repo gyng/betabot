@@ -1,4 +1,5 @@
 class Bot::Adapter::Irc::Message < Bot::Core::Message
+  attr_accessor :adapter
   attr_accessor :sender
   attr_accessor :real_name
   attr_accessor :hostname
@@ -11,11 +12,11 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
 
   def initialize
     yield self if block_given?
+    @adapter = :irc
     @time = Time.now
   end
 
   def reply(text)
-    puts 'replying'
     @origin.send "PRIVMSG #{@channel} :#{text}"
   end
 end

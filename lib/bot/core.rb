@@ -46,6 +46,8 @@ module Bot
     def initialize(bot_settings_filename)
       @adapters = {}
       @plugins = {}
+      @plugin_mapping = {}
+      @subscribed_plugins = []
       @settings = nil
       @settings_filename = bot_settings_filename
       Bot.const_set("ROOT_DIR", File.join(Dir.pwd, "lib")) unless defined?(Bot::ROOT_DIR)
@@ -86,11 +88,27 @@ module Bot
       when 'restart'
         restart
       else
-        # TODO trigger to plugin mapping
-        return @plugins[trigger.to_sym].call(m) if @plugins.has_key?(trigger.to_sym)
+        to_call = @plugin_mapping[trigger.to_sym]
+        # Plugin responds to trigger
+        return @plugins[to_call].call(m) if @plugins.has_key?(to_call)
       end
 
       nil
+    end
+
+    def publish(m)
+      # Plugin listens in to all messages
+      @subscribed_plugins.each { |p| @plugins[p].receive(m) }
+    end
+
+    def register_trigger(trigger, plugin)
+      @plugin_mapping[trigger.to_sym] = plugin.to_sym
+    end
+
+    def subscribe_plugin(plugin)
+      Bot.log.warn 'subscribing ' + plugin.to_s
+      @subscribed_plugins.push(plugin.to_sym)
+      puts @subscribed_plugins.inspect
     end
 
     def reload(type, name=nil)
