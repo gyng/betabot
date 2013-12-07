@@ -17,6 +17,11 @@ class Bot::Core::Authenticator
     password = m.args[1]
 
     if (make_hash(salt, password) == hash)
+      m.reply(
+        "Hello, #{user} (L#{user_info[:auth_level]})! You were last seen on #{user_info[:last_used]} from " +
+        "#{user_info[:last_hostname]}, logging in from #{user_info[:last_username]}."
+      )
+
       user_info[:last_used] = Time.now.utc
       user_info[:last_username] = m.sender
       user_info[:last_hostname] = m.hostname
@@ -30,8 +35,10 @@ class Bot::Core::Authenticator
   end
 
   def logout(m)
-    @authenticated_hostnames.delete(m.hostname)
-    Bot.log.info "#{user} has logged out."
+    if @authenticated_hostnames.delete(m.hostname)
+      m.reply "You have been logged out."
+      Bot.log.info "A user has logged out."
+    end
   end
 
   def auth(level, m)
