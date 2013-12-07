@@ -21,7 +21,11 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   end
 
   def args
-    @text.split(' ')[2..-1] if @text.is_a?(String)
+    if /^#{Bot::SHORT_TRIGGER}([^ ]*)/i === @text
+      @text.split(' ')[1..-1] if @text.is_a?(String)
+    else
+      @text.split(' ')[2..-1] if @text.is_a?(String)
+    end
   end
 
   def trigger

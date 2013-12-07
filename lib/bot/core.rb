@@ -49,6 +49,8 @@ module Bot
       Bot.const_set('DATABASE_DIR', File.join(Dir.pwd, 'lib', 'database'))
 
       load_settings
+
+      Bot.const_set('SHORT_TRIGGER', @settings[:short_trigger])
       @authenticator = Bot::Core::Authenticator.new
       @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3'))
       initialize_objects(:adapter)

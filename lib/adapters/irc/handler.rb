@@ -98,10 +98,9 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def check_trigger(m)
-    tokens = m.text.split(' ')
-
-    if tokens[0] == @s[:nick] + ':'
-      trigger = tokens[1]
+    if /^#{Bot::SHORT_TRIGGER}([^ ]*)/i === m.text ||
+       /^#{@s[:nick]}: ([^ ]*)/i        === m.text
+      trigger = $1
       @adapter.trigger_plugin(trigger, m)
     end
   end
