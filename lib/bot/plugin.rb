@@ -9,15 +9,15 @@ class Bot::Plugin
 
     # Default settings
     @s ||= Hash.new([])
-    @s[:trigger] = [plugin_name] unless @s.has_key?(:trigger)
+    @s[:trigger] = { plugin_name.to_sym => [:call, 0] } unless @s.has_key?(:trigger)
 
     @settings_path ||= File.join(Bot::ROOT_DIR, 'plugins', plugin_name, 'settings', 'settings.json')
     load_settings
 
-    @s[:trigger].each { |t| bot.register_trigger(t, plugin_name) } if bot
+    @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, plugin_name, *opts) } if bot
     bot.subscribe_plugin(plugin_name) if @s[:subscribe] == true
 
-    Bot.log.info("Loaded plugin #{self.class.name} with triggers #{@s[:trigger].join(', ')}")
+    Bot.log.info("Loaded plugin #{self.class.name} with triggers #{@s[:trigger].inspect}")
   end
 
   def call(m=nil)

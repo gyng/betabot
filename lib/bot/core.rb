@@ -34,6 +34,7 @@ module Bot
   class Core
     require_relative 'core/message'
     require_relative 'core/object_loader'
+    require_relative 'core/authenticator'
     include Bot::Core::ObjectLoader
 
     attr_reader :adapters, :plugins, :settings, :enabled_adapters, :enabled_plugins
@@ -42,9 +43,11 @@ module Bot
     def initialize(bot_settings_filename)
       @settings = nil
       @settings_filename = bot_settings_filename
-      Bot.const_set("ROOT_DIR", File.join(Dir.pwd, "lib")) unless defined?(Bot::ROOT_DIR)
+      Bot.const_set('ROOT_DIR',     File.join(Dir.pwd, 'lib'))
+      Bot.const_set('SETTINGS_DIR', File.join(Dir.pwd, 'lib', 'settings'))
 
       load_settings
+      @authenticator = Bot::Core::Authenticator.new
       initialize_objects(:adapter)
       initialize_objects(:plugin)
 
@@ -91,16 +94,31 @@ module Bot
     def trigger_plugin(trigger, m)
       case trigger
       when 'shutdown'
-        shutdown
+        shutdown if @authenticator.auth(5, m)
       when 'restart'
-        restart
+        restart if @authenticator.auth(5, m)
       when 'reload'
-        reload(:plugin)
-        m.reply 'Reloaded.' if m.respond_to? :reply
+        if @authenticator.auth(5, m)
+          reload(:plugin)
+          m.reply 'Reloaded.' if m.respond_to? :reply
+        end
+      when 'useradd'
+        @authenticator.make_account(m.args[0], m.args[1], m.args[2]) if @authenticator.auth(5, m)
+      when 'login'
+        @authenticator.login(m)
+      when 'logout'
+        @authenticator.logout(m)
       else
-        to_call = @plugin_mapping[trigger.to_sym]
-        # Plugin responds to trigger
-        return @plugins[to_call].call(m) if @plugins.has_key?(to_call)
+        # Check if plugin responds to trigger
+        if @plugin_mapping.has_key?(trigger.to_sym)
+          plugin = @plugin_mapping[trigger.to_sym][:plugin]
+          method = @plugin_mapping[trigger.to_sym][:method]
+          required_auth_level = @plugin_mapping[trigger.to_sym][:required_auth_level]
+
+          if @plugins.has_key?(plugin) && @authenticator.auth(required_auth_level, m)
+            return @plugins[plugin].send(method.to_sym, m)
+          end
+        end
       end
 
       nil
@@ -111,8 +129,12 @@ module Bot
       @subscribed_plugins.each { |p| @plugins[p].receive(m) }
     end
 
-    def register_trigger(trigger, plugin)
-      @plugin_mapping[trigger.to_sym] = plugin.to_sym
+    def register_trigger(trigger, plugin, method, required_auth_level)
+      @plugin_mapping[trigger.to_sym] = {
+        plugin: plugin.to_sym,
+        method: method.to_sym,
+        required_auth_level: required_auth_level.to_i
+      }
     end
 
     def subscribe_plugin(plugin)

@@ -19,4 +19,12 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   def reply(text)
     @origin.send "PRIVMSG #{@channel} :#{text}"
   end
+
+  def args
+    @text.split(' ')[2..-1] if @text.is_a?(String)
+  end
+
+  def trigger
+    @text.split(' ')[1]
+  end
 end

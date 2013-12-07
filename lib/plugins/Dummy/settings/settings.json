@@ -1,5 +1,8 @@
 {
-  "trigger": [
-    "dummy"
-  ]
+  "trigger": {
+    "dummy": [
+      "call",
+      0
+    ]
+  }
 }

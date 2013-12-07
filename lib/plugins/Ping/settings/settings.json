@@ -1,6 +1,10 @@
 {
-  "trigger": [
-    "ping"
-  ],
-  "subscribe": true
+  "trigger": {
+    "ping": [
+      "call",
+      0
+    ]
+  },
+  "subscribe": false,
+  "help": "Ping pong dong gong"
 }
