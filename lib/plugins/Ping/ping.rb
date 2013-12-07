@@ -2,7 +2,7 @@ class Bot::Plugin::Ping < Bot::Plugin
   def initialize(bot)
     # Defaults
     @s = {
-      trigger: ['dong'],
+      trigger: ['ping'],
       subscribe: false
     }
     super(bot)

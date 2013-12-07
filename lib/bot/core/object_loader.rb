@@ -5,6 +5,7 @@ module Bot::Core::ObjectLoader
   end
 
   def load_objects(type)
+    type = type.to_s
     objects_dir = get_objects_dir(type)
     Dir.foreach(objects_dir) do |f|
       next if f == '.' || f == '..'
