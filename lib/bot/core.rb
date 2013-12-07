@@ -32,12 +32,13 @@ module Bot
   end
 
   class Core
+    require_relative 'database'
     require_relative 'core/message'
     require_relative 'core/object_loader'
     require_relative 'core/authenticator'
     include Bot::Core::ObjectLoader
 
-    attr_reader :adapters, :plugins, :settings, :enabled_adapters, :enabled_plugins
+    attr_reader :adapters, :plugins, :settings, :enabled_adapters, :enabled_plugins, :shared_db
     START_TIME = Time.now
 
     def initialize(bot_settings_filename)
@@ -45,9 +46,11 @@ module Bot
       @settings_filename = bot_settings_filename
       Bot.const_set('ROOT_DIR',     File.join(Dir.pwd, 'lib'))
       Bot.const_set('SETTINGS_DIR', File.join(Dir.pwd, 'lib', 'settings'))
+      Bot.const_set('DATABASE_DIR', File.join(Dir.pwd, 'lib', 'database'))
 
       load_settings
       @authenticator = Bot::Core::Authenticator.new
+      @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3'))
       initialize_objects(:adapter)
       initialize_objects(:plugin)
 
