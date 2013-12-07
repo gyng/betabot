@@ -17,12 +17,12 @@ module Bot
         @log.level = Logger::WARN if ENV['TEST'] # Set in spec_helper.rb
         @log.formatter = -> severity, datetime, progname, message do
           color = case severity
-            when "FATAL";   :red
-            when "ERROR";   :red
-            when "WARN";    :red
-            when "INFO";    :default
-            when "DEBUG";   :default
-            when "UNKNOWN"; :default
+            when 'FATAL';   :red
+            when 'ERROR';   :red
+            when 'WARN';    :red
+            when 'INFO';    :default
+            when 'DEBUG';   :default
+            when 'UNKNOWN'; :default
           end
           "#{(severity[0] + ' ' + datetime.to_s + ' | ').colorize(color)}#{message}\n"
         end
@@ -67,15 +67,12 @@ module Bot
         load_objects(:adapter)
       end
 
-      Bot.log.warn(@subscribed_plugins.inspect)
       if type == :plugin || type == nil
-        Bot.log.warn 'reloading plulgins'
         @plugins = {}
         @plugin_mapping = {}
         @subscribed_plugins = []
         load_objects(:plugin)
       end
-      Bot.log.warn(@subscribed_plugins.inspect)
     end
 
     def start_adapters(regex='.*')

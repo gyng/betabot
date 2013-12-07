@@ -1,11 +1,16 @@
 class Bot::Plugin
   require 'fileutils'
+  require_relative 'util/settings'
+  include Bot::Util::Settings
 
   def initialize(bot=nil)
-    # Defaults
+    @bot = bot
     plugin_name = self.class.to_s.split("::").last.downcase
+
+    # Default settings
     @s ||= Hash.new([])
     @s[:trigger] = [plugin_name] unless @s.has_key?(:trigger)
+
     @settings_path ||= File.join(Bot::ROOT_DIR, 'plugins', plugin_name, 'settings', 'settings.json')
     load_settings
 
@@ -21,19 +26,5 @@ class Bot::Plugin
 
   def receive(m)
     # Receives every message from bot
-  end
-
-  def load_settings(path=@settings_path)
-    # Save defaults if no settings file exists
-    save_settings unless File.file?(@settings_path)
-    @s = JSON.parse(File.read(path), symbolize_names: true)
-  end
-
-  def save_settings(path=@settings_path)
-    if !File.directory?(File.dirname(path))
-      FileUtils.mkdir_p(File.dirname(path))
-    end
-
-    File.write(@settings_path, JSON.pretty_generate(@s))
   end
 end

@@ -5,11 +5,19 @@ class Bot::Adapter::Irc < Bot::Adapter
     require_relative 'message'
     require_relative 'handler'
 
-    @hostname = 'irc.yasashiisyndicate.org'
-    @port = 6697
-    @settings = {
-      ssl: true,
-      nick: 'WaruiBot'
+    # Default settings
+    @s = {
+      servers: [
+        {
+          enabled: true,
+          name: 'yasashii',
+          hostname: 'irc.yasashiisyndicate.org',
+          port: 6697,
+          ssl: true,
+          nick: 'WaruiBot',
+          default_channels: ['#fauxbot', '#dicks']
+        }
+      ]
     }
 
     @quit_messages = [
@@ -39,24 +47,32 @@ class Bot::Adapter::Irc < Bot::Adapter
     ]
 
     @bot = bot
-    @connection = nil
+    @connections = {}
     super
   end
 
-  def connect
-    @connection = EM.connect(@hostname, @port, Handler, self, @settings)
+  def connect(regex='.*')
+    selected = @s[:servers].select { |s| s[:name].match(/#{regex}/i) }
+
+    selected.each do |s|
+      @connections[s[:name].to_sym] = EM.connect(s[:hostname], s[:port], Handler, self, s)
+    end
   end
 
-  def quit
-    @connection.quit(@quit_messages.sample)
-    @connection.close_connection_after_writing
+  def quit(regex='.*')
+    selected = @connections.select { |k, v| k.to_s.match(/#{regex}/i) }
+    selected.each do |c|
+      c.quit(@quit_messages.sample)
+      c.close_connection_after_writing
+      @connections.delete(c)
+    end
   end
   alias :disconnect :quit
   alias :shutdown :quit
 
-  def reconnect
-    quit
-    connect
+  def reconnect(regex='.*')
+    quit(regex)
+    connect(regex)
   end
 
   def trigger_plugin(trigger, m)

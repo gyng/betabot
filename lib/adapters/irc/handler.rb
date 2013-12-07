@@ -9,12 +9,12 @@ class Bot::Adapter::Irc::Handler < EM::Connection
 
   def connection_completed
     start_tls if @s[:ssl]
-    register
+    register(@s[:nick])
     start_ping_timer(120, 30)
   end
 
   def send_data(data)
-    Bot.log.info "#{self.class.name}\n\t#{'->'.green} #{data}"
+    Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'->'.green} #{data}"
     super data + "\n"
   end
 
@@ -24,7 +24,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     @buffer << data
 
     while line = @buffer.slice!(/(.+)\r?\n/)
-      Bot.log.info "#{self.class.name}\n\t#{'<-'.cyan} #{line.chomp}"
+      Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'<-'.cyan} #{line.chomp}"
       handle_message(parse_data(line))
     end
   end
@@ -86,7 +86,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       @adapter.latency = (Time.now.to_f - m.text.to_f) * 1000
     when :"001"
       @registered = true
-      send("JOIN #fauxbot")
+      @s[:default_channels].each { |c| join(c) }
     when :privmsg
       check_trigger(m)
     end
@@ -103,9 +103,27 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     end
   end
 
-  def register
-    send "NICK WaruiBot"
-    send "USER WaruiBot 0 * :Watashi wa kawaii desu."
+  def join(channel)
+    send "JOIN #{channel}"
+  end
+
+  def part(channel)
+    send "PART #{channel}"
+  end
+
+  def nick(nick)
+    send "NICK #{nick}"
+  end
+
+  def say_to(interlocutor, text)
+    send "PRIVMSG #{interlocutor} :#{text}"
+  end
+
+  def register(nick)
+    # USER <username> <hostname> <servername> <realname> (RFC 1459)
+    # USER <user> <mode> <unused> <realname> (RFC 2812)
+    nick nick
+    send "USER #{nick} 0 * :Watashi wa kawaii desu."
   end
 
   def quit(text='')
