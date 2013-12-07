@@ -61,7 +61,8 @@ class Bot::Adapter::Irc < Bot::Adapter
 
   def quit(regex='.*')
     selected = @connections.select { |k, v| k.to_s.match(/#{regex}/i) }
-    selected.each do |c|
+
+    selected.each_value do |c|
       c.quit(@quit_messages.sample)
       c.close_connection_after_writing
       @connections.delete(c)

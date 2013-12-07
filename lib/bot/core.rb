@@ -118,7 +118,6 @@ module Bot
     def subscribe_plugin(plugin)
       Bot.log.info "Subscribing plugin #{plugin.to_s}"
       @subscribed_plugins.push(plugin.to_sym)
-      puts @subscribed_plugins.inspect
     end
 
     def reload(type, name=nil)

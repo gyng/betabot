@@ -1,4 +1,7 @@
 class Bot::Adapter::Irc::Handler < EM::Connection
+  require_relative 'rfc2812'
+  include Bot::Adapter::Irc::RFC2812
+
   def initialize(adapter, s=Hash.new(false))
     @adapter = adapter
     @s = s
@@ -103,32 +106,9 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     end
   end
 
-  def join(channel)
-    send "JOIN #{channel}"
-  end
-
-  def part(channel)
-    send "PART #{channel}"
-  end
-
-  def nick(nick)
-    send "NICK #{nick}"
-  end
-
-  def say_to(interlocutor, text)
-    send "PRIVMSG #{interlocutor} :#{text}"
-  end
-
   def register(nick)
-    # USER <username> <hostname> <servername> <realname> (RFC 1459)
-    # USER <user> <mode> <unused> <realname> (RFC 2812)
-    nick nick
-    send "USER #{nick} 0 * :Watashi wa kawaii desu."
-  end
-
-  def quit(text='')
-    send "QUIT #{text}"
-  rescue
+    nick(nick)
+    user(nick, 0, ":Romani ite domum")
   end
 
   def start_ping_timer(period, timeout)
