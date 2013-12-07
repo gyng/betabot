@@ -14,3 +14,13 @@ group :development do
   gem 'debugger'
   gem 'rspec'
 end
+
+# Adapter Gemfiles
+Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'adapters', '**', "Gemfile")) do |gemfile|
+    eval(IO.read(gemfile), binding)
+end
+
+# Plugin Gemfiles
+Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'plugins', '**', "Gemfile")) do |gemfile|
+    eval(IO.read(gemfile), binding)
+end
