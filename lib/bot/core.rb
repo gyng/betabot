@@ -56,7 +56,7 @@ module Bot
 
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
 
-      start_adapters('irc')
+      @settings[:adapters][:autostart].each { |regex| start_adapters(regex) }
     end
 
     def load_settings
