@@ -56,6 +56,7 @@ To install a plugin from a URL:
 
 1. Run `rake install_plugin[https://www.example.com/myplugin.af84ad46.package.zip]`.
 2. Run `bundle install` to install plugin dependencies.
+3. If there is a running bot instance, `reload` to reload all plugins.
 
 
 

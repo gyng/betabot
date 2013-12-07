@@ -7,7 +7,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     @s = s
     @registered = false
     @ping_state = :inactive
-    @buffer = ''
+    @buffer = BufferedTokenizer.new("\r\n")
   end
 
   def connection_completed
@@ -24,9 +24,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   alias_method :send, :send_data
 
   def receive_data(data)
-    @buffer << data
-
-    while line = @buffer.slice!(/(.+)\r?\n/)
+    data = @buffer.extract(data)
+    data.each do |line|
       Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'<-'.cyan} #{line.chomp}"
       handle_message(parse_data(line))
     end
@@ -111,13 +110,14 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def start_ping_timer(period, timeout)
-    EventMachine::PeriodicTimer.new(period) do
+    period_timer = EventMachine::PeriodicTimer.new(period) do
       send "PING #{Time.now.to_f}"
       @ping_state = :wait
       EventMachine::Timer.new(timeout) do
         if @ping_state == :wait
           Bot.log.warn "Ping timeout: PONG not received from server within #{timeout}s"
           quit
+          period_timer.cancel
           @adapter.reconnect
         end
       end
