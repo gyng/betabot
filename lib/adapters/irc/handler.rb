@@ -18,6 +18,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   def send_data(data)
     Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'->'.green} #{data}"
     super data + "\n"
+  rescue Exception => e
+    Bot.log.error "#{self.class.name} #{@s[:name]}\n#{e}\n#{e.backtrace.join("\n")}}"
   end
 
   alias_method :send, :send_data
@@ -28,6 +30,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'<-'.cyan} #{line.chomp}"
       handle_message(parse_data(line))
     end
+  rescue Exception => e
+    Bot.log.error "#{self.class.name} #{@s[:name]}\n#{e}\n#{e.backtrace.join("\n")}}"
   end
 
   def parse_data(data)
