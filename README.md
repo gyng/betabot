@@ -2,7 +2,11 @@
 
 UntitledBot is a chatbot that aims to be protocol agnostic, easy to deploy and simple to develop for. UntitledBot supersedes [HidoiBot](https://github.com/gyng/HidoiBot).
 
-An IRC adapter is included with a web-based bouncer in the roadmap.
+Features network adapters and plugin framework goodies (database ORM, settings, packaging, install).
+
+An IRC adapter is included. A web-based bouncer and public site in the roadmap.
+
+
 
 ## Installation
 
@@ -44,7 +48,15 @@ For example: `!ping`, `MyBot: ping`
 * reconnect
 * quit (closes the connection but does not stop the bot)
 * shutdown
-* useradd account_name password auth_level
+* useradd accountname password authlevel
+
+### Installing plugins
+
+To install a plugin from a URL:
+
+1. Run `rake install_plugin[https://www.example.com/myplugin.af84ad46.package.zip]`.
+2. Run `bundle install` to install plugin dependencies.
+
 
 
 ## Plugin development
@@ -104,9 +116,19 @@ In the plugin settings hash `@s` the trigger key is required:
 * `:call` is the method in the plugin the bot calls when responding to
 * `0` is the required authentication level of the user.
 
+### Packaging plugins
+
+Installable plugins can be packaged with `rake package_plugin[plugin_name]`.
+
+The zip package will be located in the `./packages` folder. This package can be installed by running `rake install_plugin[http://myurl.com/plugin_name.sha31fda.plugin.zip]`. Do not change the filename as it is used in the install process.
+
+
+
 ## Tests
 
 Tests can be run with `rspec`. Test coverage is nearly non-existent and contributions are welcome. It's painful to test since the EventMachine reactor has to be set up and torn down for adapters and core components.
+
+
 
 ## License
 UntitledBot is licensed under the MIT License.
