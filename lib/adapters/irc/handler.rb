@@ -13,7 +13,6 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   def connection_completed
     start_tls if @s[:ssl]
     register(@s[:nick])
-    start_ping_timer(120, 30)
   end
 
   def send_data(data)
@@ -89,6 +88,10 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     when :"001"
       @registered = true
       @s[:default_channels].each { |c| join(c) }
+    when :"433"
+      nick = m.raw.split(' ')[3]
+      register(nick + '_')
+      EM.add_timer(900) { nick(@s[:nick]) } # Try to reclaim desired nick
     when :privmsg
       check_trigger(m)
     end
@@ -109,18 +112,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     user(nick, 0, ":Romani ite domum")
   end
 
-  def start_ping_timer(period, timeout)
-    period_timer = EventMachine::PeriodicTimer.new(period) do
-      send "PING #{Time.now.to_f}"
-      @ping_state = :wait
-      EventMachine::Timer.new(timeout) do
-        if @ping_state == :wait
-          Bot.log.warn "Ping timeout: PONG not received from server within #{timeout}s"
-          quit
-          period_timer.cancel
-          @adapter.reconnect
-        end
-      end
-    end
+  def unbind
+    Bot.log.warn "Connection closed: reconnecting"
+    @adapter.reconnect(@s[:name])
   end
 end

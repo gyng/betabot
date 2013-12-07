@@ -46,6 +46,7 @@ class Bot::Adapter::Irc < Bot::Adapter
       'Kveðja, heimur!'
     ]
 
+    @reconnect_delay = 20
     @bot = bot
     @connections = {}
     super
@@ -55,7 +56,13 @@ class Bot::Adapter::Irc < Bot::Adapter
     selected = @s[:servers].select { |s| s[:name].match(/#{regex}/i) }
 
     selected.each do |s|
-      @connections[s[:name].to_sym] = EM.connect(s[:hostname], s[:port], Handler, self, s)
+      begin
+        @connections[s[:name].to_sym] = EM.connect(s[:hostname], s[:port], Handler, self, s)
+      rescue Exception => e
+        EM.add_timer(@reconnect_delay) { connect(s[:name]) }
+        Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, " +
+                     "retrying in #{@reconnect_delay}s"
+      end
     end
   end
 
