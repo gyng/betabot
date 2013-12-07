@@ -26,3 +26,23 @@ task :add_account do
     puts "Account #{account_name} created."
   end
 end
+
+# Run with `rake make_plugin[name]`
+task :make_plugin, :name do |t, args|
+  require 'fileutils'
+
+  name = args[:name]
+
+  dir = File.join('lib', 'plugins', name)
+  FileUtils.mkdir_p(dir)
+  template = File.join('lib', 'plugins', 'ping', 'ping.rb')
+  plugin = File.join(dir, name + '.rb')
+  FileUtils.cp(template, plugin)
+
+  to_edit = File.read(plugin)
+  name_sentence_case = name[0].upcase + name[1..-1]
+  to_edit.gsub!('Ping', name_sentence_case)
+  to_edit.gsub!('ping', name.downcase)
+
+  File.write(plugin, to_edit)
+end
