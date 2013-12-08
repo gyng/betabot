@@ -1,0 +1,18 @@
+{
+  "trigger": {
+    "pick": [
+      "pick",
+      0
+    ],
+    "pick_one": [
+      "pick_one",
+      0
+    ],
+    "shuffle": [
+      "shuffle",
+      0
+    ]
+  },
+  "subscribe": false,
+  "help": "Picks items for you."
+}
