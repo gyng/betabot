@@ -4,7 +4,7 @@ UntitledBot is a chatbot that aims to be protocol agnostic, easy to deploy and s
 
 Features network adapters and plugin framework goodies (database ORM, settings, packaging, install).
 
-An IRC adapter is included. A web-based bouncer and public site in the roadmap.
+An IRC adapter and some useful plugins are included. A web-based bouncer and public site in the roadmap.
 
 
 
@@ -41,6 +41,13 @@ For example: `!ping`, `MyBot: ping`
 
 #### Some commands
 
+* help
+* help plugin
+* blacklist
+* blacklist_adapter name
+* blacklist_plugin name
+* unblacklist_adapter name
+* unblacklist_plugin name
 * login nick pass
 * logout
 * reload (reloads plugins)
@@ -77,6 +84,12 @@ Include your gem dependencies in the plugin's Gemfile (as you would usually do f
 
 ### Gotchas
 
+#### Settings
+
+Setting files are persistent! Delete `yourplugin/settings/settings.json` if the settings hash `@s` has been modified and it will be regenerated from the defaults defined as `@s`. A handy raketask for this can be run with `rake default_plugin_settings[yourplugin]`.
+
+#### EventMachine
+
 Do not block the [EventMachine](https://github.com/eventmachine/eventmachine) reactor! This means:
 
 * No sleep(1)
@@ -110,11 +123,12 @@ If the required plugin setting `@s[:subscribe]` is set to `true`, the plugin wil
 
 In the plugin settings hash `@s` the trigger key is required:
 
-    trigger: { ping: [:call, 0] }
+    trigger: { ping: [:call, 0, 'help'] }
 
 * `ping` is the trigger the bot responds to
 * `:call` is the method in the plugin the bot calls when responding to
 * `0` is the required authentication level of the user.
+* `'help'` is the help string associated with this trigger. This is optional which means you can do `trigger: { ping: [:call, 0] }`
 
 Multiple triggers are supported: `trigger: { ping: [:pong, 0], pong: [:peng, 0] }`
 
@@ -148,19 +162,18 @@ IRC's Message class has
 * `time`
 * `origin`
 * `args` message text split by spaces
-* `trigger` shorthand for `args[0]`
-* `mode` shorthand for `args[1]`
+* `mode` shorthand for `args[0]`
 
 ### Fine authentication
 
-If finer control over authentication is needed, Bot::Plugin offers a `#auth(level, message)` helper method.
+If finer control over authentication is needed, Bot::Plugin offers an `auth(level, message)` helper method.
 
     # plugin.rb
 
     ...
 
     def call(m)
-      case m.args[1]
+      case m.args[0]
       when 'wakeup'
         m.reply 'Nope!'
         m.reply 'BOSS?' if auth(5, m)
@@ -170,6 +183,8 @@ If finer control over authentication is needed, Bot::Plugin offers a `#auth(leve
     end
 
     ...
+
+The method `auth_r(level, message)` replies to the message sender if authentication fails.
 
 ### Packaging plugins
 

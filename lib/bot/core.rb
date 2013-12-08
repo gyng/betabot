@@ -134,7 +134,7 @@ module Bot
         if @plugin_mapping.has_key?(query)
           m.reply @plugin_mapping[query][:help]
         else
-          m.reply "Triggers: #{@plugin_mapping.keys.join(', ')}"
+          m.reply "Use help <trigger> for details. Triggers: #{@plugin_mapping.keys.join(', ')}"
         end
       end
     end
