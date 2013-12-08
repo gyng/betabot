@@ -131,7 +131,25 @@ Arguments can be retrieved from the passed-in message
     message.args
     => ["hello", "world"]
 
-Full raw text is stored in `message.raw`.
+### Messages
+
+What a message contains can be defined by the adapter.
+
+IRC's Message class has
+
+* `adapter`
+* `sender` nickname
+* `real_name`
+* `hostname`
+* `type` eg. PONG, NOTICE, PRIVMSG
+* `channel`
+* `text` stripped of trigger prefixes
+* `raw`
+* `time`
+* `origin`
+* `args` message text split by spaces
+* `trigger` shorthand for `args[0]`
+* `mode` shorthand for `args[1]`
 
 ### Fine authentication
 
