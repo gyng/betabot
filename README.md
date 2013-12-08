@@ -128,8 +128,10 @@ Arguments can be retrieved from the passed-in message
 
     # hello.rb
 
-    m.args
+    message.args
     => ["hello", "world"]
+
+Full raw text is stored in `message.raw`.
 
 ### Fine authentication
 
