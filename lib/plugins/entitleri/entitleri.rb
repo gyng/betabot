@@ -4,10 +4,12 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
   def initialize(bot)
     @s = {
-      trigger: { entitleri: [:call, 0] },
+      trigger: { entitleri: [
+        :call, 0,
+        'Entitle Reverse Image harnesses the power of Google cloud technology ' +
+        'and the information superhighway botnet to tell you what an image link is.'
+      ]},
       subscribe: true,
-      help: 'Entitle Reverse Image harnesses the power of Google cloud technology ' +
-            'and the information superhighway botnet to tell you what an image link is.',
       filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp'],
       google_query: 'http://www.google.com/searchbyimage?&image_url=',
       guess_selector: '.qb-bmqc',

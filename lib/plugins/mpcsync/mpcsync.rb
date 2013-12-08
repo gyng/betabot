@@ -9,14 +9,30 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
   def initialize(bot)
     @s = {
       trigger: {
-        mpcsync: [:call, 0],
-        cock: [:cock, 5],
-        decock: [:decock, 5],
-        np: [:now_playing, 5],
-        sync: [:sync, 0]
+        mpcsync: [
+          :call, 0,
+          'MPCSync is a video player synchronizer for communal viewing of video files. ' +
+          'To set up, clients need to be running MPC with WebUI enabled and either a '   +
+          'standalone synchronization client or a copy of the plugin. Other triggers: '  +
+          'Check out the help files and help strings for sync, cock, decock, np.'
+        ],
+        cock: [
+          :cock, 5,
+          'cock - Primes the player and listens for the signal to GO!'],
+        decock: [
+          :decock, 5,
+          'decock - Unprimes the player.'],
+        np: [
+          :now_playing, 5,
+          'np - Displays the currently playing file in MPC'],
+        sync: [
+          :sync, 0,
+          'sync <countdown=3> - Sends the GO! signal to subscribed users. '  +
+          'mpcsync (un)subscribe <hostname> <port> - (un)subscribe a user. ' +
+          'mpcsync list - view all current subscriptions.'
+        ]
       },
       subscribe: false,
-      help: 'Mpcsync is a synchronization client and server for Media Player Classic.',
 
       web_ui_addr: 'http://localhost:13579',
       sync_listen_port: 15555,

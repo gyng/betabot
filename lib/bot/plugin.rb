@@ -17,7 +17,7 @@ class Bot::Plugin
     @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, plugin_name, *opts) } if bot
     bot.subscribe_plugin(plugin_name) if @s[:subscribe] == true
 
-    Bot.log.info("Loaded plugin #{self.class.name} with triggers #{@s[:trigger].inspect}")
+    Bot.log.info("Loaded plugin #{self.class.name}")
   end
 
   def call(m=nil)

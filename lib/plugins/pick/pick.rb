@@ -2,13 +2,12 @@ class Bot::Plugin::Pick < Bot::Plugin
   def initialize(bot)
     @s = {
       trigger: {
-        pick: [:pick, 0],
-        pick_one: [:pick_one, 0],
-        shuffle: [:shuffle, 0],
-        dice: [:dice, 0]
+        pick: [:pick, 0, 'pick <n> item1 item2 item3'],
+        pick_one: [:pick_one, 0, 'pick_one item1 item2 item3'],
+        shuffle: [:shuffle, 0, 'shuffle item1 item2 item3'],
+        dice: [:dice, 0, 'dice [n=6]']
       },
-      subscribe: false,
-      help: 'Picks or shuffles items for you. Also rolls dice.'
+      subscribe: false
     }
     super(bot)
   end

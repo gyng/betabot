@@ -122,12 +122,19 @@ module Bot
         else
           false
         end
-      else
-        case trigger
-        when 'login'
-          @authenticator.login(m)
-        when 'logout'
-          @authenticator.logout(m)
+      end
+
+      case trigger
+      when 'login'
+        @authenticator.login(m)
+      when 'logout'
+        @authenticator.logout(m)
+      when 'help'
+        query = m.args[0].to_sym if m.args[0].is_a?(String)
+        if @plugin_mapping.has_key?(query)
+          m.reply @plugin_mapping[query][:help]
+        else
+          m.reply "Triggers: #{@plugin_mapping.keys.join(', ')}"
         end
       end
     end
@@ -168,11 +175,12 @@ module Bot
       @subscribed_plugins.each { |p| @plugins[p].receive(m)  }
     end
 
-    def register_trigger(trigger, plugin, method, required_auth_level)
+    def register_trigger(trigger, plugin, method, required_auth_level, help='No help.')
       @plugin_mapping[trigger.to_sym] = {
         plugin: plugin.to_sym,
         method: method.to_sym,
-        required_auth_level: required_auth_level.to_i
+        required_auth_level: required_auth_level.to_i,
+        help: help
       }
     end
 

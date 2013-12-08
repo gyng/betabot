@@ -4,9 +4,13 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
   def initialize(bot)
     @s = {
-      trigger: { entitle: [:call, 0] },
+      trigger: { entitle: [
+        :call, 0,
+        'entitle list, entitle add <filter>, entitle delete <filter>. ' +
+        'Filters are regular expressions. Using these filters ' +
+        'Entitle looks for uninformative URLs and blurts their titles out.'
+      ]},
       subscribe: true,
-      help: 'Entitle looks for uninformative URLs and blurts their titles out.',
       timeout: 10,
       filters: [
         "http.*?youtu\\(\\.be|be\\.com\\)\\S*",
