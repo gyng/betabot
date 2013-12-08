@@ -29,6 +29,10 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   end
 
   def trigger
-    @text.split(' ')[1]
+    args[0]
+  end
+
+  def mode
+    args[1]
   end
 end
