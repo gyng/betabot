@@ -31,4 +31,13 @@ class Bot::Plugin
   def auth(level, m)
     @bot.auth(level, m)
   end
+
+  def auth_r(level, m)
+    if auth(level, m)
+      true
+    else
+      m.reply('You are unauthorised for this.')
+      false
+    end
+  end
 end

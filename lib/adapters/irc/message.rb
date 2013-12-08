@@ -21,18 +21,16 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   end
 
   def args
+    # Extra space if called by name (!ping vs BotName: ping).
+    # Assumes text is a String, wrap in array anyway if cannot split
     if /^#{Bot::SHORT_TRIGGER}([^ ]*)/i === @text
-      @text.split(' ')[1..-1] if @text.is_a?(String)
+      [@text.split(' ')[1..-1]].flatten
     else
-      @text.split(' ')[2..-1] if @text.is_a?(String)
+      [@text.split(' ')[2..-1]].flatten
     end
   end
 
-  def trigger
-    args[0]
-  end
-
   def mode
-    args[1]
+    args[0]
   end
 end

@@ -75,7 +75,7 @@ class Bot::Core::Authenticator
     @authentications[account_name] = {
       salt: salt,
       hash: make_hash(salt, password),
-      auth_level: auth_level,
+      auth_level: auth_level.to_i,
       generated: Time.now.utc,
       last_used: nil,
       last_username: nil,

@@ -15,5 +15,6 @@ Dir.foreach(patch_dir) do |filename|
   end
 end
 
+# Thread.abort_on_exception = true
 EM.run { Bot::Core.new(File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.json')) }
 exec "ruby #{__FILE__}" if $restart
