@@ -1,7 +1,6 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    colorize (0.6.0)
     columnize (0.3.6)
     debugger (1.6.2)
       columnize (>= 0.3.1)
@@ -52,7 +51,6 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
-  colorize
   debugger
   eventmachine
   mechanize

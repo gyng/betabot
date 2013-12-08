@@ -3,7 +3,6 @@ module Bot
   require 'date'
   require 'logger'
   require 'timeout'
-  require 'colorize'
 
   require_relative 'adapter'
   require_relative 'plugin'
@@ -20,11 +19,11 @@ module Bot
             when 'FATAL';   :red
             when 'ERROR';   :red
             when 'WARN';    :red
-            when 'INFO';    :default
-            when 'DEBUG';   :default
-            when 'UNKNOWN'; :default
+            when 'INFO';    :gray
+            when 'DEBUG';   :gray
+            when 'UNKNOWN'; :gray
           end
-          "#{(severity[0] + ' ' + datetime.to_s + ' | ').colorize(color)}#{message}\n"
+          "#{(severity[0] + ' ' + datetime.to_s + ' | ').send(color)}#{message}\n"
         end
       end
       @log
