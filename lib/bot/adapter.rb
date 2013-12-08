@@ -32,4 +32,11 @@ class Bot::Adapter
   def publish(m)
     @bot.publish(m)
   end
+
+  def format(string)
+    # Does formatting of ANSI-formatted strings before sending
+    # Handled per-adapter. ANSI -> IRC is different from ANSI -> HTML
+    # Strips all ANSI control codes by default
+    m.text.pure_string if m.text.is_a? String
+  end
 end

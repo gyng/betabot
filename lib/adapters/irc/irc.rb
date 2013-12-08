@@ -90,4 +90,24 @@ class Bot::Adapter::Irc < Bot::Adapter
     end
     super(trigger, m)
   end
+
+  def format(string)
+    ansi_to_irc_table = {
+      "\033[30m" => "\x031",  # black
+      "\033[31m" => "\x034",  # red
+      "\033[32m" => "\x033",  # green
+      "\033[33m" => "\x037",  # brown
+      "\033[34m" => "\x032",  # blue
+      "\033[35m" => "\x0313", # magenta
+      "\033[36m" => "\x0311", # cyan
+      "\033[37m" => "\x0314", # gray
+      "\033[0m"  => "\x03",   # color end
+      "\033[1m"  => "\x02",   # bold start
+      "\033[22m" => "\x02"    # bold end
+    }
+
+    s = string
+    ansi_to_irc_table.each { |ansi, irc| s.gsub!(ansi, irc) }
+    s
+  end
 end

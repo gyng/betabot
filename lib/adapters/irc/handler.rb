@@ -17,7 +17,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
 
   def send_data(data)
     Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'->'.green} #{data}"
-    super data + "\n"
+    super @adapter.format(data) + "\n"
   rescue Exception => e
     Bot.log.error "#{self.class.name} #{@s[:name]}\n#{e}\n#{e.backtrace.join("\n")}}"
   end

@@ -65,7 +65,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
   def prettifyShow(show)
     # prettifyShow is dumped here instead of being in Show so it has access to bold()
     return nil if (!show.is_a? Show)
-    return "#{show.title} airs in #{show.eta} on #{show.station} (#{show.airtime}) - #{show.website_link}"
+    return "#{show.title.bold} airs in #{show.eta.bold} on #{show.station} (#{show.airtime}) - #{show.website_link}"
   end
 
   def is_eta?(s)
