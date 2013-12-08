@@ -130,7 +130,11 @@ module Bot
           required_auth_level = @plugin_mapping[trigger.to_sym][:required_auth_level]
 
           if @plugins.has_key?(plugin) && auth(required_auth_level, m)
-            return @plugins[plugin].send(method.to_sym, m)
+            begin
+              @plugins[plugin].send(method.to_sym, m)
+            rescue Exception => e
+              Bot.log.error "#{plugin} ##{method} - #{e}\n#{e.backtrace.join("\n")}}"
+            end
           end
         end
       end
