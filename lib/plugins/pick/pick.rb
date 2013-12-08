@@ -1,9 +1,14 @@
 class Bot::Plugin::Pick < Bot::Plugin
   def initialize(bot)
     @s = {
-      trigger: { pick: [:pick, 0], pick_one: [:pick_one, 0], shuffle: [:shuffle, 0] },
+      trigger: {
+        pick: [:pick, 0],
+        pick_one: [:pick_one, 0],
+        shuffle: [:shuffle, 0],
+        dice: [:dice, 0]
+      },
       subscribe: false,
-      help: 'Picks or shuffles items for you.'
+      help: 'Picks or shuffles items for you. Also rolls dice.'
     }
     super(bot)
   end
@@ -18,5 +23,10 @@ class Bot::Plugin::Pick < Bot::Plugin
 
   def shuffle(m)
     m.reply m.args.shuffle.join(', ')
+  end
+
+  def dice(m)
+    sides = m.args.length > 0 ? m.args[0].to_i : 6
+    m.reply Random.rand(sides)
   end
 end

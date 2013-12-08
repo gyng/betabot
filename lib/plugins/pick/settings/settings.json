@@ -11,8 +11,12 @@
     "shuffle": [
       "shuffle",
       0
+    ],
+    "dice": [
+      "dice",
+      0
     ]
   },
   "subscribe": false,
-  "help": "Picks items for you."
+  "help": "Picks or shuffles items for you."
 }
