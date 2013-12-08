@@ -96,25 +96,31 @@ module Bot
       selected.each { |k, v| v.send(method) }
     end
 
-    def trigger_plugin(trigger, m)
-      case trigger
-      when 'shutdown'
-        shutdown if @authenticator.auth(5, m)
-      when 'restart'
-        restart if @authenticator.auth(5, m)
-      when 'reload'
-        if @authenticator.auth(5, m)
+    def core_triggers(trigger, m)
+      if @authenticator.auth(5, m)
+        case trigger
+        when 'shutdown'
+          shutdown
+        when 'restart'
+          restart
+        when 'reload'
           reload(:plugin)
           m.reply 'Reloaded.' if m.respond_to? :reply
+        when 'useradd'
+          @authenticator.make_account(m.args[0], m.args[1], m.args[2])
+        when 'login'
+          @authenticator.login(m)
+        when 'logout'
+          @authenticator.logout(m)
+        else
+          false
         end
-      when 'useradd'
-        @authenticator.make_account(m.args[0], m.args[1], m.args[2]) if @authenticator.auth(5, m)
-      when 'login'
-        @authenticator.login(m)
-      when 'logout'
-        @authenticator.logout(m)
-      else
-        # Check if plugin responds to trigger
+      end
+    end
+
+    def trigger_plugin(trigger, m)
+      if !core_triggers(trigger, m)
+        # Check if plugin responds to trigger after core triggers
         if @plugin_mapping.has_key?(trigger.to_sym)
           plugin = @plugin_mapping[trigger.to_sym][:plugin]
           method = @plugin_mapping[trigger.to_sym][:method]
