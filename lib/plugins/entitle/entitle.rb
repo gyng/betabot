@@ -33,6 +33,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
         save_settings
         m.reply('Filter deleted.')
       end
+    else
+      check_filter(m)
     end
   end
 
@@ -67,6 +69,6 @@ class Bot::Plugin::Entitle < Bot::Plugin
     html = open(url) # Bypass bad unicode handling by Nokogiri
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
-    return doc.at_css('title').text.gsub(/ *\n */, " ").lstrip.rstrip
+    doc.at_css('title').text.gsub(/ *\n */, " ").lstrip.rstrip
   end
 end

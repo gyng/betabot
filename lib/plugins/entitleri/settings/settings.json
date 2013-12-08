@@ -1,0 +1,20 @@
+{
+  "trigger": {
+    "entitleri": [
+      "call",
+      0
+    ]
+  },
+  "subscribe": true,
+  "help": "Entitle Reverse Image harnesses the power of Google cloud technology and the information superhighway botnet to tell you what an image link is.",
+  "filters": [
+    "http.*png",
+    "http.*gif",
+    "http.*jpg",
+    "http.*jpeg",
+    "http.*bmp"
+  ],
+  "google_query": "https://www.google.com/searchbyimage?&image_url=",
+  "guess_selector": ".qb-bmqc",
+  "user_agent": "Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0"
+}
