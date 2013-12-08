@@ -1,0 +1,16 @@
+{
+  "trigger": {
+    "entitle": [
+      "call",
+      0
+    ]
+  },
+  "subscribe": true,
+  "help": "Entitle looks for uninformative URLs and blurts their titles out.",
+  "timeout": 10,
+  "filters": [
+    "http.*?youtu\\(\\.be|be\\.com\\)\\S*",
+    "http.*?google\\.com\\S*",
+    "http.+?\\?.+?=.[^\\s]+"
+  ]
+}
