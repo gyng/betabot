@@ -90,7 +90,7 @@ Possible solutions:
 
 * `EM.add_timer(1) { stop_adapters; EM.stop }`
 * `EM.add_periodic_timer(period) { ...do stuff... }`
-* `Thread.new { ...do stuff... }
+* `Thread.new { ...do stuff... }`
 
 [A good overview of EventMachine](http://www.scribd.com/doc/28253878/EventMachine-scalable-non-blocking-i-o-in-ruby)
 
@@ -181,7 +181,7 @@ The zip package will be located in the `./packages` folder. This package can be 
 
 ## Tests
 
-Tests can be run with `rspec`. Test coverage is nearly non-existent and contributions are welcome. It's painful to test since the EventMachine reactor has to be set up and torn down for adapters and core components.
+Tests can be run with `rspec`. Tests have been abandoned for now but contributions are welcome. It's painful to test since the EventMachine reactor has to be set up and torn down for adapters and core components every spec.
 
 
 
