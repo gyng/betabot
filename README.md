@@ -54,7 +54,7 @@ For example: `!ping`, `MyBot: ping`
 
 To install a plugin from a URL:
 
-1. Run `rake install_plugin[https://www.example.com/myplugin.af84ad46.package.zip]`.
+1. Run `rake install_plugin[http://www.example.com/myplugin.af84ad46.package.zip]`.
 2. Run `bundle install` to install plugin dependencies.
 3. If there is a running bot instance, `reload` to reload all plugins.
 
@@ -89,9 +89,8 @@ Use EventMachine substitutes for these instead. EventMachine is used for non-blo
 Possible solutions:
 
 * `EM.add_timer(1) { stop_adapters; EM.stop }`
-* `EventMachine::PeriodicTimer.new(period) { ...do stuff... }`
-* `EventMachine::Timer.new(timeout) { ...do stuff... }`
-* Write asynchronous code
+* `EM.add_periodic_timer(period) { ...do stuff... }`
+* `Thread.new { ...do stuff... }
 
 [A good overview of EventMachine](http://www.scribd.com/doc/28253878/EventMachine-scalable-non-blocking-i-o-in-ruby)
 
@@ -116,6 +115,41 @@ In the plugin settings hash `@s` the trigger key is required:
 * `ping` is the trigger the bot responds to
 * `:call` is the method in the plugin the bot calls when responding to
 * `0` is the required authentication level of the user.
+
+Multiple triggers are supported: `trigger: { ping: [:pong, 0], pong: [:peng, 0] }`
+
+### Arguments
+
+Arguments can be retrieved from the passed-in message
+
+`BotName: hello world` or `!hello world`
+
+... passed to ...
+
+    # hello.rb
+
+    m.args
+    => ["hello", "world"]
+
+### Fine authentication
+
+If finer control over authentication is needed, Bot::Plugin offers a `#auth(level, message)` helper method.
+
+    # plugin.rb
+
+    ...
+
+    def call(m)
+      case m.args[1]
+      when 'wakeup'
+        m.reply 'Nope!'
+        m.reply 'BOSS?' if auth(5, m)
+      when 'sleep'
+        ...
+      end
+    end
+
+    ...
 
 ### Packaging plugins
 
