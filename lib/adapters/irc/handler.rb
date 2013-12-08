@@ -118,6 +118,6 @@ class Bot::Adapter::Irc::Handler < EM::Connection
 
   def unbind
     Bot.log.warn "Connection closed: reconnecting"
-    @adapter.reconnect(@s[:name])
+    @adapter.reconnect(@s[:name]) unless $restart
   end
 end

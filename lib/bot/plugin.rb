@@ -27,4 +27,8 @@ class Bot::Plugin
   def receive(m)
     # Receives every message from bot
   end
+
+  def auth(level, m)
+    @bot.auth(level, m)
+  end
 end

@@ -38,7 +38,7 @@ module Bot
     require_relative 'core/authenticator'
     include Bot::Core::ObjectLoader
 
-    attr_reader :adapters, :plugins, :settings, :enabled_adapters, :enabled_plugins, :shared_db
+    attr_reader :adapters, :plugins, :settings, :shared_db, :auth
     START_TIME = Time.now
 
     def initialize(bot_settings_filename)
@@ -97,7 +97,7 @@ module Bot
     end
 
     def core_triggers(trigger, m)
-      if @authenticator.auth(5, m)
+      if auth(5, m)
         case trigger
         when 'shutdown'
           shutdown
@@ -108,12 +108,15 @@ module Bot
           m.reply 'Reloaded.' if m.respond_to? :reply
         when 'useradd'
           @authenticator.make_account(m.args[0], m.args[1], m.args[2])
+        else
+          false
+        end
+      else
+        case trigger
         when 'login'
           @authenticator.login(m)
         when 'logout'
           @authenticator.logout(m)
-        else
-          false
         end
       end
     end
@@ -126,7 +129,7 @@ module Bot
           method = @plugin_mapping[trigger.to_sym][:method]
           required_auth_level = @plugin_mapping[trigger.to_sym][:required_auth_level]
 
-          if @plugins.has_key?(plugin) && @authenticator.auth(required_auth_level, m)
+          if @plugins.has_key?(plugin) && auth(required_auth_level, m)
             return @plugins[plugin].send(method.to_sym, m)
           end
         end
@@ -137,7 +140,7 @@ module Bot
 
     def publish(m)
       # Plugin listens in to all messages
-      @subscribed_plugins.each { |p| @plugins[p].receive(m) }
+      @subscribed_plugins.each { |p| @plugins[p].receive(m)  }
     end
 
     def register_trigger(trigger, plugin, method, required_auth_level)
@@ -153,17 +156,18 @@ module Bot
       @subscribed_plugins.push(plugin.to_sym)
     end
 
+    def auth (level, m)
+      @authenticator.auth(level, m)
+    end
+
     def reload(type, name=nil)
       load_settings
 
       if (type == nil)
         initialize_objects(:adapter)
         initialize_objects(:plugin)
-        load_objects(:adapter)
-        load_objects(:plugin)
       elsif (name == nil)
         initialize_objects(type)
-        load_objects(type)
       else
         load_curry(type).call(name)
       end
