@@ -36,21 +36,24 @@ module Bot
     require_relative 'core/message'
     require_relative 'core/object_loader'
     require_relative 'core/authenticator'
+    require_relative 'util/settings'
+
     include Bot::Core::ObjectLoader
+    include Bot::Util::Settings
 
     attr_reader :adapters, :plugins, :settings, :shared_db, :auth
     START_TIME = Time.now
 
-    def initialize(bot_settings_filename)
-      @settings = nil
-      @settings_filename = bot_settings_filename
+    def initialize(bot_settings_path)
       Bot.const_set('ROOT_DIR',     File.join(Dir.pwd, 'lib'))
       Bot.const_set('SETTINGS_DIR', File.join(Dir.pwd, 'lib', 'settings'))
       Bot.const_set('DATABASE_DIR', File.join(Dir.pwd, 'lib', 'database'))
 
+      @s = nil
+      @settings_path = bot_settings_path
       load_settings
 
-      Bot.const_set('SHORT_TRIGGER', @settings[:short_trigger])
+      Bot.const_set('SHORT_TRIGGER', @s[:short_trigger])
       @authenticator = Bot::Core::Authenticator.new
       @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3'))
       initialize_objects(:adapter)
@@ -58,15 +61,7 @@ module Bot
 
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
 
-      @settings[:adapters][:autostart].each { |regex| start_adapters(regex) }
-    end
-
-    def load_settings
-      @settings = JSON.parse(File.read(@settings_filename), symbolize_names: true)
-    rescue => e
-      Bot.log.fatal "Failed to load bot settings from file #{@settings_filename}. \
-                     Check that file exists and permissions are set."
-      raise e
+      @s[:adapters][:autostart].each { |regex| start_adapters(regex) }
     end
 
     def initialize_objects(type)
@@ -108,6 +103,13 @@ module Bot
           m.reply 'Reloaded.' if m.respond_to? :reply
         when 'useradd'
           @authenticator.make_account(m.args[0], m.args[1], m.args[2])
+          m.reply "User #{m.args[0]} added."
+        when 'blacklist_plugin'
+          @s[:plugins][:blacklist].push(m.args[0]).uniq!
+          save_settings
+        when 'unblacklist_plugin'
+          @s[:plugins][:blacklist].delete(m.args[0])
+          save_settings
         else
           false
         end
@@ -165,7 +167,7 @@ module Bot
     end
 
     def reload(type, name=nil)
-      load_settings
+      load_settings(@settings_filename)
 
       if (type == nil)
         initialize_objects(:adapter)

@@ -1,7 +1,7 @@
 # Methods for loading adapters/plugins with blacklists/whitelists
 module Bot::Core::ObjectLoader
   def get_objects_dir(type)
-    File.join(Bot::ROOT_DIR, @settings["#{type}s".to_sym][:dir])
+    File.join(Bot::ROOT_DIR, @s["#{type}s".to_sym][:dir])
   end
 
   def load_objects(type)
