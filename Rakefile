@@ -45,6 +45,9 @@ task :make_plugin, :name do |t, args|
   to_edit.gsub!('ping', name.downcase)
 
   File.write(plugin, to_edit)
+
+  FileUtils.mkdir_p(File.join(dir, 'settings'))
+  File.write(File.join(dir, 'settings', '.gitignore'), 'settings.json')
 end
 
 task :package_plugin, :name do |t, args|
