@@ -23,7 +23,7 @@ class Bot::Plugin::Ping < Bot::Plugin
     # it with @s[:ping_message]
     @s = {
       trigger: { ping: [:call, 0, 'Pings the bot.'] },
-      subscribe: false,
+      subscribe: false
     }
     super(bot)
   end
