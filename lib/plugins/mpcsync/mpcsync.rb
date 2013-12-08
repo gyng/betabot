@@ -95,7 +95,11 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
   end
 
   def sync(m)
-    remaining = @s[:sync_countdown]
+    if (countdown_override = m.args[0].to_i) > 0
+      remaining = countdown_override
+    else
+      remaining = @s[:sync_countdown]
+    end
 
     countdown = EventMachine.add_periodic_timer(1) do
       m.reply remaining
