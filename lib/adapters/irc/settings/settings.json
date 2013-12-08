@@ -2,14 +2,14 @@
   "servers": [
     {
       "enabled": true,
-      "name": "yasashii",
-      "hostname": "irc.yasashiisyndicate.org",
+      "name": "somename",
+      "hostname": "irc.server.org",
       "port": 6697,
       "ssl": true,
       "nick": "WaruiBot",
       "default_channels": [
         "#fauxbot",
-        "#dicks"
+        "#some-other-channel"
       ]
     }
   ]
