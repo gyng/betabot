@@ -1,17 +1,26 @@
 {
-    "short_trigger": "!",
-    "adapters": {
-        "dir": "adapters",
-        "load": "all",
-        "autostart": ["irc"],
-        "whitelist": [],
-        "blacklist": []
-    },
+  "short_trigger": "!",
+  "adapters": {
+    "dir": "adapters",
+    "load": "all",
+    "autostart": [
+      "irc"
+    ],
+    "whitelist": [
 
-    "plugins": {
-        "dir": "plugins",
-        "load": "all",
-        "whitelist": [],
-        "blacklist": []
-    }
+    ],
+    "blacklist": [
+      "dummy"
+    ]
+  },
+  "plugins": {
+    "dir": "plugins",
+    "load": "all",
+    "whitelist": [
+
+    ],
+    "blacklist": [
+      "dummy"
+    ]
+  }
 }

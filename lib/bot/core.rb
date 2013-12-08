@@ -104,12 +104,21 @@ module Bot
         when 'useradd'
           @authenticator.make_account(m.args[0], m.args[1], m.args[2])
           m.reply "User #{m.args[0]} added."
+        when 'blacklist_adapter'
+          blacklist(:adapter, m.args[0])
+          m.reply "Adapter #{m.args[0]} blacklisted. Restart for this to take effect."
+        when 'unblacklist_adapter'
+          unblacklist(:adapter, m.args[0])
+          m.reply "Adapter #{m.args[0]} unblacklisted. Restart for this to take effect."
         when 'blacklist_plugin'
-          @s[:plugins][:blacklist].push(m.args[0]).uniq!
-          save_settings
+          blacklist(:plugin, m.args[0])
+          m.reply "Plugin #{m.args[0]} blacklisted. Reload for this to take effect."
         when 'unblacklist_plugin'
-          @s[:plugins][:blacklist].delete(m.args[0])
-          save_settings
+          unblacklist(:plugin, m.args[0])
+          m.reply "Plugin #{m.args[0]} unblacklisted. Reload for this to take effect."
+        when 'blacklist'
+          m.reply "Adapters: " + @s[:adapters][:blacklist].join(', ')
+          m.reply "Plugins: " + @s[:plugins][:blacklist].join(', ')
         else
           false
         end
@@ -121,6 +130,16 @@ module Bot
           @authenticator.logout(m)
         end
       end
+    end
+
+    def blacklist(type, name)
+      @s["#{type}s".to_sym][:blacklist].push(m.args[0]).uniq!
+      save_settings
+    end
+
+    def unblacklist(type, name)
+      @s["#{type}s".to_sym][:blacklist].delete(m.args[0])
+      save_settings
     end
 
     def trigger_plugin(trigger, m)
@@ -167,7 +186,7 @@ module Bot
     end
 
     def reload(type, name=nil)
-      load_settings(@settings_filename)
+      load_settings
 
       if (type == nil)
         initialize_objects(:adapter)
