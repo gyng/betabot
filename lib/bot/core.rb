@@ -46,7 +46,7 @@ module Bot
     def initialize(bot_settings_path)
       Bot.const_set('ROOT_DIR',     File.join(Dir.pwd, 'lib'))
       Bot.const_set('SETTINGS_DIR', File.join(Dir.pwd, 'lib', 'settings'))
-      Bot.const_set('DATABASE_DIR', File.join(Dir.pwd, 'lib', 'database'))
+      Bot.const_set('DATABASE_DIR', File.join(Dir.pwd, 'lib', 'databases'))
 
       @s = nil
       @settings_path = bot_settings_path
@@ -139,12 +139,12 @@ module Bot
     end
 
     def blacklist(type, name)
-      @s["#{type}s".to_sym][:blacklist].push(m.args[0]).uniq!
+      @s["#{type}s".to_sym][:blacklist].push(name).uniq!
       save_settings
     end
 
     def unblacklist(type, name)
-      @s["#{type}s".to_sym][:blacklist].delete(m.args[0])
+      @s["#{type}s".to_sym][:blacklist].delete(name)
       save_settings
     end
 
