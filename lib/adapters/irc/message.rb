@@ -26,7 +26,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
 
       chunks.each do |line_segment|
         reply = "PRIVMSG #{@channel} :#{line_segment}"
-        reply += '...' if reply != chunks.last && !(/[[:punct:]]/ === reply[-1])
+        reply += '...' if line_segment != chunks.last && !(/[[:punct:]]/ === reply[-1])
         @origin.send reply
       end
     end
