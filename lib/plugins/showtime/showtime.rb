@@ -12,63 +12,56 @@ class Bot::Plugin::Showtime < Bot::Plugin
   end
 
   def showtime(m)
-    m.reply get_showtime(m.args[0])
+    m.reply get_showtime(*m.args)
   end
 
-  def get_showtime(filter)
+  def get_showtime(filter='.*')
     doc = Nokogiri::HTML(open('http://www.mahou.org/Showtime/'))
     shows_raw = doc.xpath("//table[@summary='Currently Airing']//table/tr").to_a
-    # shift - 0 is table heading, get rid of it
-    shows_raw.shift
-    # Add shows starting soon
+    shows_raw.shift # First element is table heading, get rid of it
+
+    # Add shows starting soon to currently airing
     shows_starting_soon_raw = doc.xpath("//table[@summary='Starting Soon']//table/tr").to_a
     shows_starting_soon_raw.shift
     shows_raw.concat(shows_starting_soon_raw)
 
-    shows = Hash.new
-    shows_raw.each { |show|
+    shows = {}
+    shows_raw.each do |show|
       begin
         # Can you modernise your god damned site
-        show_obj = Show.new
-        show_obj.title        = show.children[2].children[0].to_s.strip
-        show_obj.season       = show.children[4].children[0].to_s.strip
-        show_obj.station      = show.children[6].children[0].to_s.strip
-        show_obj.company      = show.children[8].children[0].to_s.strip
-        show_obj.airtime      = show.children[10].children[0].to_s.strip
-        show_obj.eta          = is_eta?(show.children[12].children[0].to_s.strip) || is_eta?(show.children[16].children[0].to_s.strip)
-        show_obj.episodes     = show.children[14].children[0].to_s.strip
-        show_obj.anidb_link   = show.children[-2].children[1].get_attribute('href').to_s if !show.children[-2].children[1].nil?
-        website_link          = show.children[-2].children[3].to_a  if !show.children[-2].children[3].nil?
-        show_obj.website_link = website_link[0][1] if !website_link.empty?
+        show_obj = Show.new do |s|
+          s.title        = show.children[2].children[0].to_s.strip
+          s.season       = show.children[4].children[0].to_s.strip
+          s.station      = show.children[6].children[0].to_s.strip
+          s.company      = show.children[8].children[0].to_s.strip
+          s.airtime      = show.children[10].children[0].to_s.strip
+          s.eta          = is_eta?(show.children[12].children[0].to_s.strip) || is_eta?(show.children[16].children[0].to_s.strip)
+          s.episodes     = show.children[14].children[0].to_s.strip
+          s.anidb_link   = show.children[-2].children[1].get_attribute('href').to_s if !show.children[-2].children[1].nil?
+          website_link   = show.children[-2].children[3].to_a if !show.children[-2].children[3].nil?
+          s.website_link = website_link[0][1] if !website_link.empty?
+        end
 
         shows["#{show_obj.title}"] = show_obj
       rescue
         next
       end
-    }
-
-    matching_keys = shows.keys.grep(Regexp.new(filter, Regexp::IGNORECASE))
-
-    if matching_keys.empty?
-      return @noShowMsg
-    else
-      rs = Array.new
-
-      0.upto([matching_keys.size, 3].min-1) { |i|
-         rs.push(prettifyShow(shows[matching_keys[i]]))
-      }
-
-      return rs.join("\n")
     end
-  end
 
-  def prettifyShow(show)
-    # prettifyShow is dumped here instead of being in Show so it has access to bold()
-    return nil if (!show.is_a? Show)
-    return "#{show.title.bold} airs in #{show.eta.bold} on #{show.station} (#{show.airtime}) - #{show.website_link}"
+    # matched_keys is a Hash of show_title => show_object
+    matched_keys = shows.keys.grep(Regexp.new(filter, Regexp::IGNORECASE))
+    pretty_shows = []
+
+    matched_keys.each do |k|
+      pretty_shows.push(shows[k].pretty)
+      break if pretty_shows.size >= 3
+    end
+
+    pretty_shows.empty? ? 'No shows were matched.' : pretty_shows.join("\n")
   end
 
   def is_eta?(s)
+    # Matches 4d 3h 41m or 4d 41m
     s =~ /\dd|\dh|\dm/ ? s : false
   end
 
@@ -83,8 +76,12 @@ class Bot::Plugin::Showtime < Bot::Plugin
     attr_accessor :anidb_link
     attr_accessor :website_link
 
-    def to_s
-      return [title, season, station, company, airtime, eta, episodes, anidb_link, website_link].join(", ")
+    def initialize
+      yield self if block_given?
+    end
+
+    def pretty
+      "#{@title.bold} airs in #{@eta.bold} on #{@station} (#{@airtime}) - #{@website_link}"
     end
   end
 end
