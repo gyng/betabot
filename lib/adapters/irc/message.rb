@@ -17,7 +17,9 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   end
 
   def reply(text)
-    @origin.send "PRIVMSG #{@channel} :#{text}"
+    text.split("\n").each do |line|
+      @origin.send "PRIVMSG #{@channel} :#{line}"
+    end
   end
 
   def args
