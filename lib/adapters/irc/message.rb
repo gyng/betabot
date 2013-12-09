@@ -17,8 +17,17 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   end
 
   def reply(text)
-    text.split("\n").each do |line|
-      @origin.send "PRIVMSG #{@channel} :#{line}"
+    # RFC2812 Section 2.3 - Max of 512 characters (termination \r\n inclusive)
+    text.each_line do |line|
+      # 512 - 'PRIVMSG #{@channel} :' - '\r\n'
+      max_segment_length = 510 - "PRIVMSG #{@channel} :".length - '...'.length
+      chunks = chunk(line, max_segment_length)
+
+      chunks.each do |line_segment|
+        reply = "PRIVMSG #{@channel} :#{line_segment}"
+        reply += '...' if reply != chunks.last && !(/[[:punct:]]/ === reply[-1])
+        @origin.send reply
+      end
     end
   end
 
@@ -34,5 +43,11 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
 
   def mode
     args[0]
+  end
+
+  private
+
+  def chunk(str, length)
+    str.scan(/\S.{1,#{length-1}}(?!\S)/)
   end
 end
