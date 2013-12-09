@@ -21,7 +21,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
     text.each_line do |line|
       # 512 - 'PRIVMSG #{@channel} :' - '\r\n'
       # max_segment_length = 510 - "PRIVMSG #{@channel} :".length - '...'.length
-      max_segment_length = 440 # Play it safe for non-compliant servers
+      max_segment_length = 400 # Play it safe for non-compliant servers
       chunks = chunk(line, max_segment_length)
 
       chunks.each do |line_segment|
