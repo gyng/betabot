@@ -104,8 +104,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def check_trigger(m)
-    if /^#{Bot::SHORT_TRIGGER}([^ ]*)/i === m.text ||
-       /^#{@s[:nick]}: ([^ ]*)/i        === m.text
+    if /^#{Bot::SHORT_TRIGGER}([^ ]*)/i === m.text || # !command
+       /^#{@s[:nick]}: ([^ ]*)/i        === m.text    # BotNick: command
       trigger = $1
       @adapter.trigger_plugin(trigger, m)
     end
