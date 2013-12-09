@@ -107,11 +107,13 @@ Possible solutions:
 
 [A good overview of EventMachine](http://www.scribd.com/doc/28253878/EventMachine-scalable-non-blocking-i-o-in-ruby)
 
-### Database
+### Databases
 
 UntitledBot uses [Sequel](https://github.com/jeremyevans/sequel) ORM backed by SQLite. Plugins can either create their own databases or access a shared database.
 
 The shared database can be accessed through the Bot's `attr_reader :shared_db` &ndash; `@bot.shared_db.run 'SELECT * FROM amazing;'`. Alternatively, create a database with `db = Bot::Database.new(path)`
+
+Check out the *image* plugin for an example of using a plugin-created database.
 
 [An excellent Sequel jumpstart tutorial](http://tutorials.jumpstartlab.com/topics/sequel.html)
 
