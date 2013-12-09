@@ -44,7 +44,7 @@ class Bot::Core::Authenticator
   def auth(level, m)
     return true if level <= 0
     authed_user = @authenticated_hostnames[m.hostname]
-    authed_user && authed_user >= level
+    !!authed_user && authed_user.to_i >= level
   end
 
   def load_authentications
