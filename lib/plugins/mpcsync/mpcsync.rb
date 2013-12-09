@@ -53,7 +53,6 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
 
   # The method called is defined in @s[:trigger]. In this case, it's #call.
   def call(m)
-    puts m.args
     case m.mode
     when 'subscribe'
       if auth_r(4, m)

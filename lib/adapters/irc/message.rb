@@ -18,7 +18,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
 
   def reply(text)
     # RFC2812 Section 2.3 - Max of 512 characters (termination \r\n inclusive)
-    text.each_line do |line|
+    text.to_s.each_line do |line|
       # 512 - 'PRIVMSG #{@channel} :' - '\r\n'
       # max_segment_length = 510 - "PRIVMSG #{@channel} :".length - '...'.length
       max_segment_length = 400 # Play it safe for non-compliant servers
@@ -49,6 +49,6 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   private
 
   def chunk(str, length)
-    str.scan(/\S.{1,#{length-1}}(?!\S)/)
+    str.scan(/\S.{0,#{length-1}}(?!\S)/)
   end
 end
