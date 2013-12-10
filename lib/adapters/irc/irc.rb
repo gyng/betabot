@@ -11,11 +11,11 @@ class Bot::Adapter::Irc < Bot::Adapter
         {
           enabled: true,
           name: 'yasashii',
-          hostname: 'irc.yasashiisyndicate.org',
+          hostname: 'irc.rizon.net',
           port: 6697,
           ssl: true,
-          nick: 'WaruiBot',
-          default_channels: ['#fauxbot', '#dicks']
+          nick: 'HuddaBot',
+          default_channels: ['#hudda', '#huddabot']
         }
       ]
     }
