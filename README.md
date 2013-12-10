@@ -1,6 +1,6 @@
-# UntitledBot - changeme
+# Hudda
 
-UntitledBot is a chatbot that aims to be protocol agnostic, easy to deploy and simple to develop for. UntitledBot supersedes [HidoiBot](https://github.com/gyng/HidoiBot).
+Hudda is a chatbot that aims to be protocol agnostic, easy to deploy and simple to develop for. Hudda supersedes [HidoiBot](https://github.com/gyng/HidoiBot).
 
 Features network adapters and plugin framework goodies (database ORM, settings, packaging, install).
 
@@ -27,6 +27,7 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
 4. Configure the bot. Settings files that need changing:<br>
     * `./lib/settings/bot_settings.json`
     * `./lib/adapters/irc/settings/settings.json` (and any per-adapter settings)
+    * (Optional) any plugin settings.
 
 5. Start the bot
 
@@ -39,7 +40,16 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
 
 For example: `!ping`, `MyBot: ping`
 
-#### Some commands
+#### Notable default plugins
+
+* **chat** &ndash; Learning Markov chat. Run `!chat educate` on first run to feed it `./lib/plugins/chat/settings/textbook.txt`. Learns from user text.
+* **image** &ndash; Saves all image links and records data about them in a database. Images are saved in `./public/i`.
+* **entitle** &ndash; Echos titles of uninformative URLs.
+* **entitleri** &ndash; Uses Google reverse image search to guess what image URLs are.
+* **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
+* **translate** &ndash; Translates text with Bing translate. Requires setup of API keys.
+
+#### (Some) core commands
 
 * help
 * help plugin
@@ -68,6 +78,8 @@ To install a plugin from a URL:
 
 
 ## Plugin development
+
+If the bot is eating your exceptions, run it with `ruby start_bot.rb -dev`.
 
 ### Scaffold
 
@@ -109,7 +121,7 @@ Possible solutions:
 
 ### Databases
 
-UntitledBot uses [Sequel](https://github.com/jeremyevans/sequel) ORM backed by SQLite. Plugins can either create their own databases or access a shared database.
+Hudda uses [Sequel](https://github.com/jeremyevans/sequel) ORM backed by SQLite. Plugins can either create their own databases or access a shared database.
 
 The shared database can be accessed through the Bot's `attr_reader :shared_db` &ndash; `@bot.shared_db.run 'SELECT * FROM amazing;'`. Alternatively, create a database with `db = Bot::Database.new(path)`
 
@@ -203,4 +215,4 @@ Tests can be run with `rspec`. Tests have been abandoned for now but contributio
 
 
 ## License
-UntitledBot is licensed under the MIT License.
+Hudda is licensed under the MIT License.
