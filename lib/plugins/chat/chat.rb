@@ -1,11 +1,16 @@
 class Bot::Plugin::Chat < Bot::Plugin
   def initialize(bot)
     @s = {
-      trigger: { chat: [
-        :call, 0,
-        'chat [about <some thing> | stats | chip_p <p [0..1]> | ' +
-        'learnoff | learnon | educate]. Chat with the bot.'
-      ]},
+      trigger: {
+        chat: [
+          :call, 0,
+          'chat [about <some thing> | stats | chip_p <p [0..1]> | ' +
+          'learnoff | learnon | educate]. Chat with the bot.'],
+        haiku: [
+          :call_haiku, 0,
+          'haiku [topic]. Makes a bad haiku.'
+        ]
+      },
       subscribe: true,
       brain_path: ['lib', 'plugins', 'chat', 'settings', 'brain.dat'],
       key_length: 2,
@@ -60,10 +65,18 @@ class Bot::Plugin::Chat < Bot::Plugin
         seed = m.args[1..(1 + @s[:key_length])].join(' ')
       end
       m.reply talk(seed)
+    when 'haiku'
+      call_haiku(m, m.args[1..-1])
     else
       learn(m.text)
       m.reply talk
     end
+  end
+
+  def call_haiku(m, args=nil)
+    args ||= m.args
+    seed = @brain.keys.find { |k| /#{(args.sample)}/ =~ k }
+    m.reply haiku(seed)
   end
 
   def receive(m)
@@ -137,5 +150,49 @@ class Bot::Plugin::Chat < Bot::Plugin
     end
 
     sentence.join(' ')
+  end
+
+  def haiku(seed=nil)
+    seed = @brain.keys.sample if seed.nil?
+    line = seed.split(' ') # Start off with seed
+    lines = []
+    attempts = 0
+    syllables = [5, 7, 5]
+
+    0.upto(2) do |i|
+      while count_line_syllables(line) != syllables[i] && ((attempts += 1) < 200) do
+        seed = @brain.keys.sample if seed.nil? || @brain[seed].nil?
+        append = @brain[seed].sample
+        line.concat([append.split(' ')].flatten)
+        line.shift(@s[:chain_length]) if count_line_syllables(line) > syllables[i]
+
+        if attempts % 50 == 0
+          seed = @brain.keys.sample
+        else
+          seed = line.last(@s[:key_length]).join(' ')
+        end
+      end
+
+      attempts = 0
+      lines.push(line.join(' '))
+      line = []
+    end
+
+    # lines = lines.map { |l| "(#{count_line_syllables(l.split(' '))}) " + l }
+    lines.join("\n")
+  end
+
+  def count_line_syllables(line)
+    line.inject(0) { |acc, e| acc + count_syllables(e) }
+  end
+
+  # http://stackoverflow.com/questions/1271918/ruby-count-syllables/1272072#1272072
+  def count_syllables(str)
+    word = String.new(str.to_s)
+    word.downcase!
+    return 1 if word.length <= 3
+    word.sub!(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '')
+    word.sub!(/^y/, '')
+    word.scan(/[aeiouy]{1,2}/).size
   end
 end
