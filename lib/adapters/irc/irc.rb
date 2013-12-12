@@ -109,7 +109,7 @@ class Bot::Adapter::Irc < Bot::Adapter
       "\033[22m" => "\x02"    # bold end
     }
 
-    s = string
+    s = string.to_s
     ansi_to_irc_table.each { |ansi, irc| s.gsub!(ansi, irc) }
     s
   end

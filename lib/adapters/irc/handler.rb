@@ -13,6 +13,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   def connection_completed
     start_tls if @s[:ssl]
     register(@s[:nick])
+    keep_alive
   end
 
   def send_data(data)
@@ -114,6 +115,19 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   def register(nick)
     nick(nick)
     user(nick, 0, ":Romani ite domum")
+  end
+
+  def keep_alive
+    period_timer = EventMachine::PeriodicTimer.new(300) do
+      send "PING #{Time.now.to_f}"
+      @ping_state = :waiting
+      EM.add_timer(30) do
+        if @ping_state == :waiting
+          period_timer.cancel
+          @adapter.reconnect
+        end
+      end
+    end
   end
 
   def unbind
