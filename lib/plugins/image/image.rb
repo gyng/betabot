@@ -4,14 +4,16 @@ class Bot::Plugin::Image < Bot::Plugin
   require 'uri'
   require 'open-uri'
   require 'fileutils'
+  require 'nokogiri'
 
   def initialize(bot)
     @s = {
-      trigger: { image: [:call, 0, 'Images the bot.'] },
+      trigger: { image: [:call, 0, 'Image scraper plugin.'] },
       subscribe: true,
       filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp'],
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
-      image_directory: ['lib', 'public', 'i']
+      image_directory: ['lib', 'public', 'i'],
+      get_google_guess: false
     }
     super(bot)
 
@@ -90,7 +92,7 @@ class Bot::Plugin::Image < Bot::Plugin
           sha256:             sha256,
           md5:                Digest::MD5.file(image_path).to_s,
           path:               image_path,
-          google_description: 'not implemented',
+          google_description: get_guess(url),
           bytesize:           File.size(image_path)
         )
       else
@@ -110,6 +112,30 @@ class Bot::Plugin::Image < Bot::Plugin
       )
 
       Bot.log.info "#{self.class.name} - #{url} saved."
+    end
+  end
+
+  def get_guess(url)
+    if @s[:get_google_guess]
+      puts "Image: Getting best guess of #{url}"
+
+      query      = 'http://www.google.com/searchbyimage?&image_url=',
+      selector   = '.qb-bmqc'
+      user_agent = 'Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0'
+
+      # Get redirect by spoofing User-Agent
+      html = open(
+        query + url,
+        "User-Agent" => user_agent,
+        allow_redirections: :all,
+        ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
+      )
+
+      doc = Nokogiri::HTML(html.read)
+      doc.encoding = 'utf-8'
+      doc.css(selector).inner_text
+    else
+      ''
     end
   end
 end
