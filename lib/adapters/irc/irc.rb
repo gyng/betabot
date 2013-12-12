@@ -89,6 +89,7 @@ class Bot::Adapter::Irc < Bot::Adapter
     when 'quit'; quit
     when 'join'; m.origin.join(m.args[0], m.args[1] || '') if @bot.auth(4, m)
     when 'part'; m.origin.part(m.args[0], m.args[1] || '') if @bot.auth(4, m)
+    when 'nick'; m.origin.nick(m.args[0])
     end
     super(trigger, m)
   end
