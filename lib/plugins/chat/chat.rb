@@ -30,7 +30,7 @@ class Bot::Plugin::Chat < Bot::Plugin
         m.reply 'Bot is now educated.'
       end
     when 'stats'
-      m.reply "Brain size: #{@brain.size}"
+      m.reply "Brain size: #{@brain.size} key values"
     when 'chip_p'
       if auth(4, m)
         if !m.args[1].nil?
@@ -52,7 +52,14 @@ class Bot::Plugin::Chat < Bot::Plugin
         m.reply "Learning: #{@s[:learning]}"
       end
     when 'about'
-      m.reply talk(m.args[1..(1 + @s[:key_length])].join(' '))
+      if m.args.size-1 < @s[:key_length]
+        # If shorter than key length we search the keys for a matching topic
+        seed = @brain.keys.find { |k| /#{(m.args[1..-1].sample)}/ =~ k }
+      else
+        # Assume the user knows the exact phrase
+        seed = m.args[1..(1 + @s[:key_length])].join(' ')
+      end
+      m.reply talk(seed)
     else
       learn(m.text)
       m.reply talk
