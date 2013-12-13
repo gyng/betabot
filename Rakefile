@@ -1,4 +1,4 @@
-task :add_account do
+task :make_user do
   require 'io/console'
   require 'json'
   require 'securerandom'
@@ -22,7 +22,7 @@ task :add_account do
   if password != password_confirmation
     puts 'Password does not match confirmation, try again.'
   else
-    authenticator.make_account(account_name, auth_level, password)
+    authenticator.make_account(account_name, password, auth_level)
     puts "Account #{account_name} created."
   end
 end
