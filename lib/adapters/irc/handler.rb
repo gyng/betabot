@@ -57,6 +57,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       real_name = matches[:real_name]
       hostname  = matches[:hostname]
       channel   = data[2]
+      # Handle PMs - reply to user directly.
+      channel   = ((data[2] == @s[:nick]) ? matches[:sender] : data[2])
     elsif /^(JOIN|PART)$/ === data[1]
       type      = data[1].downcase.to_sym
       matches   = data[0].match(privm_regex)
