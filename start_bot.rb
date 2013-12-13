@@ -4,6 +4,7 @@ Bundler.require(:default)
 
 require './lib/bot/core'
 
+$shutdown = false
 $restart = false
 
 # Loads .rb patches intended to be run only once.

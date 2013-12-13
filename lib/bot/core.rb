@@ -212,6 +212,7 @@ module Bot
 
     def shutdown
       # We don't want this to take too long, but give adapters some time to shutdown
+      $shutdown = true
       EM.add_timer(1) do
         stop_adapters
         EM.stop
