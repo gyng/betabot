@@ -71,7 +71,8 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
 
   def cock(m)
     if @cock_state != :cocked
-      @listen_sock ||= EM.open_datagram_socket('0.0.0.0', @s[:sync_listen_port], SyncListener, self, m)
+      @listen_sock.close_connection if @listen_sock
+      @listen_sock = EM.open_datagram_socket('0.0.0.0', @s[:sync_listen_port], SyncListener, self, m)
       @cock_state = :cocked
     end
 
