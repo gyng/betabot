@@ -1,0 +1,50 @@
+class Bot::Plugin::Wolfram < Bot::Plugin
+  def initialize(bot)
+    # http://products.wolframalpha.com/api/
+    # https://developer.wolframalpha.com/portal/apisignup.html
+    @s = {
+      trigger: { wolfram: [:call, 0, 'Wolframs the bot.'] },
+      subscribe: false,
+      api_key: '',
+      max_depth: 2
+    }
+    super(bot)
+  end
+
+  def call(m)
+    m.reply 'Wolfram API key has not been configured.' if @s[:api_key].empty?
+    m.reply format_wolfram(wolfram(m.args.join(' ')))
+  end
+
+  def wolfram(search_term, depth=1)
+    return if depth > @s[:max_depth]
+    search_term = URI.escape(search_term)
+    raw = Nokogiri::XML(open("http://api.wolframalpha.com/v2/query?appid=#{@s[:api_key]}&format=plaintext&input=\'#{search_term}\'"))
+    pods = raw.search("//pod")
+    pod_titles = raw.search("//pod['title']")
+    results = []
+
+    0.upto(pods.size - 1) do |i|
+      results[i] = {
+        title: pod_titles[i]['title'].gsub("\n", '').strip,
+        text: pod_titles[i].inner_text.gsub("\n", '').strip
+      }
+    end
+
+    if results.empty?
+      related_examples = raw.search("//relatedexamples")
+
+      if !related_examples.empty?
+        related_examples = raw.search("//relatedexamples/relatedexample")
+        search_term = related_examples[0]['input']
+        results = wolfram(search_term, depth+1)
+      end
+    end
+
+    results
+  end
+
+  def format_wolfram(results)
+    results.empty? ? 'Nothing found.' : "#{results[0][:text].bold}: #{results[1][:text]}"
+  end
+end
