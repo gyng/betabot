@@ -20,15 +20,14 @@ class Bot::Plugin::Wolfram < Bot::Plugin
     return if depth > @s[:max_depth]
     search_term = URI.escape(search_term)
     raw = Nokogiri::XML(open("http://api.wolframalpha.com/v2/query?appid=#{@s[:api_key]}&format=plaintext&input=\'#{search_term}\'"))
-    pods = raw.search("//pod")
-    pod_titles = raw.search("//pod['title']")
+    pods = raw.search("//pod['title']")
     results = []
 
-    0.upto(pods.size - 1) do |i|
-      results[i] = {
-        title: pod_titles[i]['title'].gsub("\n", '').strip,
-        text: pod_titles[i].inner_text.gsub("\n", '').strip
-      }
+    pods.each do |pod|
+      results.push({
+        title: pod['title'].strip,
+        text: pod.inner_text.strip.gsub("\n", ' · ').strip.gsub(/  +/, ' ')
+      })
     end
 
     if results.empty?
@@ -37,7 +36,7 @@ class Bot::Plugin::Wolfram < Bot::Plugin
       if !related_examples.empty?
         related_examples = raw.search("//relatedexamples/relatedexample")
         search_term = related_examples[0]['input']
-        results = wolfram(search_term, depth+1)
+        results = wolfram(search_term, depth + 1)
       end
     end
 
