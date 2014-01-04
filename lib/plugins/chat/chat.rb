@@ -18,7 +18,7 @@ class Bot::Plugin::Chat < Bot::Plugin
       max_sentence_length: 20, # Number of chains
       textbook: ['lib', 'plugins', 'chat', 'settings', 'textbook.txt'],
       learn_buffer_size: 10,
-      chip_in_probability: 0.0015, # Approx. every 666.6
+      chip_in_probability: 0.001,
       learning: true
     }
     super(bot)
@@ -87,7 +87,7 @@ class Bot::Plugin::Chat < Bot::Plugin
       end
     end
 
-    if (@s[:learning])
+    if (@s[:learning] && m.internal_type == :client)
       learn(m.text)
       save_brain if @uncommited_learns > @s[:learn_buffer_size]
     end
