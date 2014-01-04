@@ -9,6 +9,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   attr_accessor :raw
   attr_accessor :time
   attr_accessor :origin
+  attr_accessor :internal_type
 
   def initialize
     yield self if block_given?

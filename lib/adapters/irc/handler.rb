@@ -42,6 +42,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     raw         = data
     text        = data.split(' :').last.chomp
     data        = data.split(' ')
+    internal_type = :server
 
     if data[0] == 'PING'
       type      = :ping
@@ -59,6 +60,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       channel   = data[2]
       # Handle PMs - reply to user directly.
       channel   = ((data[2] == @s[:nick]) ? matches[:sender] : data[2])
+      internal_type = :client
     elsif /^(JOIN|PART)$/ === data[1]
       type      = data[1].downcase.to_sym
       matches   = data[0].match(privm_regex)
@@ -82,6 +84,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       m.text      = text
       m.raw       = raw
       m.origin    = origin
+      m.internal_type = internal_type
     end
   end
 
