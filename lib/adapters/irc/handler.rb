@@ -2,11 +2,14 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   require_relative 'rfc2812'
   include Bot::Adapter::Irc::RFC2812
 
+  attr_accessor :state
+
   def initialize(adapter, s=Hash.new(false))
     @adapter = adapter
     @s = s
     @registered = false
     @ping_state = :inactive
+    @state = :disconnected
     @buffer = BufferedTokenizer.new("\r\n")
   end
 
@@ -14,6 +17,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     start_tls if @s[:ssl]
     register(@s[:nick])
     keep_alive
+    @state = :connected
   end
 
   def send_data(data)
@@ -127,7 +131,8 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       send "PING #{Time.now.to_f}"
       @ping_state = :waiting
       EM.add_timer(30) do
-        if @ping_state == :waiting
+        if @ping_state == :waiting && @state == :connected
+          @state = :reconnecting
           period_timer.cancel
           @adapter.reconnect
         end
@@ -136,9 +141,13 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def unbind
-    Bot.log.warn "Connection closed: reconnecting in 30 seconds..."
-    EM.add_timer(30) do
-      @adapter.reconnect(@s[:name]) unless $restart || $shutdown
+    if @state == :connected
+      Bot.log.warn "Connection closed: reconnecting in 30 seconds..."
+      EM.add_timer(30) do
+        @adapter.reconnect(@s[:name]) unless $restart || $shutdown
+      end
     end
+
+    @state = :disconnected
   end
 end
