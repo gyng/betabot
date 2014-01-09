@@ -59,7 +59,7 @@ class Bot::Plugin::Chat < Bot::Plugin
     when 'about'
       if m.args.size-1 < @s[:key_length]
         # If shorter than key length we search the keys for a matching topic
-        seed = @brain.keys.find { |k| /#{(m.args[1..-1].sample)}/ =~ k }
+        seed = @brain.keys.find_all { |k| /#{(m.args[1..-1].sample)}/ =~ k }.sample
       else
         # Assume the user knows the exact phrase
         seed = m.args[1..(1 + @s[:key_length])].join(' ')
@@ -74,9 +74,13 @@ class Bot::Plugin::Chat < Bot::Plugin
   end
 
   def call_haiku(m, args=nil)
-    args ||= m.args
-    seed = @brain.keys.find { |k| /#{(args.sample)}/ =~ k }
-    m.reply haiku(seed)
+    if args.nil? || args.empty?
+      m.reply haiku
+    else
+      args ||= m.args
+      seed = @brain.keys.find_all { |k| /#{(args.sample)}/ =~ k }.sample
+      m.reply haiku(seed)
+    end
   end
 
   def receive(m)
