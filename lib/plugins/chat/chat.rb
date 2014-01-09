@@ -66,19 +66,18 @@ class Bot::Plugin::Chat < Bot::Plugin
       end
       m.reply talk(seed)
     when 'haiku'
-      call_haiku(m, m.args[1..-1])
+      call_haiku(m)
     else
       learn(m.text)
       m.reply talk
     end
   end
 
-  def call_haiku(m, args=nil)
-    if args.nil? || args.empty?
+  def call_haiku(m)
+    if m.args.nil? || m.args.empty?
       m.reply haiku
     else
-      args ||= m.args
-      seed = @brain.keys.find_all { |k| /#{(args.sample)}/ =~ k }.sample
+      seed = @brain.keys.find_all { |k| /#{(m.args.sample)}/ =~ k }.sample
       m.reply haiku(seed)
     end
   end
