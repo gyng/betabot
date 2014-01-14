@@ -4,7 +4,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
       trigger: { showtime: [
         :showtime, 0,
         'showtime <regex> - Returns airing details of matching anime ' +
-        '(up to 3 matches) from mahou Showtime! - http://www.mahou.org/Showtime/.'
+        '(up to 3 matches) from mahou Showtime! - http://www.mahou.org/Showtime/ and gesopls - http://gesopls.de/abc/.'
       ]},
       subscribe: false
     }
@@ -53,7 +53,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
     pretty_shows = []
 
     matched_keys.each do |k|
-      pretty_shows.push(shows[k].pretty)
+      pretty_shows.push(shows[k].add_gesopls_info.pretty)
       break if pretty_shows.size >= 3
     end
 
@@ -72,6 +72,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
     attr_accessor :company
     attr_accessor :airtime
     attr_accessor :eta
+    attr_accessor :episode
     attr_accessor :episodes
     attr_accessor :anidb_link
     attr_accessor :website_link
@@ -80,8 +81,18 @@ class Bot::Plugin::Showtime < Bot::Plugin
       yield self if block_given?
     end
 
+    def add_gesopls_info
+      query = URI.encode(@title.gsub(/\W/, ' ').split(' ').first)
+      doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
+      ep = doc.css('.episode').to_a[1]
+      title = doc.css('.show').to_a[1]
+      @title = title.text if title
+      @episode = ep.text if ep
+      self
+    end
+
     def pretty
-      "#{@title.bold} airs in #{@eta.bold} on #{@station} (#{@airtime}) - #{@website_link}"
+      "#{@title.bold}#{@episode ? ' episode ' + @episode.bold : ''} airs in #{@eta.bold} on #{@station} (#{@airtime}) - #{@website_link}"
     end
   end
 end
