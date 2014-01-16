@@ -11,6 +11,15 @@ RSpec.configure do |config|
 
   ENV['TEST'] = 'true'
 
+  # Loads .rb patches intended to be run only once.
+  patch_dir = File.join(Dir.pwd, 'lib', 'patches')
+  Dir.foreach(patch_dir) do |filename|
+    if File.extname(filename) == '.rb'
+      puts "Loading patch file: #{filename}"
+      load File.join(patch_dir, filename)
+    end
+  end
+
   require 'eventmachine'
 
   # Run specs in random order to surface order dependencies. If you find an
