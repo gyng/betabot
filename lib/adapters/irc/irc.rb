@@ -70,6 +70,7 @@ class Bot::Adapter::Irc < Bot::Adapter
     selected = @connections.select { |k, v| k.to_s.match(/#{regex}/i) }
 
     selected.each_value do |c|
+      c.state = :quitting
       c.quit(@quit_messages.sample)
       c.close_connection_after_writing
       @connections.delete(c)

@@ -8,7 +8,6 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     @adapter = adapter
     @s = s
     @registered = false
-    @ping_state = :inactive
     @state = :disconnected
     @buffer = BufferedTokenizer.new("\r\n")
   end
@@ -97,7 +96,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     when :ping
       send "PONG #{m.sender} #{m.text}"
     when :pong
-      @ping_state = :received
+      @state = :connected
       @adapter.latency = (Time.now.to_f - m.text.to_f) * 1000
     when :"001"
       @registered = true
@@ -128,26 +127,28 @@ class Bot::Adapter::Irc::Handler < EM::Connection
 
   def keep_alive
     period_timer = EventMachine::PeriodicTimer.new(300) do
-      send "PING #{Time.now.to_f}"
-      @ping_state = :waiting
-      EM.add_timer(30) do
-        if @ping_state == :waiting && @state == :connected
-          @state = :reconnecting
-          period_timer.cancel
-          @adapter.reconnect
+      if @state == :connected
+        send "PING #{Time.now.to_f}"
+        @state = :waiting
+        EM.add_timer(30) do
+          if @state == :waiting
+            @state = :reconnecting
+            @adapter.reconnect
+          end
         end
+      else
+        period_timer.cancel
       end
     end
   end
 
   def unbind
-    if @state == :connected
+    if (@state == :connected || @state == :waiting) && !($shutdown || $restart)
       Bot.log.warn "Connection closed: reconnecting in 30 seconds..."
-      EM.add_timer(30) do
-        @adapter.reconnect(@s[:name]) unless $restart || $shutdown
-      end
+      @state = :reconnecting
+      EM.add_timer(30) { @adapter.reconnect(@s[:name]) if @state == :reconnecting }
+    else
+      @state = :disconnected
     end
-
-    @state = :disconnected
   end
 end
