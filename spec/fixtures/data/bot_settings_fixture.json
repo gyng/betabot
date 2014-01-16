@@ -1,15 +1,15 @@
 {
     "adapters": {
-        "dir": "adapters",
-        "load": "all",
-        "whitelist": [],
+        "dir": ["adapters"],
+        "load_mode": "whitelist",
+        "whitelist": ["dummy", "irc"],
         "blacklist": []
     },
 
     "plugins": {
         "dir": "plugins",
-        "load": "all",
-        "whitelist": [],
+        "load_mode": "whitelist",
+        "whitelist": ["dummy"],
         "blacklist": []
     }
 }

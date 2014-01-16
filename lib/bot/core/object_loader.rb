@@ -4,12 +4,13 @@ module Bot::Core::ObjectLoader
     File.join(Bot::ROOT_DIR, @s["#{type}s".to_sym][:dir])
   end
 
-  def load_objects(type)
+  def load_objects(type, mode)
     type = type.to_s
     objects_dir = get_objects_dir(type)
+
     Dir.foreach(objects_dir) do |f|
       next if f == '.' || f == '..'
-      if File.directory?(File.join(objects_dir, f)) && !blacklisted?(type, f)
+      if File.directory?(File.join(objects_dir, f)) && accepted?(type, f, mode)
         load_curry(type).call(f)
       end
     end
@@ -40,7 +41,15 @@ module Bot::Core::ObjectLoader
     load_curry('plugin').call(plugin)
   end
 
-  def blacklisted?(type, name)
-    @s["#{type}s".to_sym][:blacklist].include?(name)
+  def accepted?(type, name, mode)
+    mode = mode.to_sym
+
+    if mode == :all
+      true
+    elsif mode == :whitelist
+      @s["#{type}s".to_sym][mode].include?(name)
+    elsif mode == :blacklist
+      !@s["#{type}s".to_sym][mode].include?(name)
+    end
   end
 end
