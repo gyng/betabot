@@ -56,13 +56,15 @@ module Bot
       @authenticator = Bot::Core::Authenticator.new
 
       @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3')) if @s[:databases][:shared_db]
-      initialize_objects(:adapter, @s[:adapters][:load_mode])
-      initialize_objects(:plugin, @s[:plugins][:load_mode])
+      initialize_objects(:adapter)
+      initialize_objects(:plugin)
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
       @s[:adapters][:autostart].each { |regex| start_adapters(regex) }
     end
 
-    def initialize_objects(type, mode)
+    def initialize_objects(type)
+      mode = @s["#{type}s".to_sym][:load_mode]
+
       if type == :adapter || type == nil
         @adapters = {}
         load_objects(:adapter, mode)
@@ -195,6 +197,8 @@ module Bot
       load_settings
 
       if (type == nil)
+        @adapters = nil
+        @plugins = nil
         initialize_objects(:adapter)
         initialize_objects(:plugin)
       elsif (name == nil)

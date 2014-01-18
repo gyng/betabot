@@ -5,15 +5,15 @@
         "dir": ["adapters"],
         "load_mode": "whitelist",
         "autostart": [],
-        "whitelist": ["dummy", "irc"],
-        "blacklist": []
+        "whitelist": ["dummy"],
+        "blacklist": ["irc"]
     },
 
     "plugins": {
         "dir": "plugins",
         "load_mode": "whitelist",
-        "whitelist": ["dummy"],
-        "blacklist": []
+        "whitelist": ["ping"],
+        "blacklist": ["dummy"]
     },
 
     "databases": {

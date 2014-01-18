@@ -4,7 +4,7 @@ module Bot::Core::ObjectLoader
     File.join(Bot::ROOT_DIR, @s["#{type}s".to_sym][:dir])
   end
 
-  def load_objects(type, mode)
+  def load_objects(type, mode=:all)
     type = type.to_s
     objects_dir = get_objects_dir(type)
 

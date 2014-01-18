@@ -3,17 +3,17 @@
 
     "adapters": {
         "dir": ["adapters"],
-        "load_mode": "whitelist",
+        "load_mode": "blacklist",
         "autostart": [],
-        "whitelist": ["dummy", "irc"],
-        "blacklist": []
+        "whitelist": ["dummy"],
+        "blacklist": ["irc"]
     },
 
     "plugins": {
         "dir": "plugins",
         "load_mode": "whitelist",
-        "whitelist": ["dummy"],
-        "blacklist": []
+        "whitelist": [],
+        "blacklist": ["dummy", "ping"]
     },
 
     "databases": {

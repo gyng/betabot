@@ -65,23 +65,45 @@ describe Bot::Core do
       end
     end
 
-    pending 'does not load adapters in blacklist' do
+    it 'does not load adapters in blacklist' do
+      EM.run do
+        bot = Bot::Core.new(settings_filename_blacklist_fixture)
+        expect(bot.adapters).to have_key(:dummy)
+        expect(bot.adapters).to_not have_key(:irc)
+        EM.stop
+      end
     end
 
-    pending 'does not load plugins in blacklist' do
+    it 'does not load plugins in blacklist' do
+      EM.run do
+        bot = Bot::Core.new(settings_filename_whitelist_fixture)
+        expect(bot.plugins).to have_key(:ping)
+        expect(bot.plugins).to_not have_key(:dummy)
+        EM.stop
+      end
     end
   end
 
   context 'Reload' do
-    pending 'reloads plugins' do
-      bot = Bot::Core.new(settings_filename_fixture)
-      plugins = bot.plugins
-      bot.s = settings_fixture
-      bot.reload
-      expect(bot.plugins.length).to be eq plugins.length + 1
+    it 'reloads plugins' do
+      EM.run do
+        bot = Bot::Core.new(settings_filename_blacklist_fixture)
+        expect(bot.plugins).to_not have_key(:ping)
+
+        # Load new additions
+        bot.instance_variable_set(:@settings_path, settings_filename_whitelist_fixture)
+        bot.reload(:plugin)
+        expect(bot.plugins).to have_key(:ping)
+
+        # Unload subtractions
+        bot.instance_variable_set(:@settings_path, settings_filename_blacklist_fixture)
+        bot.reload(:plugin)
+        expect(bot.plugins).to_not have_key(:ping)
+
+        EM.stop
+      end
     end
 
-    pending 'reloads adapters' do
-    end
+    # pending 'reloads adapters' do end
   end
 end
