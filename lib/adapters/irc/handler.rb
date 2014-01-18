@@ -2,7 +2,11 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   require_relative 'rfc2812'
   include Bot::Adapter::Irc::RFC2812
 
-  attr_accessor :state
+  attr_reader :state
+  attr_reader :timeout
+  attr_reader :ping_interval
+  attr_reader :reconnect_delay
+  attr_reader :nick_reclaim_interval
 
   def initialize(adapter, s=Hash.new(false))
     @adapter = adapter
@@ -10,6 +14,10 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     @registered = false
     @state = :disconnected
     @buffer = BufferedTokenizer.new("\r\n")
+    @timeout = 30
+    @ping_interval = 300
+    @nick_reclaim_interval = 900
+    @reconnect_delay = 30
   end
 
   def connection_completed
@@ -104,7 +112,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     when :"433"
       nick = m.raw.split(' ')[3]
       register(nick + '_')
-      EM.add_timer(900) { nick(@s[:nick]) } # Try to reclaim desired nick
+      EM.add_timer(@nick_reclaim_interval) { nick(@s[:nick]) } # Try to reclaim desired nick
     when :privmsg
       check_trigger(m)
     end
@@ -126,11 +134,11 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def keep_alive
-    period_timer = EventMachine::PeriodicTimer.new(300) do
+    period_timer = EventMachine::PeriodicTimer.new(@ping_interval) do
       if @state == :connected
         send "PING #{Time.now.to_f}"
         @state = :waiting
-        EM.add_timer(30) do
+        EM.add_timer(@timeout) do
           if @state == :waiting
             @state = :reconnecting
             @adapter.reconnect
@@ -144,9 +152,9 @@ class Bot::Adapter::Irc::Handler < EM::Connection
 
   def unbind
     if (@state == :connected || @state == :waiting) && !($shutdown || $restart)
-      Bot.log.warn "Connection closed: reconnecting in 30 seconds..."
+      Bot.log.warn "Connection closed: reconnecting in #{@reconnect_delay} seconds..."
       @state = :reconnecting
-      EM.add_timer(30) { @adapter.reconnect(@s[:name]) if @state == :reconnecting }
+      EM.add_timer(@reconnect_delay) { @adapter.reconnect(@s[:name]) if @state == :reconnecting }
     else
       @state = :disconnected
     end
