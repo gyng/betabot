@@ -40,19 +40,19 @@ module Bot
     include Bot::Core::ObjectLoader
     include Bot::Util::Settings
 
-    attr_reader :adapters, :plugins, :settings, :shared_db, :auth
+    attr_reader :adapters, :plugins, :s, :shared_db, :auth
     START_TIME = Time.now
 
     def initialize(bot_settings_path)
-      Bot.const_set('ROOT_DIR',     File.join(Dir.pwd, 'lib'))              if !Bot.const_defined?('ROOT_DIR')
-      Bot.const_set('SETTINGS_DIR', File.join(Dir.pwd, 'lib', 'settings'))  if !Bot.const_defined?('SETTINGS_DIR')
-      Bot.const_set('DATABASE_DIR', File.join(Dir.pwd, 'lib', 'databases')) if !Bot.const_defined?('DATABASE_DIR')
+      Bot.const_set('ROOT_DIR',     File.join(Dir.pwd, 'lib'))
+      Bot.const_set('SETTINGS_DIR', File.join(Dir.pwd, 'lib', 'settings'))
+      Bot.const_set('DATABASE_DIR', File.join(Dir.pwd, 'lib', 'databases'))
 
       @s = nil
       @settings_path = bot_settings_path
       load_settings
 
-      Bot.const_set('SHORT_TRIGGER', @s[:short_trigger]) if !Bot.const_defined?('SHORT_TRIGGER')
+      Bot.const_set('SHORT_TRIGGER', @s[:short_trigger])
       @authenticator = Bot::Core::Authenticator.new
 
       @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3')) if @s[:create_shared_db]

@@ -2,6 +2,7 @@
     "adapters": {
         "dir": ["adapters"],
         "load_mode": "whitelist",
+        "autostart": [],
         "whitelist": ["dummy", "irc"],
         "blacklist": []
     },
@@ -9,6 +10,7 @@
     "plugins": {
         "dir": "plugins",
         "load_mode": "whitelist",
+        "autostart": [],
         "whitelist": ["dummy"],
         "blacklist": []
     }

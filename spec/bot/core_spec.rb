@@ -6,6 +6,14 @@ require 'fixtures/bot'
 describe Bot::Core do
   include Fixtures::Bot
 
+  before(:each) do
+    # Remove prior module constant definintion for each Bot::Core init
+    # Else it throws warnings all over the place
+    [:ROOT_DIR, :SETTINGS_DIR, :DATABASE_DIR, :SHORT_TRIGGER].each do |const|
+      Bot.send(:remove_const, const) if Bot.const_defined?(const)
+    end
+  end
+
   context 'Objects' do
     context 'Adapters' do
       it 'loads an adapter' do
@@ -52,7 +60,7 @@ describe Bot::Core do
     it 'loads settings' do
       EM.run do
         bot = Bot::Core.new(settings_filename_fixture)
-        expect(bot.settings).to eq settings_fixture
+        expect(bot.s).to eq settings_fixture
         EM.stop
       end
     end
@@ -68,7 +76,7 @@ describe Bot::Core do
     pending 'reloads plugins' do
       bot = Bot::Core.new(settings_filename_fixture)
       plugins = bot.plugins
-      bot.settings = settings_fixture
+      bot.s = settings_fixture
       bot.reload
       expect(bot.plugins.length).to be eq plugins.length + 1
     end
