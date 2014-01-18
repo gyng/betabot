@@ -20,7 +20,7 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
 
         bundle install
 
-3. Create an admin account (auth level 5)
+3. Create an admin account (auth level 5) with the wizard
 
         rake make_user
 
@@ -47,7 +47,8 @@ For example: `!ping`, `MyBot: ping`
 * **entitle** &ndash; Echos titles of uninformative URLs.
 * **entitleri** &ndash; Uses Google reverse image search to guess what image URLs are.
 * **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
-* **translate** &ndash; Translates text with Bing translate. Requires setup of API keys.
+* **translate** &ndash; Translates text with Bing translate. *requires setup of API keys*
+* **wolfram** &ndash; Queries Wolfram|Alpha. *requires setup of API keys*
 
 #### (Some) core commands
 
@@ -210,7 +211,9 @@ The zip package will be located in the `./packages` folder. This package can be 
 
 ## Tests
 
-Tests can be run with `rspec`. Tests have been abandoned for now but contributions are welcome. It's painful to test since the EventMachine reactor has to be set up and torn down for adapters and core components every spec.
+Tests can be run with `rspec`. More tests are being written; current test coverage is still very limited.
+
+The EventMachine reactor has to be set up and torn down for most specs so there is a helper method `with_em(&block)` included in `spec_helper.rb`.
 
 
 
