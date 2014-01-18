@@ -22,6 +22,16 @@ RSpec.configure do |config|
 
   require 'eventmachine'
 
+  # Helper method for easier setup/teardown of eventmachine context
+  # We setup the bot for each spec as the bot expects to be run in EM as
+  # running every spec within a single EM sounds like a terrible idea.
+  def with_em(&block)
+    EM.run do
+      block.call
+      EM.stop
+    end
+  end
+
   # Run specs in random order to surface order dependencies. If you find an
   # order dependency and want to debug it, you can fix the order by providing
   # the seed, which is printed after each run.
