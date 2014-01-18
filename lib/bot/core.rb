@@ -55,7 +55,7 @@ module Bot
       Bot.const_set('SHORT_TRIGGER', @s[:short_trigger])
       @authenticator = Bot::Core::Authenticator.new
 
-      @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3')) if @s[:create_shared_db]
+      @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3')) if @s[:databases][:shared_db]
       initialize_objects(:adapter, @s[:adapters][:load_mode])
       initialize_objects(:plugin, @s[:plugins][:load_mode])
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."

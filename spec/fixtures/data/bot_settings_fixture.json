@@ -10,8 +10,11 @@
     "plugins": {
         "dir": "plugins",
         "load_mode": "whitelist",
-        "autostart": [],
         "whitelist": ["dummy"],
         "blacklist": []
+    },
+
+    "databases": {
+        "shared_db": false
     }
 }

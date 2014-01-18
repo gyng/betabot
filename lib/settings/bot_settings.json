@@ -1,26 +1,22 @@
 {
-  "short_trigger": "!",
+  "short_trigger": "~",
+
   "adapters": {
     "dir": "adapters",
-    "load": "all",
-    "autostart": [
-      "irc"
-    ],
-    "whitelist": [
-
-    ],
-    "blacklist": [
-      "dummy"
-    ]
+    "load_mode": "blacklist",
+    "autostart": ["irc"],
+    "whitelist": [],
+    "blacklist": ["dummy"]
   },
+
   "plugins": {
     "dir": "plugins",
-    "load": "all",
-    "whitelist": [
+    "load_mode": "blacklist",
+    "whitelist": [],
+    "blacklist": ["dummy"]
+  },
 
-    ],
-    "blacklist": [
-      "dummy"
-    ]
+  "databases": {
+    "shared_db": true
   }
 }
