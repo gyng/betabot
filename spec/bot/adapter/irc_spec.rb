@@ -7,7 +7,7 @@ require 'adapters/irc/message'
 
 describe Bot::Adapter::Irc::Handler do
   before do
-    Bot::ROOT_DIR = '.'
+    Bot::ROOT_DIR = File.join(Dir.pwd, 'lib')
     @adapter = Bot::Adapter::Irc.new(true)
     @handler = Bot::Adapter::Irc::Handler.new(@adapter, {})
   end
