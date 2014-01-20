@@ -13,20 +13,16 @@ class Bot::Plugin::Script < Bot::Plugin
   def call(m)
     Thread.start do
       begin
+        # Not entirelly safe. Ideally, we use JRuby's JVM.
         $SAFE = 2
         b = Context.new.get_binding
-
         Timeout::timeout(@s[:timeout]) do
-          m.reply "=> #{b.eval(m.args[0..-1].join(' ')).inspect}"
+          m.reply "=> #{b.eval(m.args.join(' ')).inspect}"
         end
       rescue Exception => e
-        m.reply e
+        m.reply e.inspect
       end
     end
-  rescue Exception => e
-    Bot.log.warn(e)
-    Bot.log.warn(e.backtrace.join("\n"))
-    m.reply e
   end
 
   class Bot::Plugin::Script::Context
