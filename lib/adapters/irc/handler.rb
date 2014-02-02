@@ -2,7 +2,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   require_relative 'rfc2812'
   include Bot::Adapter::Irc::RFC2812
 
-  attr_reader :state
+  attr_accessor :state
   attr_reader :timeout
   attr_reader :ping_interval
   attr_reader :reconnect_delay
