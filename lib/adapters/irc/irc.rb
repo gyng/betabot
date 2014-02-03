@@ -60,8 +60,7 @@ class Bot::Adapter::Irc < Bot::Adapter
         @connections[s[:name].to_sym] = EM.connect(s[:hostname], s[:port], Handler, self, s)
       rescue Exception => e
         EM.add_timer(@reconnect_delay) { connect(s[:name]) }
-        Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, " +
-                     "retrying in #{@reconnect_delay}s"
+        Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, retrying in #{@reconnect_delay}s"
       end
     end
   end
@@ -70,9 +69,13 @@ class Bot::Adapter::Irc < Bot::Adapter
     selected = @connections.select { |k, v| k.to_s.match(/#{regex}/i) }
 
     selected.each_value do |c|
-      c.state = :quitting
-      c.quit(@quit_messages.sample)
-      c.close_connection_after_writing
+      begin
+        c.quit(@quit_messages.sample) if (c.state != :reconnecting)
+        c.state = :quitting
+      rescue Exception => e
+        Bot.log.warn "Failed to quit connection: #{e}, continuing..."
+      end
+      c.close_connection if c.state != :disconnected
       @connections.delete(c)
     end
   end

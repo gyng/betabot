@@ -140,8 +140,10 @@ class Bot::Adapter::Irc::Handler < EM::Connection
         @state = :waiting
         EM.add_timer(@timeout) do
           if @state == :waiting
+            Bot.log.warn "Ping timeout (#{@timeout}s)"
             @state = :reconnecting
-            @adapter.reconnect
+            period_timer.cancel
+            close_connection
           end
         end
       else
@@ -151,12 +153,11 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def unbind
-    if (@state == :connected || @state == :waiting) && !($shutdown || $restart)
-      Bot.log.warn "Connection closed: reconnecting in #{@reconnect_delay} seconds..."
-      @state = :reconnecting
-      EM.add_timer(@reconnect_delay) { @adapter.reconnect(@s[:name]) if @state == :reconnecting }
-    else
-      @state = :disconnected
+    if @state != :quitting && !($shutdown || $restart)
+      Bot.log.warn "Connection closed: unexpected; reconnecting in #{@reconnect_delay} seconds..."
+      EM.add_timer(@reconnect_delay) { @adapter.reconnect(@s[:name]) }
     end
+
+    @state = :disconnected
   end
 end
