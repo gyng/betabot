@@ -71,11 +71,58 @@ class Bot::Plugin::Showtime < Bot::Plugin
     matched_shows.first(3)
   end
 
+  def get_gesopls(filter='.*')
+    query = URI.encode(filter)
+    doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
+    titles   = doc.css('.show').to_a
+    episodes = doc.css('.episode').to_a
+    channels = doc.css('.channel').to_a
+    comments = doc.css('.commentrow').to_a
+    shows = []
+
+    titles.shift
+    episodes.shift
+    channels.shift
+
+    titles.each_with_index do |title, i|
+      begin
+        start_jst = comments[i].css('.comment')[3].text.split(': ').last
+        eta = seconds_to_string(Time.parse("#{start_jst} +0900") - Time.now)
+
+        show_obj = Show.new do |s|
+          s.title   = titles[i].text   unless titles[i].nil?
+          s.episode = episodes[i].text unless episodes[i].nil?
+          s.station = channels[i].text unless channels[i].nil?
+          s.eta     = eta              unless eta.nil?
+        end
+
+        shows.push(show_obj)
+      rescue
+        next
+      end
+    end
+
+    shows.uniq { |s| s.title }.first(3)
+  end
+
+  def add_gesopls_info(shows)
+    shows.map do |show|
+      query = URI.encode(show.title.gsub(/\W/, ' ').split(' ').first)
+      doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
+      ep = doc.css('.episode').to_a[1]
+      title = doc.css('.show').to_a[1]
+      show.title = title.text if title
+      show.episode = ep.text if ep
+    end
+  end
+
   def is_eta?(s)
     # Matches 4d 3h 41m or 4d 41m
     s =~ /\dd|\dh|\dm/ ? s : false
   end
 
+  # Giant hack just to be able to set custom timeout: net/http does not respect connect_timeout
+  # and therefore takes 20 seconds just to declare a site dead
   def is_up?(url, timeout = 3)
     host = URI.parse(url).host
     port = URI.parse(url).port
@@ -107,51 +154,12 @@ class Bot::Plugin::Showtime < Bot::Plugin
     end
   end
 
-  def get_gesopls(filter='.*')
-    query = URI.encode(filter)
-    doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
-    titles   = doc.css('.show').to_a
-    episodes = doc.css('.episode').to_a
-    channels = doc.css('.channel').to_a
-    comments = doc.css('.commentrow').to_a
-    shows = []
-
-    titles.shift
-    episodes.shift
-    channels.shift
-
-    titles.each_with_index do |title, i|
-      start_jst = comments[i].css('.comment')[3].text.split(': ').last
-      time_string = "#{start_jst} +0900"
-      eta = seconds_to_string(Time.parse(time_string) - Time.now)
-
-      show_obj = Show.new do |s|
-        s.title   = titles[i].text   unless titles[i].nil?
-        s.episode = episodes[i].text unless episodes[i].nil?
-        s.station = channels[i].text unless channels[i].nil?
-        s.eta     = eta
-      end
-
-      shows.push(show_obj)
-    end
-
-    shows.uniq { |s| s.title }.first(3)
-  end
-
-  def add_gesopls_info(shows)
-    shows.map do |show|
-      query = URI.encode(show.title.gsub(/\W/, ' ').split(' ').first)
-      doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
-      ep = doc.css('.episode').to_a[1]
-      title = doc.css('.show').to_a[1]
-      show.title = title.text if title
-      show.episode = ep.text if ep
-    end
-  end
-
   def pretty(shows)
-    return 'No shows were found' if shows.empty?
-    shows.map { |s| s.pretty }.join("\n")
+    if shows.empty?
+      'No matching show was found.'
+    else
+      shows.map { |s| s.pretty }.join("\n")
+    end
   end
 
   def seconds_to_string(s)
@@ -161,8 +169,12 @@ class Bot::Plugin::Showtime < Bot::Plugin
     m = m % 60
     d = (h / 24).floor
     h = h % 24
+    s = s.floor
 
-    "#{d}d, #{h}h, #{m}m, #{s.floor}s"
+    "#{d.to_s + 'd, ' if d > 0}" +
+    "#{h.to_s + 'h, ' if h > 0}" +
+    "#{m.to_s + 'm, ' if m > 0}" +
+    "#{s.to_s + 's' if s > 0}"
   end
 
   class Show
