@@ -1,4 +1,7 @@
 class Bot::Plugin::Showtime < Bot::Plugin
+  require 'uri'
+  require 'time'
+
   def initialize(bot)
     @s = {
       trigger: { showtime: [
@@ -8,15 +11,31 @@ class Bot::Plugin::Showtime < Bot::Plugin
       ]},
       subscribe: false
     }
+
+    @mahou   = 'http://www.mahou.org/Showtime/'
+    @gesopls = 'http://gesopls.de/abc/'
+
     super(bot)
   end
 
   def showtime(m)
-    m.reply get_showtime(*m.args)
+    filter = m.args.join(' ')
+    mahou_up = is_up?(@mahou)
+    gesopls_up = is_up?(@gesopls)
+
+    if mahou_up && gesopls_up
+      m.reply pretty(add_gesopls_info(get_showtime(filter)))
+    elsif mahou_up
+      m.reply pretty(get_showtime(filter))
+    elsif gesopls_up
+      m.reply pretty(get_gesopls(filter))
+    else
+      m.reply 'All anime showtime airing services are inaccessible.'
+    end
   end
 
   def get_showtime(filter='.*')
-    doc = Nokogiri::HTML(open('http://www.mahou.org/Showtime/'))
+    doc = Nokogiri::HTML(open(@mahou))
     shows_raw = doc.xpath("//table[@summary='Currently Airing']//table/tr").to_a
     shows_raw.shift # First element is table heading, get rid of it
 
@@ -25,10 +44,10 @@ class Bot::Plugin::Showtime < Bot::Plugin
     shows_starting_soon_raw.shift
     shows_raw.concat(shows_starting_soon_raw)
 
-    shows = {}
+    shows = []
     shows_raw.each do |show|
       begin
-        # Can you modernise your god damned site
+        # Please modernise your site
         show_obj = Show.new do |s|
           s.title        = show.children[2].children[0].to_s.strip
           s.season       = show.children[4].children[0].to_s.strip
@@ -42,27 +61,108 @@ class Bot::Plugin::Showtime < Bot::Plugin
           s.website_link = website_link[0][1] if !website_link.empty?
         end
 
-        shows["#{show_obj.title}"] = show_obj
+        shows.push(show_obj)
       rescue
         next
       end
     end
 
-    # matched_keys is a Hash of show_title => show_object
-    matched_keys = shows.keys.grep(Regexp.new(filter, Regexp::IGNORECASE))
-    pretty_shows = []
-
-    matched_keys.each do |k|
-      pretty_shows.push(shows[k].add_gesopls_info.pretty)
-      break if pretty_shows.size >= 3
-    end
-
-    pretty_shows.empty? ? 'No shows were matched.' : pretty_shows.join("\n")
+    matched_shows = shows.select { |v| v.title =~ Regexp.new(filter, Regexp::IGNORECASE) }
+    matched_shows.first(3)
   end
 
   def is_eta?(s)
     # Matches 4d 3h 41m or 4d 41m
     s =~ /\dd|\dh|\dm/ ? s : false
+  end
+
+  def is_up?(url, timeout = 3)
+    host = URI.parse(url).host
+    port = URI.parse(url).port
+
+    addr = Socket.getaddrinfo(host, nil)
+    sockaddr = Socket.pack_sockaddr_in(port, addr[0][3])
+
+    Socket.new(Socket.const_get(addr[0][0]), Socket::SOCK_STREAM, 0).tap do |socket|
+      socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
+
+      begin
+        socket.connect_nonblock(sockaddr)
+      rescue IO::WaitWritable
+        if IO.select(nil, [socket], nil, timeout)
+          begin
+            socket.connect_nonblock(sockaddr)
+          rescue Errno::EISCONN
+            # Connected
+            return true
+          rescue
+            socket.close
+            return false
+          end
+        else
+          socket.close
+          return false
+        end
+      end
+    end
+  end
+
+  def get_gesopls(filter='.*')
+    query = URI.encode(filter)
+    doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
+    titles   = doc.css('.show').to_a
+    episodes = doc.css('.episode').to_a
+    channels = doc.css('.channel').to_a
+    comments = doc.css('.commentrow').to_a
+    shows = []
+
+    titles.shift
+    episodes.shift
+    channels.shift
+
+    titles.each_with_index do |title, i|
+      start_jst = comments[i].css('.comment')[3].text.split(': ').last
+      time_string = "#{start_jst} +0900"
+      eta = seconds_to_string(Time.parse(time_string) - Time.now)
+
+      show_obj = Show.new do |s|
+        s.title   = titles[i].text   unless titles[i].nil?
+        s.episode = episodes[i].text unless episodes[i].nil?
+        s.station = channels[i].text unless channels[i].nil?
+        s.eta     = eta
+      end
+
+      shows.push(show_obj)
+    end
+
+    shows.uniq { |s| s.title }.first(3)
+  end
+
+  def add_gesopls_info(shows)
+    shows.map do |show|
+      query = URI.encode(show.title.gsub(/\W/, ' ').split(' ').first)
+      doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
+      ep = doc.css('.episode').to_a[1]
+      title = doc.css('.show').to_a[1]
+      show.title = title.text if title
+      show.episode = ep.text if ep
+    end
+  end
+
+  def pretty(shows)
+    return 'No shows were found' if shows.empty?
+    shows.map { |s| s.pretty }.join("\n")
+  end
+
+  def seconds_to_string(s)
+    m = (s / 60).floor
+    s = s % 60
+    h = (m / 60).floor
+    m = m % 60
+    d = (h / 24).floor
+    h = h % 24
+
+    "#{d}d, #{h}h, #{m}m, #{s.floor}s"
   end
 
   class Show
@@ -81,18 +181,15 @@ class Bot::Plugin::Showtime < Bot::Plugin
       yield self if block_given?
     end
 
-    def add_gesopls_info
-      query = URI.encode(@title.gsub(/\W/, ' ').split(' ').first)
-      doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
-      ep = doc.css('.episode').to_a[1]
-      title = doc.css('.show').to_a[1]
-      @title = title.text if title
-      @episode = ep.text if ep
-      self
-    end
-
     def pretty
-      "#{@title.bold}#{@episode ? ' episode ' + @episode.bold : ''} airs in #{@eta.bold} on #{@station} (#{@airtime}) - #{@website_link}"
+      s = "#{@title.bold if @title} " +
+      "#{@episode ? 'episode ' + @episode.bold : ''} " +
+      "airs in #{@eta.bold if @eta} " +
+      "on #{@station}"
+
+      s += " (#{@airtime})" if @airtime
+      s += "#{' - ' + @website_link if @website_link}"
+      s
     end
   end
 end
