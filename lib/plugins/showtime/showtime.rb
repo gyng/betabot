@@ -106,7 +106,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
   end
 
   def add_gesopls_info(shows)
-    shows.map do |show|
+    shows.each do |show|
       query = URI.encode(show.title.gsub(/\W/, ' ').split(' ').first)
       doc = Nokogiri::HTML(open("http://gesopls.de/abc/?name=#{query}&channel=&firstonly=on"))
       ep = doc.css('.episode').to_a[1]
