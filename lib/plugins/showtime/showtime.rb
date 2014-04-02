@@ -58,7 +58,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
           s.episodes     = show.children[14].children[0].to_s.strip
           s.anidb_link   = show.children[-2].children[1].get_attribute('href').to_s if !show.children[-2].children[1].nil?
           website_link   = show.children[-2].children[3].to_a if !show.children[-2].children[3].nil?
-          s.website_link = website_link[0][1] if !website_link.empty?
+          s.website_link = website_link[0][1] if website_link && !website_link.empty?
         end
 
         shows.push(show_obj)
@@ -194,14 +194,14 @@ class Bot::Plugin::Showtime < Bot::Plugin
     end
 
     def pretty
-      s = "#{@title.bold if @title} " +
-      "#{@episode ? 'episode ' + @episode.bold : ''} " +
-      "airs in #{@eta.bold if @eta} " +
-      "on #{@station}"
-
-      s += " (#{@airtime})" if @airtime
-      s += "#{' - ' + @website_link if @website_link}"
-      s
+      s = []
+      s.push @title.bold if @title
+      s.push "episode #{@episode.bold}" if @episode
+      s.push "airs in #{@eta.bold}" if @eta
+      s.push "on #{@station}" if @station
+      s.push "(#{@airtime})" if @airtime
+      s.push "- #{@website_link}" if @website_link
+      s.join(' ')
     end
   end
 end
