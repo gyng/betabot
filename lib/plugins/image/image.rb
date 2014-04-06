@@ -10,7 +10,7 @@ class Bot::Plugin::Image < Bot::Plugin
     @s = {
       trigger: { image: [:call, 0, 'Image scraper plugin.'] },
       subscribe: true,
-      filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp'],
+      filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp', 'http.*webm'],
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
       image_directory: ['lib', 'public', 'i'],
       get_google_guess: false
@@ -86,7 +86,7 @@ class Bot::Plugin::Image < Bot::Plugin
       if (matched_image = @db[:images].where(sha256: sha256)).to_a.empty?
         # New image
         filetype = File.extname(URI.parse(url).path)
-        image_path = File.join(*@s[:image_directory], "#{sha256}.#{filetype}")
+        image_path = File.join(*@s[:image_directory], "#{sha256}#{filetype}")
         FileUtils.mv(temp_path, image_path) if !File.file?(image_path)
         @db.from(:images).insert(
           sha256:             sha256,
