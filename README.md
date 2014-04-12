@@ -14,7 +14,7 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
 
 1. Download or clone this repository.
 
-        git clone https://github.com/gyng/WaruiBot.git
+        git clone https://github.com/gyng/Hudda.git
 
 2. Install the gems with Bundler
 
