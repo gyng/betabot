@@ -6,7 +6,29 @@ module Bot
 
   require_relative 'adapter'
   require_relative 'plugin'
-  require_relative 'util/logger'
+
+  class << self
+    attr_accessor :log
+
+    def log
+      if !@log
+        @log = Logger.new(STDOUT)
+        @log.level = Logger::WARN if ENV['TEST'] # Set in spec_helper.rb
+        @log.formatter = -> severity, datetime, progname, message do
+          color = case severity
+            when 'FATAL';   :red
+            when 'ERROR';   :red
+            when 'WARN';    :red
+            when 'INFO';    :gray
+            when 'DEBUG';   :gray
+            when 'UNKNOWN'; :gray
+          end
+          "#{(severity[0] + ' ' + datetime.to_s + ' | ').send(color)}#{message}\n"
+        end
+      end
+      @log
+    end
+  end
 
   class Core
     require_relative 'database'
@@ -150,7 +172,7 @@ module Bot
 
     def publish(m)
       # Plugin listens in to all messages
-      @subscribed_plugins.each { |p| @plugins[p].receive(m) }
+      @subscribed_plugins.each { |p| @plugins[p].receive(m)  }
     end
 
     def register_trigger(trigger, plugin, method, required_auth_level, help='No help.')
@@ -160,6 +182,10 @@ module Bot
         required_auth_level: required_auth_level.to_i,
         help: help
       }
+    end
+
+    def unregister_trigger(trigger)
+      @plugin_mapping.delete(trigger.to_sym)
     end
 
     def subscribe_plugin(plugin)
