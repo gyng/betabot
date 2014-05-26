@@ -15,7 +15,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
       filters: [
         "http.*?youtu\\(\\.be|be\\.com\\)\\S*",
         "http.*?google\\.com\\S*",
-        "http.+?\\?.+?=.[^\\s]+"
+        "http.+?\\?.+?=.[^\\s]+",
+        "http.+?\\?.+\/\d+\/?"
       ]
     }
     super(bot)
