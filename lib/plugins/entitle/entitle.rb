@@ -13,10 +13,9 @@ class Bot::Plugin::Entitle < Bot::Plugin
       subscribe: true,
       timeout: 10,
       filters: [
-        "http.*?youtu\\(\\.be|be\\.com\\)\\S*",
-        "http.*?google\\.com\\S*",
-        "http.+?\\?.+?=.[^\\s]+",
-        "http.+?\\?.+\/\d+\/?"
+        'http.*?google\.com\S*',
+        'http.+?=.\S+',
+        'http.+\/\d+'
       ]
     }
     super(bot)
