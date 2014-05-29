@@ -91,6 +91,29 @@ There is a rake task to create a skeleton plugin. This uses the Ping plugin as a
 
 The created plugin is located at `./lib/plugins/name/name.rb`.
 
+### Example plugin
+
+    class Bot::Plugin::Ping < Bot::Plugin
+      def initialize(bot)
+        # Default settings: trigger: [method_symbol, auth_level, help_string]
+        #                   subscribe: listen in to all messages?
+        # Each trigger can call a different method.
+        @s = {
+          trigger: { ping: [:call, 0, 'Pings the bot.'] },
+          subscribe: false
+        }
+        super(bot)
+      end
+
+      def call(m=nil)
+        m.reply('pong')
+      end
+
+      # The method called if subscribe is true.
+      def receive(m)
+      end
+    end
+
 
 ### Dependencies
 
