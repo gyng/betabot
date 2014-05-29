@@ -15,7 +15,7 @@ class Bot::Plugin::Chat < Bot::Plugin
       brain_path: ['lib', 'plugins', 'chat', 'settings', 'brain.dat'],
       key_length: 2,
       chain_length: 2,
-      max_sentence_length: 20, # Number of chains
+      max_sentence_length: 30, # Number of chains
       textbook: ['lib', 'plugins', 'chat', 'settings', 'textbook.txt'],
       learn_buffer_size: 10,
       chip_in_probability: 0.001,
@@ -121,7 +121,7 @@ class Bot::Plugin::Chat < Bot::Plugin
   end
 
   def learn(line)
-    # key_length 2 and chain_length 1
+    # key_length 2 and chain_length 1, \n is the EOL token
     # 'my dog'     => ['went', 'died']
     # 'dog went'   => ['to']
     # 'went to'    => ['the']
@@ -148,7 +148,7 @@ class Bot::Plugin::Chat < Bot::Plugin
     while sentence.length < @s[:max_sentence_length]
       break if seed.nil? || @brain[seed].nil?
       append = @brain[seed].sample
-      sentence.concat([append.split(' ')].flatten)
+      sentence.concat(append.split(' ')).flatten
       seed = sentence.last(@s[:key_length]).join(' ')
     end
 
@@ -156,36 +156,42 @@ class Bot::Plugin::Chat < Bot::Plugin
   end
 
   def haiku(seed=nil)
-    seed = @brain.keys.sample if seed.nil?
-    line = seed.split(' ') # Start off with seed
     lines = []
-    attempts = 0
-    syllables = [5, 7, 5]
+    seed  = @brain.keys.sample if seed.nil?
+    line  = seed.split(' ') # Start off with seed, tokenised
 
-    0.upto(2) do |i|
-      while count_line_syllables(line) != syllables[i] && ((attempts += 1) < 200) do
+    attempts_before_fib = 200
+    monosyllable_words  = ['and', 'or', 'is', 'the', 'then', 'not', 'was']
+    syllables           = [5, 7, 5]
+
+    syllables.each do |line_syllables|
+      line_attempts = 0
+
+      while count_syllables(line) != line_syllables do
         seed = @brain.keys.sample if seed.nil? || @brain[seed].nil?
-        append = @brain[seed].sample
-        line.concat([append.split(' ')].flatten)
-        line.shift(@s[:chain_length]) if count_line_syllables(line) > syllables[i]
 
-        if attempts % 50 == 0
-          seed = @brain.keys.sample
-        else
-          seed = line.last(@s[:key_length]).join(' ')
-        end
+        # Brain is a loaded dice - more probably elements are naively repeated.
+        # Hence, a random sample works. This takes into account probability.
+        append = @brain[seed].sample.split(' ')
+        line.concat(append).flatten!
+
+        # Overshoot, trim the line until it still fits
+        line.pop while count_syllables(line) > line_syllables
+
+        # Add a monosyllable word if we can't fit anything from the brain after max tries
+        # Technically wrong, but it can't be helped.
+        line.push monosyllable_words.sample if (line_attempts += 1) > attempts_before_fib
+        seed = line.last(@s[:key_length]).join(' ')
       end
 
-      attempts = 0
       lines.push(line.join(' '))
       line = []
     end
 
-    # lines = lines.map { |l| "(#{count_line_syllables(l.split(' '))}) " + l }
     lines.join("\n")
   end
 
-  def count_line_syllables(line)
+  def count_syllables(line)
     line.inject(0) { |acc, e| acc + count_syllables(e) }
   end
 
