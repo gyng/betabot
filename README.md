@@ -93,26 +93,28 @@ The created plugin is located at `./lib/plugins/name/name.rb`.
 
 ### Example plugin
 
-    class Bot::Plugin::Ping < Bot::Plugin
-      def initialize(bot)
-        # Default settings: trigger: [method_symbol, auth_level, help_string]
-        #                   subscribe: listen in to all messages?
-        # Each trigger can call a different method.
-        @s = {
-          trigger: { ping: [:call, 0, 'Pings the bot.'] },
-          subscribe: false
-        }
-        super(bot)
-      end
+```ruby
+class Bot::Plugin::Ping < Bot::Plugin
+  def initialize(bot)
+    # Default settings: trigger: [method_symbol, auth_level, help_string]
+    #                   subscribe: listen in to all messages?
+    # Each trigger can call a different method.
+    @s = {
+      trigger: { ping: [:call, 0, 'Pings the bot.'] },
+      subscribe: false
+    }
+    super(bot)
+  end
 
-      def call(m=nil)
-        m.reply('pong')
-      end
+  def call(m=nil)
+    m.reply('pong')
+  end
 
-      # The method called if subscribe is true.
-      def receive(m)
-      end
-    end
+  # The method called if subscribe is true.
+  def receive(m)
+  end
+end
+```
 
 
 ### Dependencies
@@ -207,21 +209,23 @@ IRC's Message class has
 
 If finer control over authentication is needed, Bot::Plugin offers an `auth(level, message)` helper method.
 
-    # plugin.rb
+```ruby
+# plugin.rb
 
-    ...
+# ...
 
-    def call(m)
-      case m.args[0]
-      when 'wakeup'
-        m.reply 'Nope!'
-        m.reply 'BOSS?' if auth(5, m)
-      when 'sleep'
-        ...
-      end
-    end
+def call(m)
+  case m.args[0]
+  when 'wakeup'
+    m.reply 'Nope!'
+    m.reply 'BOSS?' if auth(5, m)
+  when 'sleep'
+    # ...
+  end
+end
 
-    ...
+# ...
+```
 
 The method `auth_r(level, message)` replies to the message sender if authentication fails.
 
