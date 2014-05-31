@@ -59,7 +59,7 @@ class Bot::Plugin::Chat < Bot::Plugin
     when 'about'
       if m.args.size-1 < @s[:key_length]
         # If shorter than key length we search the keys for a matching topic
-        seed = @brain.keys.find_all { |k| /#{(m.args[1..-1].sample)}/ =~ k }.sample
+        seed = @brain.keys.find_all { |k| /#{(m.args.sample)}/ =~ k }.sample
       else
         # Assume the user knows the exact phrase
         seed = m.args[1..(1 + @s[:key_length])].join(' ')
@@ -77,7 +77,7 @@ class Bot::Plugin::Chat < Bot::Plugin
     if m.args.nil? || m.args.empty?
       m.reply haiku
     else
-      seed = @brain.keys.find_all { |k| /#{(m.args.sample)}/ =~ k }.sample
+      seed = @brain.keys.find_all { |k| /#{(m.args.join(' '))}/ =~ k }.sample
       m.reply haiku(seed)
     end
   end
@@ -160,6 +160,7 @@ class Bot::Plugin::Chat < Bot::Plugin
     seed  = @brain.keys.sample if seed.nil?
     line  = seed.split(' ') # Start off with seed, tokenised
 
+    max_attempts = 210
     attempts_before_fib = 200
     monosyllable_words  = ['and', 'or', 'is', 'the', 'then', 'not', 'was']
     syllables           = [5, 7, 5]
@@ -167,7 +168,7 @@ class Bot::Plugin::Chat < Bot::Plugin
     syllables.each do |line_syllables|
       line_attempts = 0
 
-      while count_syllables(line) != line_syllables do
+      while count_syllables(line) != line_syllables && line_attempts < max_attempts do
         seed = @brain.keys.sample if seed.nil? || @brain[seed].nil?
 
         # Brain is a loaded dice - more probably elements are naively repeated.
