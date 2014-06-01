@@ -15,7 +15,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
       filters: [
         'http.*?google\.com\S*',
         'http.+?=.\S+',
-        'http.+\/\d+'
+        'http.+\/\d+\/?[^\.]+$'
       ]
     }
     super(bot)
