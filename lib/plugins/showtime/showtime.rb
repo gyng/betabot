@@ -1,6 +1,7 @@
 class Bot::Plugin::Showtime < Bot::Plugin
   require 'uri'
   require 'time'
+  require 'timeout'
 
   def initialize(bot)
     @s = {
@@ -20,8 +21,8 @@ class Bot::Plugin::Showtime < Bot::Plugin
 
   def showtime(m)
     filter = m.args.join(' ')
-    mahou_up = is_up?(@mahou)
-    gesopls_up = is_up?(@gesopls)
+    mahou_up = is_up?(@mahou, 3)
+    gesopls_up = is_up?(@gesopls, 3)
 
     if mahou_up && gesopls_up
       m.reply pretty(add_gesopls_info(get_showtime(filter)))
@@ -127,30 +128,27 @@ class Bot::Plugin::Showtime < Bot::Plugin
     host = URI.parse(url).host
     port = URI.parse(url).port
 
-    addr = Socket.getaddrinfo(host, nil)
-    sockaddr = Socket.pack_sockaddr_in(port, addr[0][3])
-
-    Socket.new(Socket.const_get(addr[0][0]), Socket::SOCK_STREAM, 0).tap do |socket|
-      socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
-
+    begin
+      http = Net::HTTP.start(host, port, {open_timeout: timeout, read_timeout: timeout})
       begin
-        socket.connect_nonblock(sockaddr)
-      rescue IO::WaitWritable
-        if IO.select(nil, [socket], nil, timeout)
-          begin
-            socket.connect_nonblock(sockaddr)
-          rescue Errno::EISCONN
-            # Connected
-            return true
-          rescue
-            socket.close
-            return false
-          end
+        response = http.head("/")
+        if response.code == "200"
+          # everything fine
+          return true
         else
-          socket.close
+          # unexpected status code
           return false
         end
+      rescue Timeout::Error
+        # timeout reading from server
+        return false
       end
+    rescue Timeout::Error
+      # timeout connecting to server
+      return false
+    rescue SocketError
+      # unknown server
+      return false
     end
   end
 
