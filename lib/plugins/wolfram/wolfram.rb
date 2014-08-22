@@ -18,7 +18,7 @@ class Bot::Plugin::Wolfram < Bot::Plugin
 
   def wolfram(search_term, depth=1)
     return if depth > @s[:max_depth]
-    search_term = URI.escape(search_term)
+    search_term = CGI::escape(search_term)
     raw = Nokogiri::XML(open("http://api.wolframalpha.com/v2/query?appid=#{@s[:api_key]}&format=plaintext&input=\'#{search_term}\'"))
     pods = raw.search("//pod['title']")
     results = []
