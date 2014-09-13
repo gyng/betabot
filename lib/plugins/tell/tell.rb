@@ -16,7 +16,9 @@ class Bot::Plugin::Tell < Bot::Plugin
   end
 
   def receive(m)
-    tell = @stored_messages.delete(m.sender)
-    m.reply("#{m.sender}: #{tell[:from]} wanted to tell you ``#{tell[:message]}''") if !tell.nil?
+    if m.type == :privmsg || m.type == :join
+      tell = @stored_messages.delete(m.sender)
+      m.reply("#{m.sender}: #{tell[:from]} wanted to tell you ``#{tell[:message]}''") if !tell.nil?
+    end
   end
 end
