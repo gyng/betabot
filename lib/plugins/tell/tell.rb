@@ -21,7 +21,7 @@ class Bot::Plugin::Tell < Bot::Plugin
       tells = @stored_messages.delete(m.sender)
       tells.each do |t|
         m.reply("#{m.sender}: #{t[:from]} wanted to tell you ``#{t[:message]}'', #{((Time.now.to_i - t[:at]) / 60.0 / 60.0).round(2)} hours ago")
-      end
+      end if !tells.nil?
     end
   end
 end
