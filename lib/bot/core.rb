@@ -35,8 +35,6 @@ module Bot
 
       @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3')) if @s[:databases][:shared_db]
 
-      Bot.log.info(@s[:webserver].inspect)
-
       if @s[:webserver][:enabled]
         Bot.log.info('Web server enabled, starting...')
         require_relative 'webserver.rb'

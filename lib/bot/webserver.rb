@@ -9,7 +9,6 @@ def start_web(s)
 end
 
 def start_sinatra(s, web_app)
-  Bot.log.info s.inspect
   server  = s[:server]    || 'thin'
   host    = s[:host]      || '0.0.0.0'
   port    = s[:port].to_s || '80'
