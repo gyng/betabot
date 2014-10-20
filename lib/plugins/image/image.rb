@@ -43,17 +43,29 @@ class Bot::Plugin::Image < Bot::Plugin
     end
 
     random_proc = -> (n) {
-      @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
+      @db[:images].order(Sequel.lit('RANDOM()')).limit(n)
+    }
+
+    sources_proc = -> (image) {
+      @db[:sources].where(image_id: image[:id]).order(:timestamp)
     }
 
     if defined?(Web)
       Web.get '/i/random' do
-        image = random_proc.call(1).first
+        image = random_proc.call(1).to_a.first
+        sources = sources_proc.call(image).to_a
+        op = sources.first
         path = Web.url + image[:path].gsub('lib/public', '')
         "<!DOCTYPE html>
         <html>
         <body>
           <img src=#{path} />
+          <video src=#{path} autoplay loop></video>
+          <ul>
+            <li>First posted by: #{op[:source_name]}</li>
+            <li>First posted on: #{op[:timestamp]}</li>
+            <li>Times seen: #{sources.size}
+          </ul>
         </body
         </html>"
       end

@@ -3,12 +3,12 @@
     {
       "enabled": true,
       "name": "somename",
-      "hostname": "irc.yasashiisyndicate.org",
+      "hostname": "irc.someserver.org",
       "port": 6697,
       "ssl": true,
-      "nick": "betabotNEXT-5G-LTE",
+      "nick": "Huddabot",
       "default_channels": [
-        "#dicks",
+        "#a-channel",
         "#some-other-channel"
       ]
     }

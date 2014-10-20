@@ -1,5 +1,5 @@
 {
-  "short_trigger": "~",
+  "short_trigger": "`",
 
   "adapters": {
     "dir": "adapters",
@@ -22,7 +22,7 @@
 
   "webserver": {
     "enabled": true,
-    "link_url": "localhost:80",
+    "link_url": "http://localhost:80",
     "host": "0.0.0.0",
     "port": "80"
   }
