@@ -18,4 +18,8 @@ end
 
 Thread.abort_on_exception = true if ARGV[0] == '-dev'
 EM.run { Bot::Core.new(File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.json')) }
-exec "ruby #{__FILE__}" if $restart
+if $restart
+  exec "ruby #{__FILE__}"
+else
+  Kernel.abort
+end

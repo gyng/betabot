@@ -34,6 +34,20 @@ module Bot
       @authenticator = Bot::Core::Authenticator.new
 
       @shared_db = Bot::Database.new(File.join(Bot::DATABASE_DIR, 'shared.sqlite3')) if @s[:databases][:shared_db]
+
+      Bot.log.info(@s[:webserver].inspect)
+
+      if @s[:webserver][:enabled]
+        Bot.log.info('Web server enabled, starting...')
+        require_relative 'webserver.rb'
+        start_web(@s[:webserver])
+
+        # Add (example) default path
+        Web.get '/' do
+          redirect '/index.html'
+        end
+      end
+
       initialize_objects(:adapter)
       initialize_objects(:plugin)
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
@@ -200,6 +214,7 @@ module Bot
       $shutdown = true
       EM.add_timer(1) do
         stop_adapters
+        Web.quit!
         EM.stop
       end
     end

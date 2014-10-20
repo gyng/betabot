@@ -6,6 +6,8 @@ gem 'eventmachine'
 gem 'sequel'
 gem 'sqlite3'
 gem 'rubyzip', :require => false
+gem 'sinatra'
+gem 'thin'
 
 # gem 'colorize'
 # gem 'linguistics'

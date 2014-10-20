@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hudda</title>
+</head>
+
+<body>
+  <h1>Congratulations! Your Hudda webserver is running!</h1>
+  <h2>Disabling this</h2>
+  <p>To turn this off, change the key <code>"webserver": { "enabled": true }</code> to <code>"webserver": { "enabled": false }</code> in <code>lib/settings/bot_settings.json</code>
+
+  <h2>Adding a path in your plugin</h2>
+  <p>To add a web path for your plugin, do this in your code (make sure it gets executed):
+
+  <pre>
+Web.get '/mypath' do
+  "Hello friends"
+end
+  </pre>
+
+  The web server is just a Sinatra app, so all Sinatra things apply. Just remember to add a <code>Web</code> in front of the HTTP methods.
+</body>
+</html>

@@ -18,5 +18,12 @@
 
   "databases": {
     "shared_db": true
+  },
+
+  "webserver": {
+    "enabled": true,
+    "link_url": "localhost",
+    "host": "0.0.0.0",
+    "port": "80"
   }
 }
