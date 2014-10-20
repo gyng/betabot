@@ -1,8 +1,8 @@
 # Hudda
 
-Hudda is a chatbot that aims to be protocol agnostic, easy to deploy and simple to develop for. Hudda supersedes [HidoiBot](https://github.com/gyng/HidoiBot).
+Hudda is a chatbot that aims to be protocol agnostic, easy to deploy and simple to develop for.
 
-Features network adapters and plugin framework goodies (database ORM, settings, packaging, install).
+Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).
 
 An IRC adapter and some useful plugins are included. A web-based bouncer and public site in the roadmap.
 
@@ -12,7 +12,7 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
 
 0. Requirements: Ruby version >= 2.0
 
-1. Download or clone this repository.
+1. Download or clone this repository
 
         git clone https://github.com/gyng/Hudda.git
 
@@ -25,9 +25,9 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
         rake make_user
 
 4. Configure the bot. Settings files that need changing:<br>
-    * `./lib/settings/bot_settings.json`
+    * `./lib/settings/bot_settings.json` (disable the web server here by setting `enabled` to `false` if you don't wish to have one running)
     * `./lib/adapters/irc/settings/settings.json` (and any per-adapter settings)
-    * (Optional) any plugin settings.
+    * (Optional) any plugin settings
 
 5. Start the bot
 
@@ -43,7 +43,7 @@ For example: `!ping`, `MyBot: ping`
 #### Notable default plugins
 
 * **chat** &ndash; Learning Markov chat. Run `!chat educate` on first run to feed it `./lib/plugins/chat/settings/textbook.txt`. Learns from user text.
-* **image** &ndash; Saves all image links and records data about them in a database. Images are saved in `./public/i`.
+* **image** &ndash; Saves all image links and records data about them in a database. Images are saved in `./public/i`. The image plugin also gives a random image link from the image database if the web server is running.
 * **entitle** &ndash; Echos titles of uninformative URLs.
 * **entitleri** &ndash; Uses Google reverse image search to guess what image URLs are.
 * **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
@@ -235,6 +235,41 @@ Installable plugins can be packaged with `rake package_plugin[plugin_name]`.
 
 The zip package will be located in the `./packages` folder. This package can be installed by running `rake install_plugin[http://myurl.com/plugin_name.sha31fda.plugin.zip]`. Do not change the filename as it is used in the install process.
 
+
+### Web hook
+
+Hudda runs the Sinatra web microframework by default. To hook into this, do the following and make sure it gets called somehow, somewhen. You can put this in your plugin's `initialize`.
+
+
+```ruby
+if defined?(Web)
+  Web.get '/mypath' do
+    "Hello, world!"
+  end
+end
+```
+
+
+This will make available the route `http://yourconfiguredurl/mypath` (configured in `settings/bot_settings.json`) which just displays the string "Hello, world!".
+
+You will probably need to access instance variables used by your plugin for your web route. Use a closure like this:
+
+
+```ruby
+random_proc = -> (n) {
+  @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
+}
+
+if defined?(Web)
+  Web.get '/i/random' do
+    image = random_proc.call(1).first
+    path = image[:path]
+    redirect path
+  end
+end
+```
+
+Check out the Image plugin for a concrete example.
 
 
 ## Tests
