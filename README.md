@@ -25,13 +25,19 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
         rake make_user
 
 4. Configure the bot. Settings files that need changing:<br>
-    * `./lib/settings/bot_settings.json` (disable the web server here by setting `enabled` to `false` if you don't wish to have one running)
+    * `./lib/settings/bot_settings.json` (for web server configuration options check below)
     * `./lib/adapters/irc/settings/settings.json` (and any per-adapter settings)
     * (Optional) any plugin settings
 
 5. Start the bot
 
         ruby start_bot.rb
+
+### Web server configuration details
+* `enabled` &ndash; whether the webserver runs on startup
+* `link_url` &ndash; the URL for plugins to use (eg. http://lollipop.hiphop:9999 or http://www.example.org)
+* `host` &ndash; the listening host; leave this at 0.0.0.0 and it *should* work
+* `port` &ndash; your listening port
 
 ## Usage
 
