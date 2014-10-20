@@ -22,7 +22,7 @@
 
   "webserver": {
     "enabled": true,
-    "link_url": "localhost",
+    "link_url": "localhost:80",
     "host": "0.0.0.0",
     "port": "80"
   }

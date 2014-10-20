@@ -6,6 +6,7 @@ require './lib/bot/core'
 
 $shutdown = false
 $restart = false
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 # Loads .rb patches intended to be run only once.
 patch_dir = File.join(Dir.pwd, 'lib', 'patches')

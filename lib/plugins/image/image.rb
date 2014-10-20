@@ -8,7 +8,7 @@ class Bot::Plugin::Image < Bot::Plugin
 
   def initialize(bot)
     @s = {
-      trigger: { image: [:call, 0, 'Image scraper plugin.'] },
+      trigger: { image: [:call, 0, 'Image scraper plugin. Call this for a random image.'] },
       subscribe: true,
       filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp', 'http.*webm'],
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
@@ -41,10 +41,36 @@ class Bot::Plugin::Image < Bot::Plugin
         String      :filename
       end
     end
+
+    random_proc = -> (n) {
+      @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
+    }
+
+    if defined?(Web)
+      Web.get '/i/random' do
+        image = random_proc.call(1).first
+        path = Web.url + image[:path].gsub('lib/public', '')
+        "<!DOCTYPE html>
+        <html>
+        <body>
+          <img src=#{path} />
+        </body
+        </html>"
+      end
+    end
+  end
+
+  def random_images(n)
+    @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
   end
 
   def call(m=nil)
-    m.reply 'Random image will be implemented when the web interface is up.'
+    if defined?(Web)
+      image = random_images(1).first
+      m.reply Web.url + image[:path].gsub('lib/public', '')
+    else
+      m.reply "The web server is disabled."
+    end
   end
 
   def receive(m)
@@ -64,6 +90,7 @@ class Bot::Plugin::Image < Bot::Plugin
 
   def record(url, m)
     Thread.new do
+      Bot.log.info("#{self.class.name} - Saving image #{url}...")
       temp_dir = File.join(*@s[:image_directory], 'temp')
       if !File.directory?(temp_dir)
         FileUtils.mkdir_p(temp_dir)
@@ -73,8 +100,13 @@ class Bot::Plugin::Image < Bot::Plugin
       temp_path = File.join(temp_dir, "temp_#{Time.now.to_f}")
 
       # Grab file. TODO: setup a timeout
-      File.open(temp_path, 'wb') do |f|
-        f.write(open(url).read)
+      begin
+        File.open(temp_path, 'wb') do |f|
+          f.write(open(url).read)
+        end
+      rescue Exception => e
+        Bot.log.info("Failed to open image #{url} #{e.to_s}")
+        File.delete(temp_path)
       end
 
       # Discard bad file

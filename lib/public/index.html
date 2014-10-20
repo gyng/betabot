@@ -10,14 +10,32 @@
   <p>To turn this off, change the key <code>"webserver": { "enabled": true }</code> to <code>"webserver": { "enabled": false }</code> in <code>lib/settings/bot_settings.json</code>
 
   <h2>Adding a path in your plugin</h2>
-  <p>To add a web path for your plugin, do this in your code (make sure it gets executed):
+  <p>To add a web path for your plugin, do this in your code (make sure it gets executed on load, or whenever):
 
   <pre>
-Web.get '/mypath' do
-  "Hello friends"
+if defined?(Web)
+  Web.get '/mypath' do
+    "Hello friends"
+  end
 end
   </pre>
 
-  The web server is just a Sinatra app, so all Sinatra things apply. Just remember to add a <code>Web</code> in front of the HTTP methods.
+  If you need to access instance variables from your plugin itself, which is probably going to happen, use a closure like this:
+
+  <pre>
+# Get a random image from the database
+random_proc = -> (n) {
+  @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
+}
+
+if defined?(Web)
+  Web.get '/i/random' do
+    image = random_proc.call(1).first[:path]
+    redirect path
+  end
+end
+  </pre>
+
+  <p>Check out the <code>Image</code> plugin for a concrete example. The web server is just a Sinatra app, so all Sinatra things apply. Just remember to add a <code>Web</code> in front of the HTTP methods.</p>
 </body>
 </html>
