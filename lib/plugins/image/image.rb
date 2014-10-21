@@ -8,7 +8,10 @@ class Bot::Plugin::Image < Bot::Plugin
 
   def initialize(bot)
     @s = {
-      trigger: { image: [:call, 0, 'Image scraper plugin. Call this for a random image.'] },
+      trigger: {
+        image: [:random_image_link, 0, 'Image scraper plugin. Call this for a random image.'],
+        images: [:images_link, 0, 'Gets the images listing webpage.']
+      },
       subscribe: true,
       filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp', 'http.*webm'],
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
@@ -67,8 +70,36 @@ class Bot::Plugin::Image < Bot::Plugin
             <li>First posted on: #{op[:timestamp]}</li>
             <li>Times seen: #{sources.size}
           </ul>
+          <a href='../i'>Image listing</a>
         </body>
         </html>"
+      end
+
+      image_directory = @s[:image_directory]
+      Web.get '/i' do
+        @dir = File.join(image_directory)
+        @paths = Dir.entries(@dir).reject { |p| [".gitignore", ".", "..", "temp"].include? p }
+        erb '
+          <!DOCTYPE html>
+          <html>
+          <body>
+            <h2>Image list</h2>
+            <a href="../i/random">Random image</a>
+            <table>
+              <tr>
+                <th>Filename</th>
+                <th>Last modified</th>
+              </tr>
+              <% @paths.each do |path| %>
+                <tr>
+                  <td><a href="/i/<%=path%>"><%=path%></a></td>
+                  <td><%= File.mtime "#{@dir}/#{path}" %></td>
+                </tr>
+              <% end %>
+            </table>
+            <p><%= @dir.length %> entries.</p>
+          </body>
+          </html>'
       end
     end
   end
@@ -77,10 +108,19 @@ class Bot::Plugin::Image < Bot::Plugin
     @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
   end
 
-  def call(m=nil)
+  def random_image_link(m=nil)
     if defined?(Web)
       image = random_images(1).first
       m.reply Web.url + image[:path].gsub('lib/public', '')
+    else
+      m.reply "The web server is disabled."
+    end
+  end
+
+  def images_link(m)
+    if defined?(Web)
+      path = @s[:image_directory].join('/').gsub('lib/public', '')
+      m.reply "#{Web.url}#{path}"
     else
       m.reply "The web server is disabled."
     end
