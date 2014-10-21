@@ -97,7 +97,7 @@ class Bot::Plugin::Image < Bot::Plugin
                 </tr>
               <% end %>
             </table>
-            <p><%= @dir.length %> entries.</p>
+            <p><%= @paths.length %> entries.</p>
           </body>
           </html>'
       end
