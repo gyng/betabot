@@ -59,14 +59,15 @@ class Bot::Plugin::Image < Bot::Plugin
         "<!DOCTYPE html>
         <html>
         <body>
-          <img src=#{path} />
-          <video src=#{path} autoplay loop></video>
+          <video autoplay loop poster='#{path}'>
+            <source src='#{path}' type='video/webm' />
+          </video>
           <ul>
             <li>First posted by: #{op[:source_name]}</li>
             <li>First posted on: #{op[:timestamp]}</li>
             <li>Times seen: #{sources.size}
           </ul>
-        </body
+        </body>
         </html>"
       end
     end
