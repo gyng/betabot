@@ -5,6 +5,7 @@ gem 'mechanize'
 gem 'eventmachine'
 gem 'sequel'
 gem 'sqlite3'
+gem 'rake'
 gem 'rubyzip', :require => false
 gem 'sinatra'
 gem 'thin'
