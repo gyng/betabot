@@ -58,8 +58,8 @@ describe Bot::Adapter::Irc::Handler do
         @handler.unbind
         expect(@handler.state).to eq(:disconnected)
 
-        @handler.instance_variable_set(:@state, :reconnecting)
-        $shutdown = false
+        @handler.instance_variable_set(:@state, :quitting)
+        $shutdown = true
         @handler.unbind
         expect(@handler.state).to eq(:disconnected)
       }

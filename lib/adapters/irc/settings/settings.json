@@ -3,12 +3,12 @@
     {
       "enabled": true,
       "name": "somename",
-      "hostname": "irc.someserver.org",
+      "hostname": "irc.yasashiisyndicate.org",
       "port": 6697,
       "ssl": true,
       "nick": "Huddabot",
       "default_channels": [
-        "#a-channel",
+        "#dicks",
         "#some-other-channel"
       ]
     }
