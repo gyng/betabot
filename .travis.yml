@@ -3,3 +3,4 @@ rvm:
   - 2.1
   - 1.9.3
 script: bundle exec rspec spec
+before_install: gem install eventmachine
