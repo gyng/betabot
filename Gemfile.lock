@@ -9,14 +9,7 @@ GEM
       nokogiri (~> 1.6.0)
       savon (~> 2.0)
     builder (3.2.2)
-    columnize (0.3.6)
     daemons (1.1.9)
-    debugger (1.6.2)
-      columnize (>= 0.3.1)
-      debugger-linecache (~> 1.2.0)
-      debugger-ruby_core_source (~> 1.2.3)
-    debugger-linecache (1.2.0)
-    debugger-ruby_core_source (1.2.3)
     diff-lcs (1.2.4)
     domain_name (0.5.14)
       unf (>= 0.0.5, < 1.0.0)
@@ -93,7 +86,6 @@ PLATFORMS
 
 DEPENDENCIES
   bing_translator
-  debugger
   eventmachine
   mechanize
   nokogiri
