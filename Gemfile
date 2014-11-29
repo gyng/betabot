@@ -10,6 +10,7 @@ gem 'rubyzip', :require => false
 gem 'sinatra'
 gem 'thin'
 
+gem 'rubyntlm', :require => false # Fixes https://github.com/savonrb/httpi/issues/127, remove when possible
 # gem 'colorize'
 # gem 'linguistics'
 # gem "activesupport-inflector", "~> 0.1.0"
