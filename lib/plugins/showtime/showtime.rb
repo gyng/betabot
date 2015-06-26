@@ -41,7 +41,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
   end
 
   def get_showtime(filter='')
-    doc = open(@yshi[:base] + @yshi[:next_airing] + filter).read
+    doc = open(URI.escape(@yshi[:base] + @yshi[:next_airing] + filter)).read
     hash = JSON.parse(doc, symbolize_names: true)
 
     return nil if hash.keys.empty?
@@ -61,8 +61,8 @@ class Bot::Plugin::Showtime < Bot::Plugin
   # Giant hack just to be able to set custom timeout: net/http does not respect connect_timeout
   # and therefore takes 20 seconds just to declare a site dead
   def is_up?(url, timeout = 3)
-    host = URI.parse(url).host
-    port = URI.parse(url).port
+    host = URI.parse(URI.escape(url)).host
+    port = URI.parse(URI.escape(url)).port
 
     begin
       http = Net::HTTP.start(host, port, {open_timeout: timeout, read_timeout: timeout})
