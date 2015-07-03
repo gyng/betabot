@@ -15,7 +15,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
       filters: [
         'http.*?google\.com\S*',
         'http.+?=.\S+',
-        'http.+\/\d+\/?[^\.]+$'
+        'http.+\/\d+\/?[^\.]+$',
+        'http.*?youtu\.be.\S+'
       ]
     }
     super(bot)
@@ -70,7 +71,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
-    html = open(url) # Bypass bad unicode handling by Nokogiri
+    # Storing into local var `html` bypasses bad unicode handling by Nokogiri
+    html = open(url, allow_redirections: :all)
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
     doc.at_css('title').text.gsub(/ *\n */, " ").lstrip.rstrip
