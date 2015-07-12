@@ -3,3 +3,4 @@ rvm:
   - 2.1
 script: bundle exec rspec spec
 install: bundle install --jobs=3 --retry=3
+sudo: false
