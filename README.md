@@ -49,7 +49,6 @@ For example: `!ping`, `MyBot: ping`
 
 #### Notable default plugins
 
-* **chat** &ndash; Learning Markov chat. Run `!chat educate` on first run to feed it `./lib/plugins/chat/settings/textbook.txt`. Learns from user text.
 * **image** &ndash; Saves all image links and records data about them in a database. Images are saved in `./public/i`. The image plugin also gives a random image link from the image database if the web server is running.
 * **entitle** &ndash; Echos titles of uninformative URLs.
 * **entitleri** &ndash; Uses Google reverse image search to guess what image URLs are.
