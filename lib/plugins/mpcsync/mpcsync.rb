@@ -4,7 +4,6 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
 
   require 'socket'
   require_relative 'synclistener'
-  # require_relative 'syncsender'
 
   def initialize(bot)
     @s = {
@@ -82,7 +81,7 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
   def decock(m=nil)
     @listen_sock.close_connection if @listen_sock
     @cock_state = :uncocked
-    m.reply 'Decocked.'
+    m.reply 'Decocked.' if m.respond_to?(:reply)
   end
 
   def now_playing(m=nil)

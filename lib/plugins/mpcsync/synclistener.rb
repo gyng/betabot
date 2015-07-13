@@ -7,21 +7,20 @@ class Bot::Plugin::Mpcsync::SyncListener < EventMachine::Connection
   end
 
   def receive_data(data)
-    puts data
-    puts data == 'GO!'
+    Bot.log.info "#{self.class.name} Received #{data}"
 
     if data == 'GO!'
       Net::HTTP.post_form(URI.parse(@plugin.command_addr), wm_command: '887')
-      @m.reply 'Going.'
+      @m.reply 'Going.' if @m.respond_to?(:reply)
       @plugin.decock
       close_connection
     end
   rescue Exception => e
-    puts e
+    Bot.log.error "#{self.class.name} #{e}"
   end
 
   def unbind
-    puts 'close sync'
+    Bot.log.info "#{self.class.name} Unbinding sync listen..."
     @plugin.cock_state = :uncocked
   end
 end
