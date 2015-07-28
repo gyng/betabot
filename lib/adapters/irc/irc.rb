@@ -11,7 +11,7 @@ class Bot::Adapter::Irc < Bot::Adapter
         {
           enabled: true,
           name: 'yasashii',
-          hostname: 'irc.rizon.net',
+          hostname: ['irc.rizon.net'],
           port: 6697,
           ssl: true,
           nick: 'HuddaBot',
@@ -57,7 +57,9 @@ class Bot::Adapter::Irc < Bot::Adapter
 
     selected.each do |s|
       begin
-        @connections[s[:name].to_sym] = EM.connect(s[:hostname], s[:port], Handler, self, s)
+        host = s[:hostname].sample
+        Bot.log.info "IRC: Connecting to #{host}..."
+        @connections[s[:name].to_sym] = EM.connect(host, s[:port], Handler, self, s)
       rescue Exception => e
         EM.add_timer(@reconnect_delay) { connect(s[:name]) }
         Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, retrying in #{@reconnect_delay}s"
