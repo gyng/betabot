@@ -1,7 +1,7 @@
 # Hudda
 [![Build Status](https://travis-ci.org/gyng/Hudda.svg?branch=Travis)](https://travis-ci.org/gyng/Hudda)
 
-Hudda is a chatbot that aims to be protocol agnostic, easy to deploy and simple to develop for.
+Hudda is a bot that aims to be protocol agnostic, easy to deploy and simple to develop for.
 
 Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).
 
