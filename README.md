@@ -55,6 +55,7 @@ For example: `!ping`, `MyBot: ping`
 * **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
 * **script/macro** &ndash; Script/Macro definition support.
 * **translate** &ndash; Translates text with Bing translate. *requires setup of API keys*
+* **unicode** &ndash; Search for Unicode characters or emoji by description, and identify Unicode characters
 * **wolfram** &ndash; Queries Wolfram|Alpha. *requires setup of API keys*
 
 #### (Some) core commands
