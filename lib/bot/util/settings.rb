@@ -4,7 +4,7 @@ module Bot::Util
       # Save defaults if no settings file exists
       save_settings unless File.file?(@settings_path)
       begin
-        @s = JSON.parse(File.read(path), symbolize_names: true)
+        @s = JSON.parse(File.read(path).force_encoding('utf-8'), symbolize_names: true)
       rescue
         FileUtils.cp(path, "#{path}.bad") # Bad settings file, revert to defaults
         save_settings
