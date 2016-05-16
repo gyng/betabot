@@ -59,13 +59,14 @@ class Bot::Plugin::Unicode < Bot::Plugin
   def emoji(m = nil)
     results = m.args.map do |q|
       result = find_emoji(q.downcase)
-      result.raw if result
-    end.reject(&:nil?)
 
-    if results.empty?
-      m.reply 'No matches found.'
-    else
-      m.reply(results.join)
+      if result
+        result.raw
+      else
+        q
+      end
     end
+
+    m.reply(results.join(' '))
   end
 end
