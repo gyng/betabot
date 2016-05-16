@@ -9,7 +9,7 @@ class Bot::Plugin::Script < Bot::Plugin
       },
       macros: {},
       subscribe: false,
-      timeout: 3
+      timeout: 8
     }
     super(bot)
     @s[:macros].each do |trigger, opts|
