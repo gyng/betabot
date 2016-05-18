@@ -51,12 +51,12 @@ For example: `!ping`, `MyBot: ping`
 
 * **image** &ndash; Saves all image links and records data about them in a database. Images are saved in `./public/i`. The image plugin also gives a random image link from the image database if the web server is running.
 * **entitle** &ndash; Echos titles of uninformative URLs.
-* **entitleri** &ndash; Uses Google reverse image search to guess what image URLs are.
+* **entitleri** &ndash; Uses Google reverse image search and Microsoft Computer Vision API to guess what image URLs are. *Usage of MS CV API requires the setup of [>=free subscriptions](https://www.microsoft.com/cognitive-services/en-US/subscriptions)*
 * **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
 * **script/macro** &ndash; Script/Macro definition support.
-* **translate** &ndash; Translates text with Bing translate. *requires setup of API keys*
+* **translate** &ndash; Translates text with Bing translate. *[requires setup of API keys](https://datamarket.azure.com/dataset/bing/microsofttranslator)*
 * **unicode** &ndash; Search for Unicode characters or emoji by description, and identify Unicode characters
-* **wolfram** &ndash; Queries Wolfram|Alpha. *requires setup of API keys*
+* **wolfram** &ndash; Queries Wolfram|Alpha. *[requires setup of API keys](https://developer.wolframalpha.com/portal/apisignup.html)*
 
 #### (Some) core commands
 
