@@ -4,11 +4,17 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
   def initialize(bot)
     @s = {
-      trigger: { entitleri: [
-        :call, 0,
-        'Entitle Reverse Image harnesses the power of Google cloud technology ' +
-        'and the information superhighway botnet to tell you what an image link is.'
-      ]},
+      trigger: {
+        entitleri: [
+          :call, 0,
+          'Entitle Reverse Image harnesses the power of Google cloud technology ' +
+          'and the information superhighway botnet to tell you what an image link is.'
+        ],
+        lastimage: [
+          :last_image, 0,
+          'Show the image analysis for the last image.'
+        ]
+      },
       subscribe: true,
       filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp'],
       timeout: 10,
@@ -17,6 +23,9 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       user_agent: 'Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0',
       microsoft_computer_vision_api_key: 'Get from: https://www.microsoft.com/cognitive-services/en-US/subscriptions'
     }
+
+    @last_images = {}
+
     super(bot)
   end
 
@@ -26,6 +35,14 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
   def receive(m)
     check_filter(m)
+  end
+
+  def last_image(m)
+    if @last_images[m.channel].nil?
+      m.reply 'No last image.'
+    else
+      m.reply @last_images[m.channel]
+    end
   end
 
   def check_filter(m)
@@ -47,6 +64,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               unless guess_microsoft.nil?
                 caption = guess_microsoft[:description][:captions][0]
                 guess_text.push(caption[:text]) if caption[:confidence] > 0.25
+                @last_images[m.channel] = "#{caption[:text]}, confidence: #{caption[:confidence]}"
 
                 if guess_microsoft[:adult][:isAdultContent]
                   guess_text.push('🔞 NSFW 🔞')
