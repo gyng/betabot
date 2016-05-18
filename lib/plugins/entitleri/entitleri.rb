@@ -38,10 +38,13 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   end
 
   def last_image(m)
-    if @last_images[m.channel].nil?
+    last_image = @last_images[m.channel]
+
+    if last_image.nil?
       m.reply 'No last image.'
     else
-      m.reply @last_images[m.channel]
+      caption = last_image[:description][:captions][0]
+      m.reply "#{caption[:text]}, confidence: #{caption[:confidence]}"
     end
   end
 
@@ -64,7 +67,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               unless guess_microsoft.nil?
                 caption = guess_microsoft[:description][:captions][0]
                 guess_text.push(caption[:text]) if caption[:confidence] > 0.25
-                @last_images[m.channel] = "#{caption[:text]}, confidence: #{caption[:confidence]}"
+                @last_images[m.channel] = guess_microsoft
 
                 if guess_microsoft[:adult][:isAdultContent]
                   guess_text.push('🔞 NSFW 🔞')
