@@ -17,7 +17,7 @@ class Bot::Plugin::Unicode < Bot::Plugin
   end
 
   def find(m = nil)
-    if m.empty?
+    if m.args.empty?
       m.reply @s[:trigger][:u][2]
     elsif m.args[0].length <= 2
       m.reply "Pattern too short (< 3)"
