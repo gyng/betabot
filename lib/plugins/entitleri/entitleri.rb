@@ -47,7 +47,12 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               unless guess_microsoft.nil?
                 caption = guess_microsoft[:description][:captions][0]
                 guess_text.push(caption[:text]) if caption[:confidence] > 0.25
-                guess_text.push('NSFW') if guess_microsoft[:adult][:isAdultContent]
+
+                if guess_microsoft[:adult][:isAdultContent]
+                  guess_text.push('🔞 NSFW 🔞')
+                elsif guess_microsoft[:adult][:isRacyContent]
+                  guess_text.push('maybe NSFW')
+                end
               end
 
               m.reply(guess_text.join(', ')) unless guess_text.empty?
@@ -92,7 +97,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     html = open(@s[:google_query] + url,
       "User-Agent" => @s[:user_agent],
       allow_redirections: :all,
-      ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
+      ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
+      read_timeout: @s[:timeout]
     )
 
     doc = Nokogiri::HTML(html.read)
