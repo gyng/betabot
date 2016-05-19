@@ -64,6 +64,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               guess_text.push(guess) unless guess.nil?
 
               begin
+                @last_images[m.channel] = nil
                 guess_microsoft = get_guess_microsoft(result)
                 if !guess_microsoft.nil? && !guess_microsoft[:code].nil? && guess_microsoft[:code] != 'InternalServerError'
                   caption = guess_microsoft[:description][:captions][0]
