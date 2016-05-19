@@ -63,20 +63,24 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               guess = get_guess(result)
               guess_text.push(guess) unless guess.nil?
 
-              guess_microsoft = get_guess_microsoft(result)
-              unless guess_microsoft.nil?
-                caption = guess_microsoft[:description][:captions][0]
-                guess_text.push(caption[:text]) if caption[:confidence] > 0.25
-                @last_images[m.channel] = guess_microsoft
+              begin
+                guess_microsoft = get_guess_microsoft(result)
+                if !guess_microsoft.nil? && !guess_microsoft[:code].nil? && guess_microsoft[:code] != 'InternalServerError'
+                  caption = guess_microsoft[:description][:captions][0]
+                  guess_text.push(caption[:text]) if caption[:confidence] > 0.25
+                  @last_images[m.channel] = guess_microsoft
 
-                if guess_microsoft[:adult][:isAdultContent]
-                  guess_text.push('🔞 NSFW 🔞')
-                elsif guess_microsoft[:adult][:isRacyContent]
-                  guess_text.push('maybe NSFW')
+                  if guess_microsoft[:adult][:isAdultContent]
+                    guess_text.push('🔞 NSFW 🔞')
+                  elsif guess_microsoft[:adult][:isRacyContent]
+                    guess_text.push('maybe NSFW')
+                  end
                 end
-              end
 
-              m.reply(guess_text.join(', ')) unless guess_text.empty?
+                m.reply(guess_text.join(', ')) if !guess_text.empty?
+              rescue Exception => e
+                puts "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
+              end
             end
           end
 
@@ -91,15 +95,15 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     puts "EntitleRI: Getting image analysis of #{url}"
     uri = URI('https://api.projectoxford.ai/vision/v1.0/analyze')
     uri.query = URI.encode_www_form({
-        'visualFeatures' => 'Categories,Description,Tags,Faces,ImageType,Color,Adult'
+      'visualFeatures' => 'Categories,Description,Tags,Faces,ImageType,Color,Adult'
     })
 
     request = Net::HTTP::Post.new(uri.request_uri)
     request['Content-Type'] = 'application/json'
     request['Ocp-Apim-Subscription-Key'] = @s[:microsoft_computer_vision_api_key]
-    request.body = {url: url}.to_json
+    request.body = { url: url }.to_json
 
-    response = Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https') do |http|
+    response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
       http.request(request)
     end
 
@@ -116,7 +120,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
     # Get redirect by spoofing User-Agent
     html = open(@s[:google_query] + url,
-      "User-Agent" => @s[:user_agent],
+      'User-Agent' => @s[:user_agent],
       allow_redirections: :all,
       ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
       read_timeout: @s[:timeout]
@@ -124,7 +128,9 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
-    doc.css(@s[:guess_selector]).inner_text
+    result = doc.css(@s[:guess_selector]).inner_text
+    puts "EntitleRI: Got Google guess: #{result}"
+    result
   rescue Exception => e
     puts "Error in Entitleri#get_guess: #{e} #{e.backtrace}"
     nil
