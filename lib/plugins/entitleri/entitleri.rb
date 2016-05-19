@@ -18,7 +18,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       subscribe: true,
       filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp'],
       timeout: 10,
-      google_query: 'http://www.google.com/searchbyimage?&image_url=',
+      google_query: 'https://www.google.com/searchbyimage?&image_url=',
       guess_selector: '._hUb',
       user_agent: 'Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0',
       microsoft_computer_vision_api_key: 'Get from: https://www.microsoft.com/cognitive-services/en-US/subscriptions'
