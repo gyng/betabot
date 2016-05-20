@@ -43,8 +43,13 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     if last_image.nil?
       m.reply 'No last image.'
     else
+      clipart_types = ['Non-clipart', 'ambiguous', 'normal-clipart', 'good-clipart']
+      line_drawing_types = ['Non-LineDrawing', 'LineDrawing']
       caption = last_image[:description][:captions][0]
-      m.reply "#{caption[:text]}, confidence: #{caption[:confidence].round(2)}"
+      clipart_type = clipart_types[last_image[:imageType][:clipArtType]]
+      line_drawing_type = line_drawing_types[last_image[:imageType][:lineDrawingType]]
+
+      m.reply "#{caption[:text]}, confidence: #{caption[:confidence].round(2)}, #{clipart_type}, #{line_drawing_type}"
       m.reply last_image.to_s
     end
   end
@@ -98,7 +103,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     puts "EntitleRI: Getting image analysis of #{url}"
     uri = URI('https://api.projectoxford.ai/vision/v1.0/analyze')
     uri.query = URI.encode_www_form({
-      'visualFeatures' => 'Categories,Description,Tags,Faces,ImageType,Color,Adult'
+      'visualFeatures' => 'Categories,Description,Tags,Faces,ImageType,Color,Adult',
+      'details' => 'Celebrities'
     })
 
     request = Net::HTTP::Post.new(uri.request_uri)
