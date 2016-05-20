@@ -17,7 +17,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       },
       subscribe: true,
       filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp'],
-      timeout: 10,
+      timeout: 20,
       google_query: 'https://www.google.com/searchbyimage?&image_url=',
       guess_selector: '._hUb',
       user_agent: 'Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0',
@@ -44,7 +44,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       m.reply 'No last image.'
     else
       caption = last_image[:description][:captions][0]
-      m.reply "#{caption[:text]}, confidence: #{caption[:confidence]}"
+      m.reply "#{caption[:text]}, confidence: #{caption[:confidence].round(2)}"
+      m.reply last_image.to_s
     end
   end
 
@@ -66,7 +67,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               begin
                 @last_images[m.channel] = nil
                 guess_microsoft = get_guess_microsoft(result)
-                if !guess_microsoft.nil? && !guess_microsoft[:code].nil? && guess_microsoft[:code] != 'InternalServerError'
+                puts guess_microsoft.inspect
+                if !guess_microsoft.nil? && guess_microsoft[:code].nil?
                   caption = guess_microsoft[:description][:captions][0]
                   guess_text.push(caption[:text]) if caption[:confidence] > 0.25
                   @last_images[m.channel] = guess_microsoft
@@ -104,7 +106,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     request['Ocp-Apim-Subscription-Key'] = @s[:microsoft_computer_vision_api_key]
     request.body = { url: url }.to_json
 
-    response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https') do |http|
+    response = Net::HTTP.start(uri.host, uri.port, use_ssl: uri.scheme == 'https', open_timeout: @s[:timeout]) do |http|
       http.request(request)
     end
 
