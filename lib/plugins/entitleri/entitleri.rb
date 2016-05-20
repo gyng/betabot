@@ -12,7 +12,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         ],
         lastimage: [
           :last_image, 0,
-          'Show the image analysis for the last image.'
+          'lastimage [more]: Show the image analysis for the last image. more returns ' +
+          'the entire cached response.'
         ]
       },
       subscribe: true,
@@ -38,6 +39,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   end
 
   def last_image(m)
+    more_mode = m.args[0] === 'more' || m.args[0] === '-m'
     last_image = @last_images[m.channel]
 
     if last_image.nil?
@@ -50,7 +52,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       line_drawing_type = line_drawing_types[last_image[:imageType][:lineDrawingType]]
 
       m.reply "#{caption[:text]}, confidence: #{caption[:confidence].round(2)}, #{clipart_type}, #{line_drawing_type}"
-      m.reply last_image.to_s
+      m.reply last_image.to_s if more_mode
     end
   end
 
