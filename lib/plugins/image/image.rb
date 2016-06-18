@@ -13,7 +13,7 @@ class Bot::Plugin::Image < Bot::Plugin
         images: [:images_link, 0, 'Gets the images listing webpage.']
       },
       subscribe: true,
-      filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp', 'http.*webm'],
+      filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp', 'http.*webm', 'http.*mp4'],
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
       image_directory: ['lib', 'public', 'i'],
       get_google_guess: false
