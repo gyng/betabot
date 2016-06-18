@@ -37,7 +37,7 @@ class Bot::Plugin::Unicode < Bot::Plugin
   end
 
   def name(m = nil)
-    if m.empty?
+    if m.args.empty?
       m.reply @s[:trigger][:uid][2]
     else
       m.reply(
