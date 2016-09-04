@@ -50,6 +50,6 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   private
 
   def chunk(str, length)
-    str.scan(/\S.{0, #{length - 1}}(?!\S)/)
+    str.scan(/\S.{0,#{length - 1}}(?!\S)/)
   end
 end
