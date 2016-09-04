@@ -25,6 +25,10 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
 
         rake make_user
 
+   or the command
+
+        rake make_user_cmd[name,password,auth_level]
+
 4. Configure the bot. Settings files that need changing:<br>
     * `./lib/settings/bot_settings.json` (for web server configuration options check below)
     * `./lib/adapters/irc/settings/settings.json` (and any per-adapter settings)

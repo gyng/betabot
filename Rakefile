@@ -27,6 +27,19 @@ task :make_user do
   end
 end
 
+task :make_user_cmd do |_t, args|
+  require 'json'
+  require 'securerandom'
+  require 'base64'
+
+  require_relative('./lib/bot/core')
+  require_relative('./lib/bot/core/authenticator')
+
+  path = File.join('lib', 'settings')
+  authenticator = Bot::Core::Authenticator.new(path)
+  authenticator.make_account(args[:name], args[:password], args[:auth_level])
+end
+
 # Run with `rake make_plugin[name]`
 task :make_plugin, :name do |_t, args|
   require 'fileutils'
