@@ -28,7 +28,7 @@ task :make_user do
 end
 
 # Run with `rake make_plugin[name]`
-task :make_plugin, :name do |t, args|
+task :make_plugin, :name do |_t, args|
   require 'fileutils'
 
   name = args[:name]
@@ -50,7 +50,7 @@ task :make_plugin, :name do |t, args|
   File.write(File.join(dir, 'settings', '.gitignore'), 'settings.json')
 end
 
-task :package_plugin, :name do |t, args|
+task :package_plugin, :name do |_t, args|
   require 'zip'
   require 'fileutils'
   require 'digest/sha1'
@@ -71,7 +71,7 @@ task :package_plugin, :name do |t, args|
   puts "Package created in #{out}."
 end
 
-task :default_plugin_settings, :plugin do |t, args|
+task :default_plugin_settings, :plugin do |_t, args|
   plugin = args[:plugin] || '**'
   Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'plugins', plugin, 'settings')) do |d|
     path = File.join(d, 'settings.json')
@@ -79,7 +79,7 @@ task :default_plugin_settings, :plugin do |t, args|
   end
 end
 
-task :default_adapter_settings, :adapter do |t, args|
+task :default_adapter_settings, :adapter do |_t, args|
   adapter = args[:plugin] || '**'
   Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'adapters', adapter, 'settings')) do |d|
     path = File.join(d, 'settings.json')
@@ -87,7 +87,7 @@ task :default_adapter_settings, :adapter do |t, args|
   end
 end
 
-task :install_plugin, :url do |t, args|
+task :install_plugin, :url do |_t, args|
   require 'zip'
   require 'fileutils'
   require 'openssl'
@@ -102,13 +102,13 @@ task :install_plugin, :url do |t, args|
   package_path = File.join(packages_dir, package_name)
 
   puts "Downloading package from #{url}"
-  open(url, { ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE }) do |f|
-    File.open(package_path, "wb") do |file|
+  open(url, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE) do |f|
+    File.open(package_path, 'wb') do |file|
       file.puts f.read
     end
   end
 
-  puts "Package downloaded. Extracting..."
+  puts 'Package downloaded. Extracting...'
   plugin_name = package_name.match(/(?<name>.+?)\..+/)[:name]
   plugin_dir = File.join('lib', 'plugins', plugin_name)
   FileUtils.mkdir_p(plugin_dir)
@@ -121,9 +121,9 @@ task :install_plugin, :url do |t, args|
     end
   end
 
-  puts "Cleaning up downloaded files..."
+  puts 'Cleaning up downloaded files...'
   File.delete(package_path)
 
-  puts "\nPlugin #{plugin_name} installed to #{plugin_dir}!\n" +
-       "Run `bundle install` to install plugin dependencies."
+  puts '\nPlugin #{plugin_name} installed to #{plugin_dir}!\n' \
+       'Run `bundle install` to install plugin dependencies.'
 end

@@ -1,7 +1,7 @@
 class Bot::Core::Authenticator
   attr_reader :authenticated_hostnames
 
-  def initialize(path=Bot::SETTINGS_DIR)
+  def initialize(path = Bot::SETTINGS_DIR)
     @authentications = nil
     @authenticated_hostnames = {}
     @authentications_path = File.join(path, 'authentication.json')
@@ -16,9 +16,9 @@ class Bot::Core::Authenticator
     hash = user_info[:hash]
     password = m.args[1]
 
-    if (make_hash(salt, password) == hash)
+    if make_hash(salt, password) == hash
       m.reply(
-        "Hello, #{user} (L#{user_info[:auth_level]})! You were last seen on #{user_info[:last_used]} from " +
+        "Hello, #{user} (L#{user_info[:auth_level]})! You were last seen on #{user_info[:last_used]} from " \
         "#{user_info[:last_hostname]}, logging in from #{user_info[:last_username]}."
       )
 
@@ -36,15 +36,15 @@ class Bot::Core::Authenticator
 
   def logout(m)
     if @authenticated_hostnames.delete(m.hostname)
-      m.reply "You have been logged out."
-      Bot.log.info "A user has logged out."
+      m.reply 'You have been logged out.'
+      Bot.log.info 'A user has logged out.'
     end
   end
 
   def auth(level, m)
     return true if level <= 0
     authed_user = @authenticated_hostnames[m.hostname]
-    !!authed_user && authed_user.to_i >= level
+    !authed_user.nil? && authed_user.to_i >= level
   end
 
   def load_authentications

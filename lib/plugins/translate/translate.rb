@@ -3,9 +3,9 @@ class Bot::Plugin::Translate < Bot::Plugin
     @s = {
       trigger: { translate: [
         :translate, 0,
-        'translate [<from> <to>] text. Translates text. Autodetects locale if not provided. ' +
+        'translate [<from> <to>] text. Translates text. Autodetects locale if not provided. ' \
         'Example locales: en, ja, es, fr, de, ko'
-      ]},
+      ] },
       subscribe: false,
       bing_client_id: nil,
       bing_api_key: nil,

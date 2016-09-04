@@ -9,7 +9,7 @@ class Bot::Plugin::Info < Bot::Plugin
     super(bot)
   end
 
-  def info(m=nil)
+  def info(m = nil)
     bytes = `ps -o rss -p #{Process.pid}`.strip.split.last.to_i * 1024
     t = Process.times
     m.reply "PID #{Process.pid}, resident set size: #{bytes / 1024 / 1024}MB, user #{t.utime}s sys #{t.stime}s"

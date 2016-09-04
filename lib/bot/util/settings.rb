@@ -1,6 +1,6 @@
 module Bot::Util
   module Settings
-    def load_settings(path=@settings_path)
+    def load_settings(path = @settings_path)
       # Save defaults if no settings file exists
       save_settings unless File.file?(@settings_path)
       begin
@@ -11,8 +11,8 @@ module Bot::Util
       end
     end
 
-    def save_settings(path=@settings_path)
-      if !File.directory?(File.dirname(path))
+    def save_settings(path = @settings_path)
+      unless File.directory?(File.dirname(path))
         FileUtils.mkdir_p(File.dirname(path))
       end
 

@@ -6,6 +6,7 @@ class Bot::Plugin::Image < Bot::Plugin
   require 'fileutils'
   require 'nokogiri'
 
+  # rubocop:disable Metrics/MethodLength
   def initialize(bot)
     @s = {
       trigger: {
@@ -45,13 +46,13 @@ class Bot::Plugin::Image < Bot::Plugin
       end
     end
 
-    random_proc = -> (n) {
+    random_proc = lambda do |n|
       @db[:images].order(Sequel.lit('RANDOM()')).limit(n)
-    }
+    end
 
-    sources_proc = -> (image) {
+    sources_proc = lambda do |image|
       @db[:sources].where(image_id: image[:id]).order(:timestamp)
-    }
+    end
 
     if defined?(Web)
       Web.get '/i/random' do
@@ -78,7 +79,7 @@ class Bot::Plugin::Image < Bot::Plugin
       image_directory = @s[:image_directory]
       Web.get '/i' do
         @dir = File.join(image_directory)
-        @paths = Dir.entries(@dir).reject { |p| [".gitignore", ".", "..", "temp"].include? p }
+        @paths = Dir.entries(@dir).reject { |p| ['.gitignore', '.', '..', 'temp'].include? p }
         erb '
           <!DOCTYPE html>
           <html>
@@ -108,12 +109,12 @@ class Bot::Plugin::Image < Bot::Plugin
     @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
   end
 
-  def random_image_link(m=nil)
+  def random_image_link(m = nil)
     if defined?(Web)
       image = random_images(1).first
       m.reply Web.url + image[:path].gsub('lib/public', '')
     else
-      m.reply "The web server is disabled."
+      m.reply 'The web server is disabled.'
     end
   end
 
@@ -122,7 +123,7 @@ class Bot::Plugin::Image < Bot::Plugin
       path = @s[:image_directory].join('/').gsub('lib/public', '')
       m.reply "#{Web.url}#{path}"
     else
-      m.reply "The web server is disabled."
+      m.reply 'The web server is disabled.'
     end
   end
 
@@ -157,8 +158,8 @@ class Bot::Plugin::Image < Bot::Plugin
         File.open(temp_path, 'wb') do |f|
           f.write(open(url).read)
         end
-      rescue Exception => e
-        Bot.log.info("Failed to open image #{url} #{e.to_s}")
+      rescue StandardError => e
+        Bot.log.info("Failed to open image #{url} #{e}")
         File.delete(temp_path)
       end
 
@@ -204,14 +205,14 @@ class Bot::Plugin::Image < Bot::Plugin
     if @s[:get_google_guess]
       puts "Image: Getting best guess of #{url}"
 
-      query      = 'http://www.google.com/searchbyimage?&image_url=',
+      query      = 'http://www.google.com/searchbyimage?&image_url='
       selector   = '.qb-bmqc'
       user_agent = 'Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0'
 
       # Get redirect by spoofing User-Agent
       html = open(
         query + url,
-        "User-Agent" => user_agent,
+        'User-Agent' => user_agent,
         allow_redirections: :all,
         ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
       )

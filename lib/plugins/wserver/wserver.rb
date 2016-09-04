@@ -11,11 +11,11 @@ class Bot::Plugin::Wserver < Bot::Plugin
 
   def wserver(m)
     Thread.new do
-      Timeout::timeout(10) do
+      Timeout.timeout(10) do
         host = m.args[0]
         http = Net::HTTP.new(host)
         http.read_timeout = 20
-        res = http.head("/")
+        res = http.head('/')
 
         case res.class
         when Net::HTTPRedirection, Net::HTTPMovedPermanently

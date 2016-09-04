@@ -21,29 +21,10 @@ class Bot::Adapter::Irc < Bot::Adapter
     }
 
     @quit_messages = [
-      'Goodbye, world!',
-      'さようなら、世界！',
-      '안녕, 세계!',
-      '再见，世界！',
-      '再見，世界！',
-      'وداعا، العالم!',
-      'Vaarwel, wereld!',
-      'Adiaŭ, mondo!',
-      'Addio, mondo!',
-      'Adiós, mundo!',
-      'Adieu, monde!',
-      'Goodbye, dunia!',
-      'Hej då, världen!',
-      'זייַ געזונט, וועלט!',
-      'שלום, עולם!',
-      'Selamat tinggal, dunia!',
-      'Αντίο, κόσμο!',
-      'Auf Wiedersehen, Welt!',
-      'अलविदा, दुनिया!',
-      'Прощай, мир!',
-      'Salve, per omnia saecula!',
-      'Hyvästi, maailma!',
-      'Kveðja, heimur!'
+      'Goodbye, world!', 'さようなら、世界！', '안녕, 세계!', '再见，世界！', '再見，世界！', 'وداعا، العالم!', 'Vaarwel, wereld!',
+      'Adiaŭ, mondo!', 'Addio, mondo!', 'Adiós, mundo!', 'Adieu, monde!', 'Goodbye, dunia!', 'Hej då, världen!',
+      'זייַ געזונט, וועלט!', 'שלום, עולם!', 'Selamat tinggal, dunia!', 'Αντίο, κόσμο!', 'Auf Wiedersehen, Welt!',
+      'अलविदा, दुनिया!', 'Прощай, мир!', 'Salve, per omnia saecula!', 'Hyvästi, maailma!', 'Kveðja, heimur!'
     ]
 
     @reconnect_delay = 20
@@ -52,7 +33,7 @@ class Bot::Adapter::Irc < Bot::Adapter
     super
   end
 
-  def connect(regex='.*')
+  def connect(regex = '.*')
     selected = @s[:servers].select { |s| s[:name].match(/#{regex}/i) }
 
     selected.each do |s|
@@ -60,42 +41,43 @@ class Bot::Adapter::Irc < Bot::Adapter
         host = s[:hostname].sample
         Bot.log.info "IRC: Connecting to #{host}..."
         @connections[s[:name].to_sym] = EM.connect(host, s[:port], Handler, self, s)
-      rescue Exception => e
+      rescue StandardError => e
         EM.add_timer(@reconnect_delay) { connect(s[:name]) }
         Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, retrying in #{@reconnect_delay}s"
       end
     end
   end
 
-  def quit(regex='.*')
-    selected = @connections.select { |k, v| k.to_s.match(/#{regex}/i) }
+  def quit(regex = '.*')
+    selected = @connections.select { |k, _| k.to_s.match(/#{regex}/i) }
 
     selected.each_value do |c|
       begin
-        c.quit(@quit_messages.sample) if (c.state != :reconnecting)
+        c.quit(@quit_messages.sample) if c.state != :reconnecting
         c.state = :quitting
-      rescue Exception => e
+      rescue StandardError => e
         Bot.log.warn "Failed to quit connection: #{e}, continuing..."
       end
       c.close_connection if c.state != :disconnected
       @connections.delete(c)
     end
   end
-  alias :disconnect :quit
-  alias :shutdown :quit
 
-  def reconnect(regex='.*')
+  alias disconnect quit
+  alias shutdown quit
+
+  def reconnect(regex = '.*')
     quit(regex)
     connect(regex)
   end
 
   def trigger_plugin(trigger, m)
     case trigger
-    when 'reconnect'; reconnect
-    when 'quit'; quit
-    when 'join'; m.origin.join(m.args[0], m.args[1] || []) if @bot.auth(4, m)
-    when 'part'; m.origin.part(m.args[0], m.args[1] || '') if @bot.auth(4, m)
-    when 'nick'; m.origin.nick(m.args[0])
+    when 'reconnect' then reconnect
+    when 'quit' then quit
+    when 'join' then m.origin.join(m.args[0], m.args[1] || []) if @bot.auth(4, m)
+    when 'part' then m.origin.part(m.args[0], m.args[1] || '') if @bot.auth(4, m)
+    when 'nick' then m.origin.nick(m.args[0])
     end
     super(trigger, m)
   end

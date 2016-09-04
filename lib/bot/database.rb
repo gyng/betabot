@@ -12,8 +12,16 @@ class Bot::Database
   end
 
   def method_missing(m, *args, &block)
-    @db.send(m, *args, &block)
+    if @db
+      @db.send(m, *args, &block)
+    else
+      super
+    end
   rescue => e
     Bot.log.error "Bot::Database - #{@path}: #{e}\n#{e.backtrace.join("\n")}"
+  end
+
+  def respond_to_missing?
+    true
   end
 end

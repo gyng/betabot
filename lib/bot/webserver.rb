@@ -19,12 +19,12 @@ def start_sinatra(s, web_app)
     end
   end
 
-  Rack::Server.start({
+  Rack::Server.start(
     app:    dispatch,
     server: server,
     Host:   host,
     Port:   port
-  })
+  )
 end
 
 class Web < Sinatra::Base

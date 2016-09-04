@@ -55,12 +55,12 @@ module Bot
     def initialize_objects(type)
       mode = @s["#{type}s".to_sym][:load_mode]
 
-      if type == :adapter || type == nil
+      if type == :adapter || type.nil?
         @adapters = {}
         load_objects(:adapter, mode)
       end
 
-      if type == :plugin || type == nil
+      if type == :plugin || type.nil?
         @plugins = {}
         @plugin_mapping = {}
         @subscribed_plugins = []
@@ -68,19 +68,20 @@ module Bot
       end
     end
 
-    def start_adapters(regex='.*')
+    def start_adapters(regex = '.*')
       send_to_objects(@adapters, :connect, regex)
     end
 
-    def stop_adapters(regex='.*')
+    def stop_adapters(regex = '.*')
       send_to_objects(@adapters, :shutdown, regex)
     end
 
-    def send_to_objects(list, method, regex='.*')
-      selected = list.select { |k, v| k.to_s.match(/#{regex}/i) }
-      selected.each { |k, v| v.send(method) }
+    def send_to_objects(list, method, regex = '.*')
+      selected = list.select { |k, _| k.to_s.match(/#{regex}/i) }
+      selected.each { |_, v| v.send(method) }
     end
 
+    # rubocop:disable Metrics/CyclomaticComplexity
     def core_triggers(trigger, m)
       if auth(5, m)
         case trigger
@@ -107,8 +108,8 @@ module Bot
           unblacklist(:plugin, m.args[0])
           m.reply "Plugin #{m.args[0]} unblacklisted. Reload for this to take effect."
         when 'blacklist'
-          m.reply "Adapters: " + @s[:adapters][:blacklist].join(', ')
-          m.reply "Plugins: " + @s[:plugins][:blacklist].join(', ')
+          m.reply 'Adapters: ' + @s[:adapters][:blacklist].join(', ')
+          m.reply 'Plugins: ' + @s[:plugins][:blacklist].join(', ')
         else
           false
         end
@@ -121,13 +122,14 @@ module Bot
         @authenticator.logout(m)
       when 'help'
         query = m.args[0].to_sym if m.args[0].is_a?(String)
-        if @plugin_mapping.has_key?(query)
+        if @plugin_mapping.key?(query)
           m.reply @plugin_mapping[query][:help]
         else
           m.reply "Use help <trigger> for details. Triggers: #{@plugin_mapping.keys.join(', ')}"
         end
       end
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def blacklist(type, name)
       @s["#{type}s".to_sym][:blacklist].push(name).uniq!
@@ -140,17 +142,17 @@ module Bot
     end
 
     def trigger_plugin(trigger, m)
-      if !core_triggers(trigger, m)
+      unless core_triggers(trigger, m)
         # Check if plugin responds to trigger after core triggers
-        if @plugin_mapping.has_key?(trigger.to_sym)
+        if @plugin_mapping.key?(trigger.to_sym)
           plugin = @plugin_mapping[trigger.to_sym][:plugin]
           method = @plugin_mapping[trigger.to_sym][:method]
           required_auth_level = @plugin_mapping[trigger.to_sym][:required_auth_level]
 
-          if @plugins.has_key?(plugin) && auth(required_auth_level, m)
+          if @plugins.key?(plugin) && auth(required_auth_level, m)
             begin
               @plugins[plugin].send(method.to_sym, m)
-            rescue Exception => e
+            rescue StandardError => e
               Bot.log.error "#{plugin} ##{method} - #{e}\n#{e.backtrace.join("\n")}}"
             end
           end
@@ -162,10 +164,10 @@ module Bot
 
     def publish(m)
       # Plugin listens in to all messages
-      @subscribed_plugins.each { |p| @plugins[p].receive(m)  }
+      @subscribed_plugins.each { |p| @plugins[p].receive(m) }
     end
 
-    def register_trigger(trigger, plugin, method, required_auth_level, help='No help.')
+    def register_trigger(trigger, plugin, method, required_auth_level, help = 'No help.')
       @plugin_mapping[trigger.to_sym] = {
         plugin: plugin.to_sym,
         method: method.to_sym,
@@ -179,23 +181,23 @@ module Bot
     end
 
     def subscribe_plugin(plugin)
-      Bot.log.info "Subscribing plugin #{plugin.to_s}"
+      Bot.log.info "Subscribing plugin #{plugin}"
       @subscribed_plugins.push(plugin.to_sym)
     end
 
-    def auth (level, m)
+    def auth(level, m)
       @authenticator.auth(level, m)
     end
 
-    def reload(type, name=nil)
+    def reload(type, name = nil)
       load_settings
 
-      if (type == nil)
+      if type.nil?
         @adapters = nil
         @plugins = nil
         initialize_objects(:adapter)
         initialize_objects(:plugin)
-      elsif (name == nil)
+      elsif name.nil?
         initialize_objects(type)
       else
         load_curry(type).call(name)

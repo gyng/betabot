@@ -3,13 +3,13 @@ class Bot::Plugin
   require_relative 'util/settings'
   include Bot::Util::Settings
 
-  def initialize(bot=nil)
+  def initialize(bot = nil)
     @bot = bot
-    plugin_name = self.class.to_s.split("::").last.downcase
+    plugin_name = self.class.to_s.split('::').last.downcase
 
     # Default settings
     @s ||= Hash.new([])
-    @s[:trigger] = { plugin_name.to_sym => [:call, 0] } unless @s.has_key?(:trigger)
+    @s[:trigger] = { plugin_name.to_sym => [:call, 0] } unless @s.key?(:trigger)
 
     @settings_path ||= File.join(Bot::ROOT_DIR, 'plugins', plugin_name, 'settings', 'settings.json')
     load_settings
@@ -20,7 +20,7 @@ class Bot::Plugin
     Bot.log.info("Loaded plugin #{self.class.name}")
   end
 
-  def call(m=nil)
+  def call(_m)
     Bot.log.info("Called empty plugin #{self.class.name}")
   end
 

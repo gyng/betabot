@@ -15,7 +15,7 @@ class Bot::Plugin::Script < Bot::Plugin
     @s[:macros].each do |trigger, opts|
       begin
         register_trigger(trigger, opts)
-      rescue Exception => e
+      rescue StandardError => e
         Bot.log.info "Failed to load macro #{trigger}: #{e}"
         next
       end
@@ -66,16 +66,16 @@ class Bot::Plugin::Script < Bot::Plugin
         # Not entirelly safe. Ideally, we use JRuby's JVM.
         $SAFE = 2
         b = Context.new.get_binding
-        Timeout::timeout(@s[:timeout]) { m.reply "=> #{b.eval(script).inspect}" }
-      rescue Exception => e
+        Timeout.timeout(@s[:timeout]) { m.reply "=> #{b.eval(script).inspect}" }
+      rescue StandardError => e
         m.reply "=> #{e.inspect}"
       end
     end
   end
 
   class Bot::Plugin::Script::Context
-    def get_binding
-      return binding()
+    def get_binding # rubocop:disable Style/AccessorMethodName
+      binding
     end
   end
 end

@@ -7,9 +7,8 @@ class Bot::Plugin::Showtime < Bot::Plugin
     @s = {
       trigger: { showtime: [
         :showtime, 0,
-        'showtime <showname> - Returns airing details of matching anime ' +
-        'from anime.yshi.org'
-      ]},
+        'showtime <showname> - Returns airing details of matching anime from anime.yshi.org'
+      ] },
       subscribe: false
     }
 
@@ -25,13 +24,13 @@ class Bot::Plugin::Showtime < Bot::Plugin
   def showtime(m)
     filter = m.args.join(' ')
 
-    if is_up?(@yshi[:base], 3)
+    if up?(@yshi[:base], 3)
       show = get_showtime(filter)
 
       if show.nil?
-        m.reply "No matching show found."
+        m.reply 'No matching show found.'
       else
-        now_airing = is_airing(show.title)
+        now_airing = airing(show.title)
         m.reply now_airing.pretty_now_airing if now_airing
         m.reply show.pretty
       end
@@ -40,7 +39,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
     end
   end
 
-  def get_showtime(filter='')
+  def get_showtime(filter = '')
     doc = open(URI.escape(@yshi[:base] + @yshi[:next_airing] + filter)).read
     hash = JSON.parse(doc, symbolize_names: true)
 
@@ -49,7 +48,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
     Show.from_hash(hash)
   end
 
-  def is_airing(filter='')
+  def airing(filter = '')
     doc = open(@yshi[:base] + @yshi[:now_airing]).read
     res = JSON.parse(doc, symbolize_names: true)
 
@@ -60,21 +59,15 @@ class Bot::Plugin::Showtime < Bot::Plugin
 
   # Giant hack just to be able to set custom timeout: net/http does not respect connect_timeout
   # and therefore takes 20 seconds just to declare a site dead
-  def is_up?(url, timeout = 3)
+  def up?(url, timeout = 3)
     host = URI.parse(URI.escape(url)).host
     port = URI.parse(URI.escape(url)).port
 
     begin
-      http = Net::HTTP.start(host, port, {open_timeout: timeout, read_timeout: timeout})
+      http = Net::HTTP.start(host, port, open_timeout: timeout, read_timeout: timeout)
       begin
-        response = http.head("/")
-        if response.code == "200"
-          # everything fine
-          return true
-        else
-          # unexpected status code
-          return false
-        end
+        response = http.head('/')
+        return response.code == '200'
       rescue Timeout::Error
         # timeout reading from server
         return false
@@ -155,9 +148,9 @@ class Bot::Plugin::Showtime < Bot::Plugin
       h = h % 24
       s = s.floor
 
-      "#{d.to_s + 'd ' if d > 0}" +
-      "#{h.to_s + 'h ' if h > 0}" +
-      "#{m.to_s + 'm ' if m > 0}" +
+      "#{d.to_s + 'd ' if d > 0}" \
+      "#{h.to_s + 'h ' if h > 0}" \
+      "#{m.to_s + 'm ' if m > 0}" \
       "#{s.to_s + 's' if s > 0}"
     end
   end

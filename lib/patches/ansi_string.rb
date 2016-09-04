@@ -1,5 +1,6 @@
 # http://stackoverflow.com/questions/1489183/colorized-ruby-output/16363159#16363159
 
+# rubocop:disable Style/SingleLineMethods, Style/EmptyLineBetweenDefs
 class String
   def black;         "\033[30m#{self}\033[0m" end
   def red;           "\033[31m#{self}\033[0m" end
@@ -21,7 +22,7 @@ class String
   def reverse_color; "\033[7m#{self}\033[27m" end
 
   def pure_string
-    loop { self[/\033\[\d+m/] = "" }
+    loop { self[/\033\[\d+m/] = '' }
   rescue IndexError
     return self
   end

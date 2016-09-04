@@ -6,10 +6,10 @@ class Bot::Plugin::Entitle < Bot::Plugin
     @s = {
       trigger: { entitle: [
         :call, 0,
-        'entitle list, entitle add <filter>, entitle delete <filter>. ' +
-        'Filters are regular expressions. Using these filters ' +
+        'entitle list, entitle add <filter>, entitle delete <filter>. ' \
+        'Filters are regular expressions. Using these filters ' \
         'Entitle looks for uninformative URLs and blurts their titles out.'
-      ]},
+      ] },
       subscribe: true,
       timeout: 10,
       filters: [
@@ -22,7 +22,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     super(bot)
   end
 
-  def call(m=nil)
+  def call(m = nil)
     case m.args[0]
     when 'list'
       m.reply(@s[:filters].join(', '))
@@ -53,18 +53,18 @@ class Bot::Plugin::Entitle < Bot::Plugin
     @s[:filters].each do |regex|
       results = line.scan(Regexp.new(regex))
 
-      unless results.empty?
-        results.each do |result|
-          Thread.new do
-            timeout(@s[:timeout]) do
-              title = get_title(result)
-              m.reply(title) unless title.nil?
-            end
-          end
+      next if results.empty?
 
-          # Prevent double-matching
-          line.gsub!(result, '')
+      results.each do |result|
+        Thread.new do
+          timeout(@s[:timeout]) do
+            title = get_title(result)
+            m.reply(title) if !title.nil?
+          end
         end
+
+        # Prevent double-matching
+        line.gsub!(result, '')
       end
     end
   end
@@ -75,6 +75,6 @@ class Bot::Plugin::Entitle < Bot::Plugin
     html = open(url, allow_redirections: :all)
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
-    doc.at_css('title').text.gsub(/ *\n */, " ").lstrip.rstrip
+    doc.at_css('title').text.gsub(/ *\n */, ' ').strip
   end
 end

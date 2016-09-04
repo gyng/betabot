@@ -15,7 +15,7 @@ class Bot::Plugin::Mpcsync::SyncListener < EventMachine::Connection
       @plugin.decock
       close_connection
     end
-  rescue Exception => e
+  rescue StandardError => e
     Bot.log.error "#{self.class.name} #{e}"
   end
 

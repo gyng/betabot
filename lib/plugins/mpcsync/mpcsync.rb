@@ -10,34 +10,37 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
       trigger: {
         mpcsync: [
           :call, 0,
-          'MPCSync is a video player synchronizer for communal viewing of video files. ' +
-          'To set up, clients need to be running MPC with WebUI enabled and either a '   +
-          'standalone synchronization client or a copy of the plugin. Other triggers: '  +
+          'MPCSync is a video player synchronizer for communal viewing of video files. ' \
+          'To set up, clients need to be running MPC with WebUI enabled and either a '   \
+          'standalone synchronization client or a copy of the plugin. Other triggers: '  \
           'Check out the help files and help strings for sync, cock, decock, np.'
         ],
         cock: [
           :cock, 5,
-          'cock - Primes the player and listens for the signal to GO!'],
+          'cock - Primes the player and listens for the signal to GO!'
+        ],
         decock: [
           :decock, 5,
-          'decock - Unprimes the player.'],
+          'decock - Unprimes the player.'
+        ],
         np: [
           :now_playing, 5,
-          'np - Displays the currently playing file in MPC'],
+          'np - Displays the currently playing file in MPC'
+        ],
         sync: [
           :sync, 0,
-          'sync <countdown=3> - Sends the GO! signal to subscribed users. '  +
-          'mpcsync (un)subscribe <hostname> <port> - (un)subscribe a user. ' +
+          'sync <countdown=3> - Sends the GO! signal to subscribed users. '  \
+          'mpcsync (un)subscribe <hostname> <port> - (un)subscribe a user. ' \
           'mpcsync list - view all current subscriptions.'
         ]
       },
       subscribe: false,
 
       web_ui_addr: 'http://localhost:13579',
-      sync_listen_port: 15555,
+      sync_listen_port: 15_555,
       sync_countdown: 3,
       sync_subscribers: [
-        ['127.0.0.1', 15555] # Add self as a subscriber for !sync
+        ['127.0.0.1', 15_555] # Add self as a subscriber for !sync
       ]
     }
 
@@ -64,7 +67,7 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
         m.reply "Deleted subscriber #{m.args[1]}:#{m.args[2]}"
       end
     when 'list'
-      m.reply @s[:sync_subscribers].map { |sub| "#{sub[0]}:#{sub[1]}"}.join(', ')
+      m.reply @s[:sync_subscribers].map { |sub| "#{sub[0]}:#{sub[1]}" }.join(', ')
     end
   end
 
@@ -78,13 +81,13 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
     m.reply "Cocked. #{now_playing}"
   end
 
-  def decock(m=nil)
+  def decock(m = nil)
     @listen_sock.close_connection if @listen_sock
     @cock_state = :uncocked
     m.reply 'Decocked.' if m.respond_to?(:reply)
   end
 
-  def now_playing(m=nil)
+  def now_playing(m = nil)
     doc      = Nokogiri::HTML(open(@control_addr))
     filepath = doc.search('//td[@colspan="4"]/a[1]').inner_text
     filename = filepath.to_s.split('\\').last
@@ -110,18 +113,15 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
   end
 
   def sync(m)
-    if (countdown_override = m.args[0].to_i) > 0
-      remaining = countdown_override
-    else
-      remaining = @s[:sync_countdown]
-    end
+    countdown_override = m.args[0].to_i
+    remaining = countdown_override > 0 ? countdown_override : @s[:sync_countdown]
 
     countdown = EventMachine.add_periodic_timer(1) do
       m.reply remaining
       if (remaining -= 1) <= 0
         m.reply 'GO!'
         # Forget about using EM.open_datagram_socket for this simple task
-        @s[:sync_subscribers].each { |s| UDPSocket.open.send("GO!", 0, s[0], s[1].to_i) }
+        @s[:sync_subscribers].each { |s| UDPSocket.open.send('GO!', 0, s[0], s[1].to_i) }
         countdown.cancel
       end
     end

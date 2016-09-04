@@ -20,7 +20,7 @@ class Bot::Plugin::Unicode < Bot::Plugin
     if m.args.empty?
       m.reply @s[:trigger][:u][2]
     elsif m.args[0].length <= 2
-      m.reply "Pattern too short (< 3)"
+      m.reply 'Pattern too short (< 3)'
     else
       matches = UnicodeUtils.grep(/#{m.args[0]}/i).map(&:to_s)
       emoji_match = find_emoji(m.args[0])

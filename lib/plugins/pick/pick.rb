@@ -12,7 +12,7 @@ class Bot::Plugin::Pick < Bot::Plugin
   end
 
   def pick(m)
-    picks = (/[0-9]+/ === m.args[0]) ? m.args[0].to_i : 1
+    picks = m.args[0] =~ /[0-9]+/ ? m.args[0].to_i : 1
     m.reply m.args[1..-1].sample(picks).join(', ')
   end
 
@@ -21,7 +21,7 @@ class Bot::Plugin::Pick < Bot::Plugin
   end
 
   def dice(m)
-    sides = m.args.length > 0 ? m.args[0].to_i : 6
+    sides = !m.args.empty? ? m.args[0].to_i : 6
     m.reply Random.rand(sides)
   end
 end

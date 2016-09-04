@@ -4,7 +4,7 @@ module Bot::Core::ObjectLoader
     File.join(Bot::ROOT_DIR, @s["#{type}s".to_sym][:dir])
   end
 
-  def load_objects(type, mode=:all)
+  def load_objects(type, mode = :all)
     type = type.to_s
     objects_dir = get_objects_dir(type)
 
@@ -18,13 +18,13 @@ module Bot::Core::ObjectLoader
 
   # Loads object type and adds a reference to it
   def load_curry(type)
-    Proc.new do |f|
+    proc do |f|
       begin
         Bot.log.info "Loading #{type} #{f}..."
-        path =  File.join(get_objects_dir(type), f.to_s)
+        path = File.join(get_objects_dir(type), f.to_s)
         load File.join(path, "#{f}.rb")
         # Initialize the loaded object
-        object = Bot.module_eval("#{type.capitalize}").const_get(f.capitalize).new(self)
+        object = Bot.module_eval(type.capitalize.to_s).const_get(f.capitalize).new(self)
         # And store a reference to that object in @types (eg. @plugins)
         instance_eval("@#{type}s")[f.downcase.to_sym] = object
       rescue => e

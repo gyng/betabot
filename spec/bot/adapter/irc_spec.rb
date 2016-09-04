@@ -52,7 +52,7 @@ describe Bot::Adapter::Irc::Handler do
     # end
 
     it 'should not reconnect if socket is intentionally closed' do
-      with_em {
+      with_em do
         @handler.instance_variable_set(:@state, :connected)
         $shutdown = true
         @handler.unbind
@@ -62,7 +62,7 @@ describe Bot::Adapter::Irc::Handler do
         $shutdown = true
         @handler.unbind
         expect(@handler.state).to eq(:disconnected)
-      }
+      end
     end
   end
 end

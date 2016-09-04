@@ -2,9 +2,9 @@ class Bot::Adapter
   require_relative 'util/settings'
   include Bot::Util::Settings
 
-  def initialize(bot=nil)
+  def initialize(bot = nil)
     @bot = bot
-    adapter_name = self.class.to_s.split("::").last.downcase
+    adapter_name = self.class.to_s.split('::').last.downcase
 
     # Default settings
     @s ||= Hash.new([])
@@ -25,7 +25,7 @@ class Bot::Adapter
   def shutdown
   end
 
-  def trigger_plugin(trigger, m=nil)
+  def trigger_plugin(trigger, m = nil)
     @bot.trigger_plugin(trigger, m)
   end
 
@@ -33,7 +33,7 @@ class Bot::Adapter
     @bot.publish(m)
   end
 
-  def format(string)
+  def format(m)
     # Does formatting of ANSI-formatted strings before sending
     # Handled per-adapter. ANSI -> IRC is different from ANSI -> HTML
     # Strips all ANSI control codes by default

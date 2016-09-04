@@ -7,12 +7,12 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       trigger: {
         entitleri: [
           :call, 0,
-          'Entitle Reverse Image harnesses the power of Google cloud technology ' +
+          'Entitle Reverse Image harnesses the power of Google cloud technology ' \
           'and the information superhighway botnet to tell you what an image link is.'
         ],
         lastimage: [
           :last_image, 0,
-          'lastimage [more]: Show the image analysis for the last image. more returns ' +
+          'lastimage [more]: Show the image analysis for the last image. more returns ' \
           'the entire cached response.'
         ]
       },
@@ -39,7 +39,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   end
 
   def last_image(m)
-    more_mode = m.args[0] === 'more' || m.args[0] === '-m'
+    more_mode = m.args[0] == 'more' || m.args[0] == '-m'
     last_image = @last_images[m.channel]
 
     if last_image.nil?
@@ -62,41 +62,41 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     @s[:filters].each do |regex|
       results = line.scan(Regexp.new(regex))
 
-      unless results.empty?
-        results.each do |result|
-          Thread.new do
-            timeout(@s[:timeout]) do
-              guess_text = []
+      next if results.empty?
 
-              guess = get_guess(result)
-              guess_text.push(guess) unless guess.nil?
+      results.each do |result|
+        Thread.new do
+          timeout(@s[:timeout]) do
+            guess_text = []
 
-              begin
-                @last_images[m.channel] = nil
-                guess_microsoft = get_guess_microsoft(result)
-                puts guess_microsoft.inspect
-                if !guess_microsoft.nil? && guess_microsoft[:code].nil?
-                  caption = guess_microsoft[:description][:captions][0]
-                  guess_text.push(caption[:text]) if caption[:confidence] > 0.25
-                  @last_images[m.channel] = guess_microsoft
+            guess = get_guess(result)
+            guess_text.push(guess) if !guess.nil?
 
-                  if guess_microsoft[:adult][:isAdultContent]
-                    guess_text.push('🔞 NSFW 🔞')
-                  elsif guess_microsoft[:adult][:isRacyContent]
-                    guess_text.push('maybe NSFW')
-                  end
+            begin
+              @last_images[m.channel] = nil
+              guess_microsoft = get_guess_microsoft(result)
+              puts guess_microsoft.inspect
+              if !guess_microsoft.nil? && guess_microsoft[:code].nil?
+                caption = guess_microsoft[:description][:captions][0]
+                guess_text.push(caption[:text]) if caption[:confidence] > 0.25
+                @last_images[m.channel] = guess_microsoft
+
+                if guess_microsoft[:adult][:isAdultContent]
+                  guess_text.push('🔞 NSFW 🔞')
+                elsif guess_microsoft[:adult][:isRacyContent]
+                  guess_text.push('maybe NSFW')
                 end
-
-                m.reply(guess_text.join(', ')) if !guess_text.empty?
-              rescue Exception => e
-                puts "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
               end
+
+              m.reply(guess_text.join(', ')) if !guess_text.empty?
+            rescue StandardError => e
+              puts "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
             end
           end
-
-          # Prevent double-matching
-          line.gsub!(result, '')
         end
+
+        # Prevent double-matching
+        line.gsub!(result, '')
       end
     end
   end
@@ -104,10 +104,10 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   def get_guess_microsoft(url)
     puts "EntitleRI: Getting image analysis of #{url}"
     uri = URI('https://api.projectoxford.ai/vision/v1.0/analyze')
-    uri.query = URI.encode_www_form({
+    uri.query = URI.encode_www_form(
       'visualFeatures' => 'Categories,Description,Tags,Faces,ImageType,Color,Adult',
       'details' => 'Celebrities'
-    })
+    )
 
     request = Net::HTTP::Post.new(uri.request_uri)
     request['Content-Type'] = 'application/json'
@@ -121,7 +121,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     parsed = JSON.parse(response.body, symbolize_names: true)
     puts "EntitleRI: parsed image analysis: #{parsed.inspect}"
     parsed
-  rescue Exception => e
+  rescue StandardError => e
     puts "Error in Entitleri#get_guess_microsoft: #{e} #{e.backtrace}"
     nil
   end
@@ -131,18 +131,17 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
     # Get redirect by spoofing User-Agent
     html = open(@s[:google_query] + url,
-      'User-Agent' => @s[:user_agent],
-      allow_redirections: :all,
-      ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
-      read_timeout: @s[:timeout]
-    )
+                'User-Agent' => @s[:user_agent],
+                allow_redirections: :all,
+                ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
+                read_timeout: @s[:timeout])
 
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
     result = doc.css(@s[:guess_selector]).inner_text
     puts "EntitleRI: Got Google guess: #{result}"
     result
-  rescue Exception => e
+  rescue StandardError => e
     puts "Error in Entitleri#get_guess: #{e} #{e.backtrace}"
     nil
   end

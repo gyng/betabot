@@ -8,7 +8,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   attr_reader :reconnect_delay
   attr_reader :nick_reclaim_interval
 
-  def initialize(adapter, s=Hash.new(false))
+  def initialize(adapter, s = Hash.new(false))
     @adapter = adapter
     @s = s
     @registered = false
@@ -30,11 +30,11 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   def send_data(data)
     Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'->'.green} #{data}"
     super @adapter.format(data) + "\n"
-  rescue Exception => e
+  rescue StandardError => e
     Bot.log.error "#{self.class.name} #{@s[:name]}\n#{e}\n#{e.backtrace.join("\n")}}"
   end
 
-  alias_method :send, :send_data
+  alias send send_data
 
   def receive_data(data)
     data = @buffer.extract(data)
@@ -42,7 +42,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'<-'.cyan} #{line.chomp}"
       handle_message(parse_data(line))
     end
-  rescue Exception => e
+  rescue StandardError => e
     Bot.log.error "#{self.class.name} #{@s[:name]}\n#{e}\n#{e.backtrace.join("\n")}}"
   end
 
@@ -70,16 +70,16 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       hostname  = matches[:hostname]
       channel   = data[2]
       # Handle PMs - reply to user directly.
-      channel   = ((data[2] == @s[:nick]) ? matches[:sender] : data[2])
+      channel   = (data[2] == @s[:nick] ? matches[:sender] : data[2])
       internal_type = :client
-    elsif /^(JOIN|PART)$/ === data[1]
+    elsif data[1] =~ /^(JOIN|PART)$/
       type      = data[1].downcase.to_sym
       matches   = data[0].match(privm_regex)
       sender    = matches[:sender]
       real_name = matches[:real_name]
       hostname  = matches[:hostname]
       channel   = data[2].gsub(/^:/, '')
-    elsif /^\d+$/ === data[1]
+    elsif data[1] =~ /^\d+$/
       # If message type is numeric
       type      = data[1].to_sym
       sender    = data[0].delete(':')
@@ -121,16 +121,16 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def check_trigger(m)
-    if /^#{Bot::SHORT_TRIGGER}([^ ]*)/i === m.text || # !command
-       /^#{@s[:nick]}: ([^ ]*)/i        === m.text    # BotNick: command
-      trigger = $1
+    if m.text =~ /^#{Bot::SHORT_TRIGGER}([^ ]*)/i || # !command
+       m.text =~ /^#{@s[:nick]}: ([^ ]*)/i # BotNick: command
+      trigger = Regexp.last_match[1]
       @adapter.trigger_plugin(trigger, m)
     end
   end
 
   def register(nick)
     nick(nick)
-    user(nick, 0, ":Romani ite domum")
+    user(nick, 0, ':Romani ite domum')
   end
 
   def keep_alive

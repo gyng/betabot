@@ -3,12 +3,12 @@
     {
       "enabled": true,
       "name": "somename",
-      "hostname": "irc.yasashiisyndicate.org",
+      "hostname": "irc.rizon.net",
       "port": 6697,
       "ssl": true,
-      "nick": "Huddabot",
+      "nick": "betabot",
       "default_channels": [
-        "#dicks",
+        "#lphp",
         "#some-other-channel"
       ]
     }

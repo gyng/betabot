@@ -29,7 +29,7 @@ class Bot::Plugin::Ping < Bot::Plugin
   end
 
   # The method called is defined in @s[:trigger]. In this case, it's #call.
-  def call(m=nil)
+  def call(m = nil)
     m.reply('pong')
   end
 

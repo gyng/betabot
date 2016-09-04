@@ -18,11 +18,14 @@ end
 # Adapter Gemfiles
 adapters_path = File.join(File.dirname(__FILE__), 'lib', 'adapters', '**', 'Gemfile')
 Dir.glob(adapters_path) do |gemfile|
+  # Dangerous! However, if we want to load additional `Gemfile`s we need to `eval`...
+  # rubocop:disable Lint/Eval
   eval(IO.read(gemfile), binding)
 end
 
 # Plugin Gemfiles
 plugins_path = File.join(File.dirname(__FILE__), 'lib', 'plugins', '**', 'Gemfile')
 Dir.glob(plugins_path) do |gemfile|
+  # Dangerous!
   eval(IO.read(gemfile), binding)
 end

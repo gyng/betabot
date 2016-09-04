@@ -16,69 +16,69 @@ describe Bot::Core do
   context 'Objects' do
     context 'Adapters' do
       it 'loads an adapter' do
-        with_em {
+        with_em do
           bot = Bot::Core.new(settings_filename_fixture)
           bot.load_adapter(:dummy)
           expect(bot.adapters).to have_key(:dummy)
-        }
+        end
       end
 
       it 'skips bad adapters' do
-        with_em {
+        with_em do
           bot = Bot::Core.new(settings_filename_fixture)
           expect { bot.load_adapter(:nothing) }.to raise_error(LoadError)
           expect(bot.adapters).to_not have_key(:nothing)
-        }
+        end
       end
     end
 
     context 'Plugins' do
       it 'loads a plugin' do
-        with_em {
+        with_em do
           bot = Bot::Core.new(settings_filename_fixture)
           bot.load_plugin(:dummy)
           expect(bot.plugins).to have_key(:dummy)
-        }
+        end
       end
 
       it 'skips bad plugins' do
-        with_em {
+        with_em do
           bot = Bot::Core.new(settings_filename_fixture)
           expect { bot.load_plugin(:nothing) }.to raise_error(LoadError)
           expect(bot.adapters).to_not have_key(:nothing)
-        }
+        end
       end
     end
   end
 
   context 'Settings' do
     it 'loads settings' do
-      with_em {
+      with_em do
         bot = Bot::Core.new(settings_filename_fixture)
         expect(bot.s).to eq settings_fixture
-      }
+      end
     end
 
     it 'does not load adapters in blacklist' do
-      with_em {
+      with_em do
         bot = Bot::Core.new(settings_filename_blacklist_fixture)
         expect(bot.adapters).to have_key(:dummy)
         expect(bot.adapters).to_not have_key(:irc)
-      }
+      end
     end
 
     it 'does not load plugins in blacklist' do
-      with_em {
+      with_em do
         bot = Bot::Core.new(settings_filename_whitelist_fixture)
         expect(bot.plugins).to have_key(:ping)
         expect(bot.plugins).to_not have_key(:dummy)
-      }
+      end
     end
   end
 
   context 'Reload' do
     it 'reloads plugins' do
-      with_em {
+      with_em do
         bot = Bot::Core.new(settings_filename_blacklist_fixture)
         expect(bot.plugins).to_not have_key(:ping)
 
@@ -91,7 +91,7 @@ describe Bot::Core do
         bot.instance_variable_set(:@settings_path, settings_filename_blacklist_fixture)
         bot.reload(:plugin)
         expect(bot.plugins).to_not have_key(:ping)
-      }
+      end
     end
 
     # pending 'reloads adapters' do end

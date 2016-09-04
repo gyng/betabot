@@ -27,7 +27,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
 
       chunks.each do |line_segment|
         reply = "PRIVMSG #{@channel} :#{line_segment}"
-        reply += '...' if line_segment != chunks.last && !(/[[:punct:]]/ === reply[-1])
+        reply += '...' if line_segment != chunks.last && !(reply[-1] =~ /[[:punct:]]/)
         @origin.send reply
       end
     end
@@ -36,7 +36,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   def args
     # Extra space if called by name (!ping vs BotName: ping).
     # Assumes text is a String, wrap in array anyway if cannot split
-    if /^#{Bot::SHORT_TRIGGER}([^ ]*)/i === @text
+    if @text =~ /^#{Bot::SHORT_TRIGGER}([^ ]*)/i
       [@text.split(' ')[1..-1]].flatten
     else
       [@text.split(' ')[2..-1]].flatten
@@ -50,6 +50,6 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
   private
 
   def chunk(str, length)
-    str.scan(/\S.{0,#{length-1}}(?!\S)/)
+    str.scan(/\S.{0, #{length - 1}}(?!\S)/)
   end
 end

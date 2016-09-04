@@ -3,7 +3,7 @@ class Bot::Plugin::Wolfram < Bot::Plugin
     # http://products.wolframalpha.com/api/
     # https://developer.wolframalpha.com/portal/apisignup.html
     @s = {
-      trigger: { wolfram: [:call, 0, 'Wolframs the bot.'] },
+      trigger: { wolfram: [:call, 0, 'wolfram <query>. Querys Wolfram|Alpha.'] },
       subscribe: false,
       api_key: '',
       max_depth: 2
@@ -16,25 +16,26 @@ class Bot::Plugin::Wolfram < Bot::Plugin
     m.reply format_wolfram(wolfram(m.args.join(' ')))
   end
 
-  def wolfram(search_term, depth=1)
+  def wolfram(search_term, depth = 1)
     return if depth > @s[:max_depth]
-    search_term = CGI::escape(search_term)
-    raw = Nokogiri::XML(open("http://api.wolframalpha.com/v2/query?appid=#{@s[:api_key]}&format=plaintext&input=\'#{search_term}\'"))
+    search_term = CGI.escape(search_term)
+    url = "http://api.wolframalpha.com/v2/query?appid=#{@s[:api_key]}&format=plaintext&input=\'#{search_term}\'"
+    raw = Nokogiri::XML(open(url))
     pods = raw.search("//pod['title']")
     results = []
 
     pods.each do |pod|
-      results.push({
+      results.push(
         title: pod['title'].strip,
         text: pod.inner_text.strip.gsub("\n", ' · ').strip.gsub(/  +/, ' ')
-      })
+      )
     end
 
     if results.empty?
-      related_examples = raw.search("//relatedexamples")
+      related_examples = raw.search('//relatedexamples')
 
       if !related_examples.empty?
-        related_examples = raw.search("//relatedexamples/relatedexample")
+        related_examples = raw.search('//relatedexamples/relatedexample')
         search_term = related_examples[0]['input']
         results = wolfram(search_term, depth + 1)
       end
