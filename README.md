@@ -1,7 +1,7 @@
-# Hudda
-[![Build Status](https://travis-ci.org/gyng/Hudda.svg?branch=Travis)](https://travis-ci.org/gyng/Hudda)
+# betabot
+[![Build Status](https://travis-ci.org/gyng/betabot.svg?branch=Travis)](https://travis-ci.org/gyng/betabot)
 
-Hudda is a bot that aims to be protocol agnostic, easy to deploy and simple to develop for.
+betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to develop for.
 
 Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).
 
@@ -15,7 +15,7 @@ An IRC adapter and some useful plugins are included. A web-based bouncer and pub
 
 1. Download or clone this repository
 
-        git clone https://github.com/gyng/Hudda.git
+        git clone https://github.com/gyng/betabot.git
 
 2. Install the gems with Bundler
 
@@ -162,7 +162,7 @@ Possible solutions:
 
 ### Databases
 
-Hudda uses [Sequel](https://github.com/jeremyevans/sequel) ORM backed by SQLite. Plugins can either create their own databases or access a shared database.
+betabot uses [Sequel](https://github.com/jeremyevans/sequel) ORM backed by SQLite. Plugins can either create their own databases or access a shared database.
 
 The shared database can be accessed through the Bot's `attr_reader :shared_db` &ndash; `@bot.shared_db.run 'SELECT * FROM amazing;'`. Alternatively, create a database with `db = Bot::Database.new(path)`
 
@@ -252,7 +252,7 @@ The zip package will be located in the `./packages` folder. This package can be 
 
 ### Web hook
 
-Hudda runs the Sinatra web microframework by default. To hook into this, do the following and make sure it gets called somehow, somewhen. You can put this in your plugin's `initialize`.
+betabot runs the Sinatra web microframework by default. To hook into this, do the following and make sure it gets called somehow, somewhen. You can put this in your plugin's `initialize`.
 
 
 ```ruby
@@ -297,4 +297,4 @@ Tests for plugins are to be placed inside a `spec` directory in the plugin direc
 The project is linted with Rubocop, and will fail CI if any violations are found.
 
 ## License
-Hudda is licensed under the MIT License.
+betabot is licensed under the MIT License.
