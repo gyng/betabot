@@ -290,5 +290,7 @@ The EventMachine reactor has to be set up and torn down for most specs so there 
 
 Tests for plugins are to be placed inside a `spec` directory in the plugin directory. See the ping plugin for an example.
 
+The project is linted with Rubocop, and will fail CI if any violations are found.
+
 ## License
 Hudda is licensed under the MIT License.
