@@ -1,2 +1,3 @@
 --color
 --format progress
+--pattern "**{,/*/**}/*_spec.rb,../lib/plugins/**/spec/*_spec.rb"

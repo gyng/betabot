@@ -14,6 +14,7 @@ RSpec.configure do |config|
   end
 
   require 'eventmachine'
+  require 'bot/core'
 
   # Helper method for easier setup/teardown of eventmachine context
   # We setup the bot for each spec as the bot expects to be run in EM as

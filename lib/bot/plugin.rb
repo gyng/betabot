@@ -11,7 +11,8 @@ class Bot::Plugin
     @s ||= Hash.new([])
     @s[:trigger] = { plugin_name.to_sym => [:call, 0] } unless @s.key?(:trigger)
 
-    @settings_path ||= File.join(Bot::ROOT_DIR, 'plugins', plugin_name, 'settings', 'settings.json')
+    root_dir = defined?(Bot) && defined?(Bot::ROOT_DIR) ? Bot::ROOT_DIR : File.join(Dir.pwd, 'lib')
+    @settings_path ||= File.join(root_dir, 'plugins', plugin_name, 'settings', 'settings.json')
     load_settings
 
     @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, plugin_name, *opts) } if bot

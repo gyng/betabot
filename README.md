@@ -123,10 +123,13 @@ class Bot::Plugin::Ping < Bot::Plugin
 end
 ```
 
-
 ### Dependencies
 
 Include your gem dependencies in the plugin's Gemfile (as you would usually do for any application). This is *not* the same Gemfile located at the bot's root directory. The plugin's Gemfile will get picked up when a `bundle install` is run. See `./lib/plugins/ping/Gemfile` for an example.
+
+### Tests
+
+Include your tests inside a `spec` directory, in the plugin directory. See the ping plugin for a concrete example.
 
 ### Gotchas
 
@@ -281,11 +284,11 @@ Check out the Image plugin for a concrete example.
 
 ## Tests
 
-Tests can be run with `rspec`. More tests are being written; current test coverage is still very limited.
+Tests can be run with `rspec`. Current test coverage is very limited.
 
 The EventMachine reactor has to be set up and torn down for most specs so there is a helper method `with_em(&block)` included in `spec_helper.rb`.
 
-
+Tests for plugins are to be placed inside a `spec` directory in the plugin directory. See the ping plugin for an example.
 
 ## License
 Hudda is licensed under the MIT License.
