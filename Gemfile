@@ -1,30 +1,28 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
-gem 'nokogiri'
-gem 'mechanize'
 gem 'eventmachine'
+gem 'mechanize'
+gem 'nokogiri'
 gem 'sequel'
-gem 'sqlite3'
-gem 'rake'
-gem 'rubyzip', :require => false
 gem 'sinatra'
+gem 'sqlite3'
 gem 'thin'
 
-gem 'rubyntlm', :require => false # Fixes https://github.com/savonrb/httpi/issues/127, remove when possible
-# gem 'colorize'
-# gem 'linguistics'
-# gem "activesupport-inflector", "~> 0.1.0"
-
-group :development do
+group :development, :test do
+  gem 'rake'
   gem 'rspec'
+  gem 'rubocop'
+  gem 'rubyzip'
 end
 
 # Adapter Gemfiles
-Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'adapters', '**', "Gemfile")) do |gemfile|
-    eval(IO.read(gemfile), binding)
+adapters_path = File.join(File.dirname(__FILE__), 'lib', 'adapters', '**', 'Gemfile')
+Dir.glob(adapters_path) do |gemfile|
+  eval(IO.read(gemfile), binding)
 end
 
 # Plugin Gemfiles
-Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'plugins', '**', "Gemfile")) do |gemfile|
-    eval(IO.read(gemfile), binding)
+plugins_path = File.join(File.dirname(__FILE__), 'lib', 'plugins', '**', 'Gemfile')
+Dir.glob(plugins_path) do |gemfile|
+  eval(IO.read(gemfile), binding)
 end

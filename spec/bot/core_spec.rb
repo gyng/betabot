@@ -26,7 +26,7 @@ describe Bot::Core do
       it 'skips bad adapters' do
         with_em {
           bot = Bot::Core.new(settings_filename_fixture)
-          expect { bot.load_adapter(:nothing) }.to raise_error
+          expect { bot.load_adapter(:nothing) }.to raise_error(LoadError)
           expect(bot.adapters).to_not have_key(:nothing)
         }
       end
@@ -44,7 +44,7 @@ describe Bot::Core do
       it 'skips bad plugins' do
         with_em {
           bot = Bot::Core.new(settings_filename_fixture)
-          expect { bot.load_plugin(:nothing) }.to raise_error
+          expect { bot.load_plugin(:nothing) }.to raise_error(LoadError)
           expect(bot.adapters).to_not have_key(:nothing)
         }
       end
