@@ -5,7 +5,7 @@ betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to
 
 Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).
 
-An IRC adapter and some useful plugins are included. A web-based bouncer and public site in the roadmap.
+An IRC adapter and some useful plugins are included.
 
 
 
