@@ -8,7 +8,7 @@ RSpec.configure do |config|
   patch_dir = File.join(Dir.pwd, 'lib', 'patches')
   Dir.foreach(patch_dir) do |filename|
     if File.extname(filename) == '.rb'
-      puts 'Loading patch file: #{filename}'
+      puts "Loading patch file: #{filename}"
       load File.join(patch_dir, filename)
     end
   end
