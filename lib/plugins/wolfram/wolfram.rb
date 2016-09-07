@@ -13,7 +13,10 @@ class Bot::Plugin::Wolfram < Bot::Plugin
 
   def call(m)
     m.reply 'Wolfram API key has not been configured.' if @s[:api_key].empty?
-    m.reply format_wolfram(wolfram(m.args.join(' ')))
+
+    Thread.new do
+      m.reply format_wolfram(wolfram(m.args.join(' ')))
+    end
   end
 
   def wolfram(search_term, depth = 1)
