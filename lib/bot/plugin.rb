@@ -15,8 +15,13 @@ class Bot::Plugin
     @settings_path ||= File.join(root_dir, 'plugins', plugin_name, 'settings', 'settings.json')
     load_settings
 
-    @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, plugin_name, *opts) } if bot
-    bot.subscribe_plugin(plugin_name) if @s[:subscribe] == true
+    if bot.methods.include?(:register_trigger)
+      @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, plugin_name, *opts) }
+    end
+
+    if @s[:subscribe] == true && bot.methods.include?(:subscribe_plugin)
+      bot.subscribe_plugin(plugin_name)
+    end
 
     Bot.log.info("Loaded plugin #{self.class.name}")
   end
