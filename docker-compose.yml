@@ -3,6 +3,7 @@ services:
   bot:
     build: .
     command: bundle exec ruby start_bot.rb
+    image: betabot:latest
     ports:
       - 15555:15555
       - 80:80
