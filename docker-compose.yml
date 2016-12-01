@@ -7,9 +7,6 @@ services:
       - 15555:15555
       - 80:80
     volumes:
-      - settings:/app/lib/settings
-      - databases:/app/lib/databases
-
-volumes:
-  settings:
-  databases:
+      - ./lib/databases:/app/lib/databases
+      - ./lib/public:/app/lib/public
+      - ./lib/settings:/app/lib/settings
