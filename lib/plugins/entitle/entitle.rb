@@ -1,6 +1,7 @@
 class Bot::Plugin::Entitle < Bot::Plugin
   require 'nokogiri'
   require 'open-uri'
+  require 'timeout'
 
   def initialize(bot)
     @s = {
@@ -57,7 +58,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
       results.each do |result|
         Thread.new do
-          timeout(@s[:timeout]) do
+          Timeout.timeout(@s[:timeout]) do
             title = get_title(result)
             m.reply(title) if !title.nil?
           end
