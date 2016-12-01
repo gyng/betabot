@@ -1,0 +1,15 @@
+version: '2'
+services:
+  bot:
+    build: .
+    command: bundle exec ruby start_bot.rb
+    ports:
+      - 15555:15555
+      - 80:80
+    volumes:
+      - settings:/app/lib/settings
+      - databases:/app/lib/databases
+
+volumes:
+  settings:
+  databases:
