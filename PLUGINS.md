@@ -72,7 +72,7 @@ Possible solutions:
 
 betabot uses [Sequel](https://github.com/jeremyevans/sequel) ORM backed by SQLite. Plugins can either create their own databases or access a shared database.
 
-The shared database can be accessed through the Bot's `attr_reader :shared_db` &ndash; `@bot.shared_db.run 'SELECT * FROM my_table;'`. Alternatively, create a database with `db = Bot::Database.new(path)`
+The shared database can be accessed through the Bot's `attr_reader :shared_db` &ndash; `@bot.shared_db.run 'SELECT * FROM my_table;'`. Alternatively, create a database with `Bot::Database.new(File.join(Bot::DATABASE_DIR, 'my_db.sqlite3'))`. Databases should be created inside the database directory so they can be persisted by Docker.
 
 Check out the *image* plugin for an example of using a plugin-created database.
 
