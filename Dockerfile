@@ -9,7 +9,6 @@ RUN apk --update add --virtual build-dependencies \
     build-base \
     ruby-dev \
     sqlite-dev \
-    curl \
   && apk --update add \
     imagemagick \
     sqlite-libs
