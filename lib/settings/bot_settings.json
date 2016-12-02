@@ -1,5 +1,5 @@
 {
-  "short_trigger": "`",
+  "short_trigger": "~",
 
   "adapters": {
     "dir": "adapters",

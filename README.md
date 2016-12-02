@@ -23,20 +23,16 @@ You can choose either to use or not to use Docker to run betabot.
 
 2. Build the image. You might need to configure the ports used by the webserver and plugins.
 
-        docker build . -t betabot:latest
-
-    or with port configuration:
-
-        docker build . -t betabot:latest --build-arg PORT_WEB=80 --build-arg PORT_SYNC_LISTENER=15555
+        docker build . -t betabot
 
 3. Create an admin account (auth level 5) with the wizard
 
-        docker run -it --entrypoint=sh betabot:latest
+        docker-compose run --entrypoint sh bot
         rake make_user
 
    or the command
 
-        docker run -it --entrypoint=sh betabot:latest
+        docker-compose run --entrypoint sh bot
         rake make_user_cmd[name,password,auth_level]
 
 4. [Configure the bot](#configuration)
@@ -49,7 +45,7 @@ You can choose either to use or not to use Docker to run betabot.
 
         docker-compose up -d
 
-Settings, accounts, databases, and the public directory are persisted with usage of Docker. The image needs to be rebuilt (easily with `docker-compose up --build -d`) when adapters or plugins are changed or added.
+Settings, accounts, databases, and the public directory are persisted with usage of Docker. The image needs to be rebuilt (easily with `docker-compose up --build -d`) when adapters or plugins are changed or added. As of now, the port mappings in `docker-compose.yml` must be changed manually when not using default ports.
 
 #### Without Docker
 
