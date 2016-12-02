@@ -36,7 +36,7 @@ class Bot::Adapter::Slack < Bot::Adapter
     @client.start!
   end
 
-  def send(channel, text)
+  def message(channel, text)
     @client.message(channel: channel, text: text)
   end
 
