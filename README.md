@@ -49,7 +49,7 @@ Settings, accounts, databases, and the public directory are persisted with usage
 
 #### Without Docker
 
-1. Requirements: [Ruby version >= 2.0](https://www.ruby-lang.org/en/downloads/), [Bundler](http://bundler.io/).
+1. Requirements: [Ruby version >= 2.2.2](https://www.ruby-lang.org/en/downloads/), [Bundler](http://bundler.io/).
 
 2. Install the gems with Bundler. You might need `sqlite-dev` and `imagemagick` packages installed on your system for gem installation.
 
