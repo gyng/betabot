@@ -91,7 +91,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
               m.reply(guess_text.join(', ')) if !guess_text.empty?
             rescue StandardError => e
-              puts "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
+              puts "EntitleRI: Error in formulating guess from Microsoft: #{e} #{e.backtrace}"
+              m.reply(guess_text.join(', ')) if !guess_text.empty?
             end
           end
         end
