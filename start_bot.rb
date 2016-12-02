@@ -17,7 +17,7 @@ Dir.foreach(patch_dir) do |filename|
   end
 end
 
-Thread.abort_on_exception = true if ARGV[0] == '-dev'
+Thread.abort_on_exception = true if ARGV[0] == '--dev'
 EM.run { Bot::Core.new(File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.json')) }
 if $restart
   exec "ruby #{__FILE__}"

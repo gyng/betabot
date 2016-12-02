@@ -7,8 +7,11 @@ require 'adapters/irc/message'
 
 describe Bot::Adapter::Irc::Handler do
   before do
-    Bot.send(:remove_const, :ROOT_DIR) if Bot.const_defined?(:ROOT_DIR)
+    [:ROOT_DIR, :SETTINGS_DIR].each do |c|
+      Bot.send(:remove_const, c) if Bot.const_defined?(c)
+    end
     Bot.const_set(:ROOT_DIR, File.join(Dir.pwd, 'lib'))
+    Bot.const_set(:SETTINGS_DIR, File.join(Dir.pwd, 'lib', 'settings'))
     @adapter = Bot::Adapter::Irc.new(true)
     @handler = Bot::Adapter::Irc::Handler.new(@adapter, {})
   end

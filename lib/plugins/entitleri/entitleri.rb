@@ -1,6 +1,7 @@
 class Bot::Plugin::Entitleri < Bot::Plugin
   require 'nokogiri'
   require 'open-uri'
+  require 'timeout'
 
   def initialize(bot)
     @s = {
@@ -66,7 +67,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
       results.each do |result|
         Thread.new do
-          timeout(@s[:timeout]) do
+          Timeout.timeout(@s[:timeout]) do
             guess_text = []
 
             guess = get_guess(result)

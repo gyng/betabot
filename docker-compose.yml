@@ -1,0 +1,13 @@
+version: '2'
+services:
+  bot:
+    build: .
+    command: bundle exec ruby start_bot.rb
+    image: betabot
+    ports:
+      - 15555:15555
+      - 80:80
+    volumes:
+      - ./lib/databases:/app/lib/databases
+      - ./lib/public:/app/lib/public
+      - ./lib/settings:/app/lib/settings

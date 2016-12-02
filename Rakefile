@@ -84,22 +84,6 @@ task :package_plugin, :name do |_t, args|
   puts "Package created in #{out}."
 end
 
-task :default_plugin_settings, :plugin do |_t, args|
-  plugin = args[:plugin] || '**'
-  Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'plugins', plugin, 'settings')) do |d|
-    path = File.join(d, 'settings.json')
-    File.delete(path) if File.file?(path)
-  end
-end
-
-task :default_adapter_settings, :adapter do |_t, args|
-  adapter = args[:plugin] || '**'
-  Dir.glob(File.join(File.dirname(__FILE__), 'lib', 'adapters', adapter, 'settings')) do |d|
-    path = File.join(d, 'settings.json')
-    File.delete(path) if File.file?(path)
-  end
-end
-
 task :install_plugin, :url do |_t, args|
   require 'zip'
   require 'fileutils'

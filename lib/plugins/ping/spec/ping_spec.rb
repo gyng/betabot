@@ -7,6 +7,6 @@ describe Bot::Plugin::Ping do
   it 'responds to ping with pong' do
     m = Bot::Core::Message.new
     expect(m).to receive(:reply).with('pong')
-    subject.call(m)
+    subject.method_to_call(m)
   end
 end
