@@ -5,7 +5,7 @@ betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to
 
 Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).
 
-An IRC adapter and some useful plugins are included.
+Has IRC and *basic* Slack adapters. Some useful plugins are also included. Not all plugins support Slack right now.
 
 ## Installation
 
@@ -49,7 +49,7 @@ Settings, accounts, databases, and the public directory are persisted with usage
 
 #### Without Docker
 
-1. Requirements: [Ruby version >= 2.0](https://www.ruby-lang.org/en/downloads/), [Bundler](http://bundler.io/).
+1. Requirements: [Ruby version >= 2.2.2](https://www.ruby-lang.org/en/downloads/), [Bundler](http://bundler.io/).
 
 2. Install the gems with Bundler. You might need `sqlite-dev` and `imagemagick` packages installed on your system for gem installation.
 
@@ -73,17 +73,20 @@ Settings, accounts, databases, and the public directory are persisted with usage
 
 ### Configuration
 
-  Settings files that need changing:<br>
+  Settings files that may need changing:<br>
   * `./lib/settings/bot_settings.json` (for web server configuration options check below)
   * `./lib/settings/adapters/irc.json` (and any per-adapter settings)
+  * `./lib/settings/adapters/slack.json` (and any per-adapter settings)
   * (Optional) any plugin settings in `./lib/settings/plugins/`
 
-  Note that the plugin settings files are generated with default settings on first run for a fresh install. They do not exist before first run.
+  Add the adapters to be run on startup to the autostart key in `bot_settings.json`. Currently supported adapters are `slack` and `irc`.
+
+  Note that adapter and plugin settings files are generated with default settings on first run for a fresh install as of now. They do not exist before first run.
 
 #### Web server configuration details
 * `enabled` &ndash; whether the webserver runs on startup
 * `link_url` &ndash; the URL for plugins to use (eg. http://lollipop.hiphop:9999 or http://www.example.org)
-* `host` &ndash; the listening host; leave this at 0.0.0.0 and it *should* work
+* `host` &ndash; the listening host; leave this at `0.0.0.0` and it *should* work
 * `port` &ndash; your listening port
 
 
