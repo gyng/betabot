@@ -8,6 +8,8 @@ class Bot::Adapter::Slack < Bot::Adapter
       api_token: 'insert token here'
     }
 
+    @reconnect_delay = 30
+
     # Avoid massive spam
     @slack_logger = ::Logger.new(STDOUT)
     @slack_logger.level = Logger::INFO
@@ -31,6 +33,19 @@ class Bot::Adapter::Slack < Bot::Adapter
       end
 
       publish(m)
+    end
+
+    @client.on :closed do |_data|
+      if !($shutdown || !$restart)
+        Bot.log.warn "#{self.class.name} Connection closed: unexpected; reconnecting in #{@reconnect_delay} seconds..."
+        EM.add_timer(@reconnect_delay) { @client.start! }
+      else
+        Bot.log.info "#{self.class.name} Connection closed"
+      end
+    end
+
+    @client.on :hello do |_data|
+      Bot.log.info "#{self.class.name} Connection established"
     end
 
     @client.start!
