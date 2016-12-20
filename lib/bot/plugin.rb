@@ -5,11 +5,11 @@ class Bot::Plugin
 
   def initialize(bot = nil)
     @bot = bot
-    plugin_name = self.class.to_s.split('::').last.downcase
+    @plugin_name = self.class.to_s.split('::').last.downcase
 
     # Default settings
     @s ||= Hash.new([])
-    @s[:trigger] = { plugin_name.to_sym => [:call, 0] } unless @s.key?(:trigger)
+    @s[:trigger] = { @plugin_name.to_sym => [:call, 0] } unless @s.key?(:trigger)
 
     settings_path = if defined?(Bot) && defined?(Bot::SETTINGS_DIR)
                       Bot::SETTINGS_DIR
@@ -17,15 +17,15 @@ class Bot::Plugin
                       File.join(Dir.pwd, 'lib', 'settings')
                     end
 
-    @settings_path ||= File.join(settings_path, 'plugins', "#{plugin_name}.json")
+    @settings_path ||= File.join(settings_path, 'plugins', "#{@plugin_name}.json")
     load_settings
 
     if bot.methods.include?(:register_trigger)
-      @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, plugin_name, *opts) }
+      @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, @plugin_name, *opts) }
     end
 
     if @s[:subscribe] == true && bot.methods.include?(:subscribe_plugin)
-      bot.subscribe_plugin(plugin_name)
+      bot.subscribe_plugin(@plugin_name)
     end
 
     Bot.log.info("Loaded plugin #{self.class.name}")
