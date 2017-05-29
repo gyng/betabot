@@ -1,7 +1,6 @@
 class Bot::Plugin::Entitleri < Bot::Plugin
   require 'nokogiri'
   require 'open-uri'
-  require 'timeout'
 
   def initialize(bot)
     @s = {
@@ -18,7 +17,14 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         ]
       },
       subscribe: true,
-      filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp'],
+      filters: [
+        '(http.*png(\/?\?.*)?$)',
+        '(http.*gif(\/?\?.*)?$)',
+        '(http.*jpg(\/?\?.*)?$)',
+        '(http.*jpeg(\/?\?.*)?$)',
+        '(http.*bmp(\/?\?.*)?$)',
+        '(http.*webp(\/?\?.*)?$)'
+      ],
       timeout: 20,
       google_query: 'https://www.google.com/searchbyimage?&image_url=',
       guess_selector: '._hUb',
@@ -65,9 +71,9 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
       next if results.empty?
 
-      results.each do |result|
+      results.map(&:first).each do |result|
         Thread.new do
-          Timeout.timeout(@s[:timeout]) do
+          timeout(@s[:timeout]) do
             guess_text = []
 
             guess = get_guess(result)
@@ -77,7 +83,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               @last_images[m.channel] = nil
               guess_microsoft = get_guess_microsoft(result)
               puts guess_microsoft.inspect
-              if !guess_microsoft.nil? && guess_microsoft[:code].nil?
+              if !guess_microsoft.nil?
                 caption = guess_microsoft[:description][:captions][0]
                 guess_text.push(caption[:text]) if caption[:confidence] > 0.25
                 @last_images[m.channel] = guess_microsoft
@@ -91,8 +97,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
               m.reply(guess_text.join(', ')) if !guess_text.empty?
             rescue StandardError => e
-              puts "EntitleRI: Error in formulating guess from Microsoft: #{e} #{e.backtrace}"
-              m.reply(guess_text.join(', ')) if !guess_text.empty?
+              puts "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
             end
           end
         end
@@ -104,7 +109,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   end
 
   def get_guess_microsoft(url)
-    puts "EntitleRI: Getting image analysis of #{url}"
+    puts "EntitleRI: Getting Microsoft image analysis of #{url}"
     uri = URI('https://api.projectoxford.ai/vision/v1.0/analyze')
     uri.query = URI.encode_www_form(
       'visualFeatures' => 'Categories,Description,Tags,Faces,ImageType,Color,Adult',
@@ -129,7 +134,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   end
 
   def get_guess(url)
-    puts "EntitleRI: Getting best guess of #{url}"
+    puts "EntitleRI: Getting Google best guess of #{url}"
 
     # Get redirect by spoofing User-Agent
     html = open(@s[:google_query] + url,
@@ -140,7 +145,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
-    result = doc.css(@s[:guess_selector]).inner_text
+    result = doc.css(@s[:guess_selector]).inner_text.strip
     puts "EntitleRI: Got Google guess: #{result}"
     result
   rescue StandardError => e
