@@ -14,7 +14,16 @@ class Bot::Plugin::Image < Bot::Plugin
         images: [:images_link, 0, 'Gets the images listing webpage.']
       },
       subscribe: true,
-      filters: ['http.*png', 'http.*gif', 'http.*jpg', 'http.*jpeg', 'http.*bmp', 'http.*webm', 'http.*mp4'],
+      filters: [
+        '(http.*png(\/?\?.*)?$)',
+        '(http.*gif(\/?\?.*)?$)',
+        '(http.*jpg(\/?\?.*)?$)',
+        '(http.*jpeg(\/?\?.*)?$)',
+        '(http.*bmp(\/?\?.*)?$)',
+        '(http.*webp(\/?\?.*)?$)',
+        '(http.*webm(\/?\?.*)?$)',
+        '(http.*mp4(\/?\?.*)?$)'
+      ],
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
       image_directory: ['lib', 'public', 'i'],
       get_google_guess: false
@@ -134,11 +143,13 @@ class Bot::Plugin::Image < Bot::Plugin
     @s[:filters].each do |regex|
       results = line.scan(Regexp.new(regex))
 
-      results.each do |result|
-        Bot.log.info "#{self.class.name} - Image detected: #{result}"
-        record(result, m)
-        line.gsub!(result, '') # Prevent double-matching
-      end
+      results
+        .map(&:first)
+        .each do |result|
+          Bot.log.info "#{self.class.name} - Image detected: #{result}"
+          record(result, m)
+          line.gsub!(result, '') # Prevent double-matching
+        end
     end
   end
 
