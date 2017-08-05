@@ -27,7 +27,7 @@ module Bot::Core::ObjectLoader
         object = Bot.module_eval(type.capitalize.to_s).const_get(f.capitalize).new(self)
         # And store a reference to that object in @types (eg. @plugins)
         instance_eval("@#{type}s")[f.downcase.to_sym] = object
-      rescue => e
+      rescue LoadError, StandardError, SyntaxError => e
         Bot.log.warn "Failed to load #{f} - #{e}\n\t#{e.backtrace.join("\n\t")}"
       end
     end
