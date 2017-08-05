@@ -9,149 +9,104 @@ class Bot::Plugin::Showtime < Bot::Plugin
         :showtime, 0,
         'showtime <showname> - Returns airing details of matching anime from anime.yshi.org'
       ] },
+      anilist: {
+        client_id: 'https://anilist.co/settings/developer',
+        client_secret: 'https://anilist.co/settings/developer'
+      },
       subscribe: false
     }
 
-    @yshi = {
-      base: 'http://anime.yshi.org/api/calendar',
-      next_airing: '/next?name=',
-      now_airing: '/airing'
+    @anilist = {
+      endpoints: {
+        anime: 'https://anilist.co/api/anime',
+        search: 'https://anilist.co/api/anime/search',
+        token: 'https://anilist.co/api/auth/access_token'
+      },
+      token: nil
     }
 
     super(bot)
   end
 
   def showtime(m)
-    filter = m.args.join(' ')
+    refresh_anilist_token if !check_anilist_token
+    query = m.args[0..-1].join(' ').force_encoding('UTF-8')
+    candidates_uri = URI.parse(URI.escape("#{@anilist[:endpoints][:search]}/#{query}"))
+    candidates_res = get_anilist_api(candidates_uri)
 
-    if up?(@yshi[:base], 3)
-      show = get_showtime(filter)
+    if candidates_res.is_a? Net::HTTPSuccess
+      candidates = JSON.parse(candidates_res.body, symbolize_names: true)
 
-      if show.nil?
-        m.reply 'No matching show found.'
-      else
-        now_airing = airing(show.title)
-        m.reply now_airing.pretty_now_airing if now_airing
-        m.reply show.pretty
+      m.reply 'Show not found.' if !candidates.is_a? Array
+
+      candidate_ids = candidates.select { |c| c[:airing_status] == 'currently airing' }
+                                .map { |c| c[:id] }
+
+      m.reply "No currently airing shows were found for 「#{query}」." if candidate_ids.empty?
+
+      candidate_ids[0..5].each do |id|
+        anime_uri = URI.parse(URI.escape("#{@anilist[:endpoints][:anime]}/#{id}"))
+        m.reply prettify(JSON.parse(get_anilist_api(anime_uri).body, symbolize_names: true))
       end
     else
-      m.reply 'All anime showtime airing services are inaccessible.'
+      m.reply 'Failed to connect to Anilist'
     end
   end
 
-  def get_showtime(filter = '')
-    doc = open(URI.escape(@yshi[:base] + @yshi[:next_airing] + filter)).read
-    hash = JSON.parse(doc, symbolize_names: true)
-
-    return nil if hash.keys.empty?
-
-    Show.from_hash(hash)
+  def get_anilist_api(uri)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.get(uri,
+             'authorization' => "Bearer #{@anilist[:token][:access_token]}")
   end
 
-  def airing(filter = '')
-    doc = open(@yshi[:base] + @yshi[:now_airing]).read
-    res = JSON.parse(doc, symbolize_names: true)
-
-    res.map { |s| Show.from_hash(s) }
-       .select { |v| v.title =~ Regexp.new(filter, Regexp::IGNORECASE) }
-       .first
+  def check_anilist_token
+    token = @anilist[:token]
+    token && token[:expires] && token[:expires] < Time.now.to_i
   end
 
-  # Giant hack just to be able to set custom timeout: net/http does not respect connect_timeout
-  # and therefore takes 20 seconds just to declare a site dead
-  def up?(url, timeout = 3)
-    host = URI.parse(URI.escape(url)).host
-    port = URI.parse(URI.escape(url)).port
+  def refresh_anilist_token
+    uri = URI(@anilist[:endpoints][:token])
+    res = Net::HTTP.post_form(uri, 'grant_type' => 'client_credentials',
+                                   'client_id' => @s[:anilist][:client_id],
+                                   'client_secret' => @s[:anilist][:client_secret])
+    if res.is_a? Net::HTTPSuccess
+      parsed = JSON.parse(res.body, symbolize_names: true)
 
-    begin
-      http = Net::HTTP.start(host, port, open_timeout: timeout, read_timeout: timeout)
-      begin
-        response = http.head('/')
-        return response.code == '200'
-      rescue Timeout::Error
-        # timeout reading from server
+      if parsed[:access_token].nil?
+        Bot.log.warn 'Showtime: Failed to obtain Anilist auth token'
         return false
       end
-    rescue Timeout::Error
-      # timeout connecting to server
-      return false
-    rescue SocketError
-      # unknown server
-      return false
+
+      @anilist[:token] = parsed
+
+      true
     end
+  rescue => e
+    Bot.log.warn "Showtime: Failed to obtain Anilist auth token #{e}"
+    false
   end
 
-  class Show
-    attr_accessor :title
-    attr_accessor :station
-    attr_accessor :start_time
-    attr_accessor :end_time
-    attr_accessor :eta
-    attr_accessor :end_eta
-    attr_accessor :episode
-    attr_accessor :episode_name
-    attr_accessor :delay
-    attr_accessor :comment
+  def prettify(s)
+    "#{s[:title_romaji].to_s.bold} (#{s[:title_japanese]}) " \
+    "episode #{s[:airing][:next_episode].to_s.bold} airs in " \
+    "#{seconds_to_string(s[:airing][:countdown]).bold} at " \
+    "#{s[:airing][:time]} ・ " \
+    "#{s[:total_episodes]}×#{s[:duration]}"
+  end
 
-    def initialize
-      yield self if block_given?
-    end
+  def seconds_to_string(s)
+    m = (s / 60).floor
+    s = s % 60
+    h = (m / 60).floor
+    m = m % 60
+    d = (h / 24).floor
+    h = h % 24
+    s = s.floor
 
-    def self.from_hash(hash)
-      start_time = DateTime.strptime(hash[:start_time].to_s, '%s')
-      end_time = DateTime.strptime(hash[:end_time].to_s, '%s')
-
-      Show.new do |s|
-        s.title = hash[:title_name]
-        s.station = hash[:channel_name]
-        s.start_time = start_time
-        s.end_time = end_time
-        s.eta = hash[:start_time].to_i - Time.now.utc.to_i
-        s.end_eta = hash[:end_time].to_i - Time.now.utc.to_i
-        s.episode = hash[:count]
-        s.episode_name = hash[:episode_name]
-        s.delay = hash[:start_offset]
-        s.comment = hash[:comment]
-      end
-    end
-
-    def pretty
-      s = []
-      s.push @title.bold if @title
-      s.push "episode #{@episode.bold}" if @episode
-      s.push "— #{@episode_name}" if @episode_name && !@episode_name.empty?
-      s.push "airs in #{seconds_to_string(@eta).bold}" if @eta
-      s.push "on #{@station}" if @station
-      s.push "(#{@start_time})" if @start_time
-      s.push " delayed #{seconds_to_string(@delay)}" if @delay && @delay > 0
-      s.join(' ')
-    end
-
-    def pretty_now_airing
-      s = []
-      s.push @title.bold if @title
-      s.push "episode #{@episode.bold}" if @episode
-      s.push "— #{@episode_name}" if @episode_name && !@episode_name.empty?
-      s.push "is now airing on #{@station}" if @station
-      s.push "and ends in #{seconds_to_string(@end_eta).bold}" if @end_eta
-      s.join(' ').green
-    end
-
-    private
-
-    def seconds_to_string(s)
-      m = (s / 60).floor
-      s = s % 60
-      h = (m / 60).floor
-      m = m % 60
-      d = (h / 24).floor
-      h = h % 24
-      s = s.floor
-
-      "#{d.to_s + 'd ' if d > 0}" \
-      "#{h.to_s + 'h ' if h > 0}" \
-      "#{m.to_s + 'm ' if m > 0}" \
-      "#{s.to_s + 's' if s > 0}"
-    end
+    "#{d.to_s + 'd ' if d > 0}" \
+    "#{h.to_s + 'h ' if h > 0}" \
+    "#{m.to_s + 'm ' if m > 0}" \
+    "#{s.to_s + 's' if s > 0}"
   end
 end

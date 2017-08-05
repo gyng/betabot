@@ -102,7 +102,7 @@ For example: `!ping`, `MyBot: ping`
 * **entitleri** &ndash; Uses Google reverse image search and Microsoft Computer Vision API to guess what image URLs are. *Usage of MS CV API requires the setup of [>=free subscriptions](https://www.microsoft.com/cognitive-services/en-US/subscriptions)*
 * **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
 * **script/macro** &ndash; Script/Macro definition support.
-* **translate** &ndash; Translates text with Bing translate. *[requires setup of API keys](https://datamarket.azure.com/dataset/bing/microsofttranslator)*
+* **showtime** &ndash; Checks Anilist for anime airing times *[requires setup of API keys](https://anilist.co/settings/developer)*
 * **unicode** &ndash; Search for Unicode characters or emoji by description, and identify Unicode characters
 * **wolfram** &ndash; Queries Wolfram|Alpha. *[requires setup of API keys](https://developer.wolframalpha.com/portal/apisignup.html)*
 
