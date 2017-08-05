@@ -15,6 +15,7 @@ GEM
       nokogiri (~> 1.6.0)
       savon (~> 2.10.0)
     builder (3.2.2)
+    chronic (0.10.2)
     concurrent-ruby (1.0.5)
     daemons (1.2.4)
     diff-lcs (1.2.5)
@@ -164,7 +165,9 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
+  activesupport
   bing_translator
+  chronic
   eventmachine
   faye-websocket
   gemoji

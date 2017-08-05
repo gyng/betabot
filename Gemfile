@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'activesupport'
 gem 'eventmachine'
 gem 'mechanize'
 gem 'nokogiri'
