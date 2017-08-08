@@ -2,6 +2,12 @@ require 'rubygems'
 require 'bundler/setup'
 Bundler.require(:default)
 
+if ENV['BETABOT_SSL_NO_VERIFY'] == '1'
+  OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+  puts "ENV['BETABOT_SSL_NO_VERIFY'] == 1"
+  puts "\033[31mAccepting invalid SSL certificates...\033[0m"
+end
+
 require './lib/bot/core'
 
 $shutdown = false
@@ -19,7 +25,7 @@ end
 override = File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.user.json')
 default = File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.json')
 settings_path = File.exist?(override) ? override : default
-puts 'Loading settings from #{settings_path}...'
+puts "\033[34mLoading settings from #{settings_path}...\033[0m"
 
 EM.run { Bot::Core.new(settings_path) }
 if $restart

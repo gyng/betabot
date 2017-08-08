@@ -99,10 +99,10 @@ Settings, accounts, databases, and the public directory are persisted with usage
 
 #### Disable SSL verification
 
-Run with bot with `--ssl-no-verify`.
+Run bot with `BETABOT_SSL_NO_VERIFY=1`.
 
 ```
-ruby start_bot.rb --ssl-no-verify
+BETABOT_SSL_NO_VERIFY=1 ruby start_bot.rb
 ```
 
 #### (IRC) Calling the bot
