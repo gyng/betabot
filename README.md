@@ -73,24 +73,40 @@ Settings, accounts, databases, and the public directory are persisted with usage
 
 ### Configuration
 
+  For bot settings, betabot will read from `bot_settings.user.json` instead of `bot_settings.json` if it exists. `bot_settings.user.json` is ignored in `.gitignore`, which makes it easier to update betabot using git.
+
+  ```
+  cd settings
+  cp bot_settings.json bot_settings.user.json
+  ```
+
   Settings files that may need changing:<br>
-  * `./lib/settings/bot_settings.json` (for web server configuration options check below)
-  * `./lib/settings/adapters/irc.json` (and any per-adapter settings)
-  * `./lib/settings/adapters/slack.json` (and any per-adapter settings)
-  * (Optional) any plugin settings in `./lib/settings/plugins/`
+  * `./settings/bot_settings.json` (for web server configuration options check below)
+  * `./settings/adapters/irc.json` (and any per-adapter settings)
+  * `./settings/adapters/slack.json` (and any per-adapter settings)
+  * (Optional) any plugin settings in `./settings/plugins/`
 
   Add the adapters to be run on startup to the autostart key in `bot_settings.json`. Currently supported adapters are `slack` and `irc`.
 
   Note that adapter and plugin settings files are generated with default settings on first run for a fresh install as of now. They do not exist before first run.
 
 #### Web server configuration details
+
 * `enabled` &ndash; whether the webserver runs on startup
 * `link_url` &ndash; the URL for plugins to use (eg. http://lollipop.hiphop:9999 or http://www.example.org)
 * `host` &ndash; the listening host; leave this at `0.0.0.0` and it *should* work
 * `port` &ndash; your listening port
 
+#### Disable SSL verification
+
+Run with bot with `--ssl-no-verify`.
+
+```
+ruby start_bot.rb --ssl-no-verify
+```
 
 #### (IRC) Calling the bot
+
 `BotNickname: command arg1 arg2` or `(trigger_shorthand)command arg1 arg2`
 
 For example: `!ping`, `MyBot: ping`
