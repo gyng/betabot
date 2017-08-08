@@ -1,7 +1,5 @@
 # Plugin development
 
-If the bot is eating your exceptions, run it with `ruby start_bot.rb --dev`.
-
 ## Scaffold
 
 There is a rake task to create a skeleton plugin. This uses the Ping plugin as a template.

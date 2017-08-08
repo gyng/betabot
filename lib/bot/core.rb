@@ -30,6 +30,12 @@ module Bot
       @settings_path = bot_settings_path
       load_settings
 
+      if @s[:accept_invalid_ssl] == true
+        OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+        puts 'accept_invalid_ssl: true'
+        puts 'Accepting invalid SSL certificates...'
+      end
+
       Bot.const_set('SHORT_TRIGGER', @s[:short_trigger])
       @authenticator = Bot::Core::Authenticator.new
 

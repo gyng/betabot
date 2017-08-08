@@ -1,5 +1,6 @@
 {
   "short_trigger": "~",
+  "accept_invalid_ssl": false,
 
   "adapters": {
     "dir": "adapters",
