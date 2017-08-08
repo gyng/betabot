@@ -1,2 +1,0 @@
-gem 'bing_translator'
-gem 'rubyntlm', '~> 0.6.0'
