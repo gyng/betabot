@@ -9,7 +9,7 @@ describe Bot::Plugin::Showtime do
   describe '#valid_anilist_token?' do
     it 'checks for empty token' do
       empty_token = {
-          token: nil
+        token: nil
       }
       @plugin.instance_variable_set(:@anilist, empty_token)
       expect(@plugin.valid_anilist_token?).to be false
@@ -17,9 +17,9 @@ describe Bot::Plugin::Showtime do
 
     it 'checks for expired token' do
       expired_token = {
-          token: {
-            expires: Time.now.to_i - 1
-          }
+        token: {
+          expires: Time.now.to_i - 1
+        }
       }
       @plugin.instance_variable_set(:@anilist, expired_token)
       expect(@plugin.valid_anilist_token?).to be false
@@ -27,9 +27,9 @@ describe Bot::Plugin::Showtime do
 
     it 'checks for valid token' do
       valid_token = {
-          token: {
-            expires: Time.now.to_i + 1
-          }
+        token: {
+          expires: Time.now.to_i + 1
+        }
       }
       @plugin.instance_variable_set(:@anilist, valid_token)
       expect(@plugin.valid_anilist_token?).to be true

@@ -1,4 +1,3 @@
-# rubocop:disable ClassLength
 class Bot::Plugin::Image < Bot::Plugin
   require 'digest/md5'
   require 'digest/sha2'
