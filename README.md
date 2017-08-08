@@ -76,15 +76,15 @@ Settings, accounts, databases, and the public directory are persisted with usage
   For bot settings, betabot will read from `bot_settings.user.json` instead of `bot_settings.json` if it exists. `bot_settings.user.json` is ignored in `.gitignore`, which makes it easier to update betabot using git.
 
   ```
-  cd settings
+  cd lib/settings
   cp bot_settings.json bot_settings.user.json
   ```
 
   Settings files that may need changing:<br>
-  * `./settings/bot_settings.json` (for web server configuration options check below)
-  * `./settings/adapters/irc.json` (and any per-adapter settings)
-  * `./settings/adapters/slack.json` (and any per-adapter settings)
-  * (Optional) any plugin settings in `./settings/plugins/`
+  * `./lib/settings/bot_settings.json` (for web server configuration options check below)
+  * `./lib/settings/adapters/irc.json` (and any per-adapter settings)
+  * `./lib/settings/adapters/slack.json` (and any per-adapter settings)
+  * (Optional) any plugin settings in `./lib/settings/plugins/`
 
   Add the adapters to be run on startup to the autostart key in `bot_settings.json`. Currently supported adapters are `slack` and `irc`.
 
