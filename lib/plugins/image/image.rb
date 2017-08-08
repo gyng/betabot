@@ -63,54 +63,54 @@ class Bot::Plugin::Image < Bot::Plugin
       @db[:sources].where(image_id: image[:id]).order(:timestamp)
     end
 
-    if defined?(Web)
-      Web.get '/i/random' do
-        image = random_proc.call(1).to_a.first
-        sources = sources_proc.call(image).to_a
-        op = sources.first
-        path = Web.url + image[:path].gsub('lib/public', '')
-        "<!DOCTYPE html>
+    return if !defined?(Web)
+
+    Web.get '/i/random' do
+      image = random_proc.call(1).to_a.first
+      sources = sources_proc.call(image).to_a
+      op = sources.first
+      path = Web.url + image[:path].gsub('lib/public', '')
+      "<!DOCTYPE html>
+      <html>
+      <body>
+        <video autoplay loop poster='#{path}'>
+          <source src='#{path}' type='video/webm' />
+        </video>
+        <ul>
+          <li>First posted by: #{op[:source_name]}</li>
+          <li>First posted on: #{op[:timestamp]}</li>
+          <li>Times seen: #{sources.size}
+        </ul>
+        <a href='../i'>Image listing</a>
+      </body>
+      </html>"
+    end
+
+    image_directory = @s[:image_directory]
+    Web.get '/i' do
+      @dir = File.join(image_directory)
+      @paths = Dir.entries(@dir).reject { |p| ['.gitignore', '.', '..', 'temp'].include? p }
+      erb '
+        <!DOCTYPE html>
         <html>
         <body>
-          <video autoplay loop poster='#{path}'>
-            <source src='#{path}' type='video/webm' />
-          </video>
-          <ul>
-            <li>First posted by: #{op[:source_name]}</li>
-            <li>First posted on: #{op[:timestamp]}</li>
-            <li>Times seen: #{sources.size}
-          </ul>
-          <a href='../i'>Image listing</a>
-        </body>
-        </html>"
-      end
-
-      image_directory = @s[:image_directory]
-      Web.get '/i' do
-        @dir = File.join(image_directory)
-        @paths = Dir.entries(@dir).reject { |p| ['.gitignore', '.', '..', 'temp'].include? p }
-        erb '
-          <!DOCTYPE html>
-          <html>
-          <body>
-            <h2>Image list</h2>
-            <a href="../i/random">Random image</a>
-            <table>
+          <h2>Image list</h2>
+          <a href="../i/random">Random image</a>
+          <table>
+            <tr>
+              <th>Filename</th>
+              <th>Last modified</th>
+            </tr>
+            <% @paths.each do |path| %>
               <tr>
-                <th>Filename</th>
-                <th>Last modified</th>
+                <td><a href="/i/<%=path%>"><%=path%></a></td>
+                <td><%= File.mtime "#{@dir}/#{path}" %></td>
               </tr>
-              <% @paths.each do |path| %>
-                <tr>
-                  <td><a href="/i/<%=path%>"><%=path%></a></td>
-                  <td><%= File.mtime "#{@dir}/#{path}" %></td>
-                </tr>
-              <% end %>
-            </table>
-            <p><%= @paths.length %> entries.</p>
-          </body>
-          </html>'
-      end
+            <% end %>
+          </table>
+          <p><%= @paths.length %> entries.</p>
+        </body>
+        </html>'
     end
   end
 
@@ -152,6 +152,7 @@ class Bot::Plugin::Image < Bot::Plugin
   end
 
   def record(url, m)
+    # rubocop:disable Metrics/BlockLength
     Thread.new do
       Bot.log.info("#{self.class.name} - Saving image #{url}...")
       temp_dir = File.join(*@s[:image_directory], 'temp')

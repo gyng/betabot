@@ -101,10 +101,10 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
   end
 
   def add_sync_subscriber(addr, port)
-    if addr.is_a?(String) && port.to_i.is_a?(Fixnum)
-      @s[:sync_subscribers].push([addr, port.to_i]).uniq!
-      save_settings
-    end
+    return if !addr.is_a?(String) || !port.to_i.is_a?(Integer)
+
+    @s[:sync_subscribers].push([addr, port.to_i]).uniq!
+    save_settings
   end
 
   def del_sync_subscriber(addr, port)

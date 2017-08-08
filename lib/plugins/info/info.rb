@@ -16,6 +16,5 @@ class Bot::Plugin::Info < Bot::Plugin
     m.reply "GC #{GC.stat}"
   end
 
-  def receive(m)
-  end
+  def receive(m) end
 end

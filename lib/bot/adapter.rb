@@ -19,11 +19,9 @@ class Bot::Adapter
     Bot.log.info "Empty connect method: not connecting adapter #{self.class.name}"
   end
 
-  def disconnect
-  end
+  def disconnect; end
 
-  def shutdown
-  end
+  def shutdown; end
 
   def trigger_plugin(trigger, m = nil)
     @bot.trigger_plugin(trigger, m)

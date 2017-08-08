@@ -60,12 +60,14 @@ module Bot
         load_objects(:adapter, mode)
       end
 
+      # rubocop:disable Style/GuardClause
       if type == :plugin || type.nil?
         @plugins = {}
         @plugin_mapping = {}
         @subscribed_plugins = []
         load_objects(:plugin, mode)
       end
+      # rubocop:enable Style/GuardClause
     end
 
     def start_adapters(regex = '.*')

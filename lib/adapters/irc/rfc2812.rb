@@ -272,11 +272,10 @@ module Bot::Adapter::Irc::RFC2812
   end
 
   def whowas(nicknames, count = nil, server = nil)
+    list = nicknames.join(',') if nicknames.is_a?(Array)
     if count.nil?
-      list = nicknames.join(',') if nicknames.is_a?(Array)
       send "WHOWAS #{list}"
     else
-      list = nicknames.join(',') if nicknames.is_a?(Array)
       send "WHOWAS #{list} #{count} #{server}"
     end
   end

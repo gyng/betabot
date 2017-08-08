@@ -36,3 +36,15 @@ Style/NegatedIf:
 
 Style/WordArray:
   Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Metrics/BlockLength:
+  Enabled: true
+  Exclude:
+    - spec/**/*
+    - lib/plugins/**/spec/*
+
+Layout/EndOfLine:
+  Enabled: false

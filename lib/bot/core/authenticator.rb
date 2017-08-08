@@ -35,10 +35,9 @@ class Bot::Core::Authenticator
   end
 
   def logout(m)
-    if @authenticated_hostnames.delete(m.hostname)
-      m.reply 'You have been logged out.'
-      Bot.log.info 'A user has logged out.'
-    end
+    return if !@authenticated_hostnames.delete(m.hostname)
+    m.reply 'You have been logged out.'
+    Bot.log.info 'A user has logged out.'
   end
 
   def auth(level, m)

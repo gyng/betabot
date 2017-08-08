@@ -15,6 +15,5 @@ class Bot::Core::Message
     [text.split(' ')[1..-1]].flatten
   end
 
-  def reply(*args)
-  end
+  def reply(*args); end
 end

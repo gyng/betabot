@@ -9,7 +9,7 @@ module Bot::Core::ObjectLoader
     objects_dir = get_objects_dir(type)
 
     Dir.foreach(objects_dir) do |f|
-      next if f == '.' || f == '..'
+      next if ['.', '..'].include?(f)
       if File.directory?(File.join(objects_dir, f)) && accepted?(type, f, mode)
         load_curry(type).call(f)
       end

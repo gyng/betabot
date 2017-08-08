@@ -1,3 +1,5 @@
+# rubocop:disable Metrics/BlockLength
+
 task :make_user do
   require 'io/console'
   require 'json'
