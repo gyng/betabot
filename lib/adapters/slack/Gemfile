@@ -1,2 +1,2 @@
-gem 'slack-ruby-client'
 gem 'faye-websocket'
+gem 'slack-ruby-client'

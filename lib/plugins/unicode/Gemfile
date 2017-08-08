@@ -1,2 +1,2 @@
-gem 'unicode_utils'
 gem 'gemoji'
+gem 'unicode_utils'
