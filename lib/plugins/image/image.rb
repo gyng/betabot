@@ -139,18 +139,16 @@ class Bot::Plugin::Image < Bot::Plugin
 
   def receive(m)
     # Record each URL found in m.text
-    line = String.new(m.text)
+    tokens = String.new(m.text).split(' ').uniq
 
-    @s[:filters].each do |regex|
-      results = line.scan(Regexp.new(regex))
+    @s[:filters].each do |regex_s|
+      regex = Regexp.new(regex_s)
 
-      results
-        .map(&:first)
-        .each do |result|
-          Bot.log.info "#{self.class.name} - Image detected: #{result}"
-          record(result, m)
-          line.gsub!(result, '') # Prevent double-matching
-        end
+      tokens.each do |t|
+        next if regex.match(t).nil?
+        Bot.log.info "#{self.class.name} - Image detected: #{t}"
+        record(t, m)
+      end
     end
   end
 

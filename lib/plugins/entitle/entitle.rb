@@ -49,23 +49,22 @@ class Bot::Plugin::Entitle < Bot::Plugin
   end
 
   def check_filter(m)
-    line = String.new(m.text)
+    tokens = String.new(m.text).split(' ').uniq
+    titles = []
 
-    @s[:filters].each do |regex|
-      results = line.scan(Regexp.new(regex))
+    @s[:filters].each do |regex_s|
+      regex = Regexp.new(regex_s)
 
-      next if results.empty?
+      tokens.each do |t|
+        next if regex.match(t).nil?
 
-      results.each do |result|
         Thread.new do
           Timeout.timeout(@s[:timeout]) do
-            title = get_title(result)
-            m.reply(title) if !title.nil?
+            title = get_title(t)
+            m.reply(title) if !title.nil? && !titles.include?(title)
+            titles.push(title)
           end
         end
-
-        # Prevent double-matching
-        line.gsub!(result, '')
       end
     end
   end

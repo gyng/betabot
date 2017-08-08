@@ -7,13 +7,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       trigger: {
         entitleri: [
           :call, 0,
-          'Entitle Reverse Image harnesses the power of Google cloud technology ' \
-          'and the information superhighway botnet to tell you what an image link is.'
-        ],
-        lastimage: [
-          :last_image, 0,
-          'lastimage [more]: Show the image analysis for the last image. more returns ' \
-          'the entire cached response.'
+          'Entitle Reverse Image uses Google and MS Vision API to tell you what an image link is.'
         ]
       },
       subscribe: true,
@@ -32,84 +26,68 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       microsoft_computer_vision_api_key: 'Get from: https://www.microsoft.com/cognitive-services/en-US/subscriptions'
     }
 
-    @last_images = {}
-
     super(bot)
   end
 
   def call(m)
-    check_filter(m)
+    m.reply "Active filters: #{@s[:filters].join(', ')}"
   end
 
   def receive(m)
     check_filter(m)
   end
 
-  def last_image(m)
-    more_mode = m.args[0] == 'more' || m.args[0] == '-m'
-    last_image = @last_images[m.channel]
-
-    if last_image.nil?
-      m.reply 'No last image.'
-    else
-      clipart_types = ['Non-clipart', 'ambiguous', 'normal-clipart', 'good-clipart']
-      line_drawing_types = ['Non-LineDrawing', 'LineDrawing']
-      caption = last_image[:description][:captions][0]
-      clipart_type = clipart_types[last_image[:imageType][:clipArtType]]
-      line_drawing_type = line_drawing_types[last_image[:imageType][:lineDrawingType]]
-
-      m.reply "#{caption[:text]}, confidence: #{caption[:confidence].round(2)}, #{clipart_type}, #{line_drawing_type}"
-      m.reply last_image.to_s if more_mode
-    end
-  end
-
   def check_filter(m)
-    line = String.new(m.text)
+    tokens = String.new(m.text).split(' ').uniq
 
-    @s[:filters].each do |regex|
-      results = line.scan(Regexp.new(regex))
+    @s[:filters].each do |regex_s|
+      regex = Regexp.new(regex_s)
 
-      next if results.empty?
+      tokens.each do |t|
+        next if regex.match(t).nil?
 
-      results.map(&:first).each do |result|
         Thread.new do
-          timeout(@s[:timeout]) do
-            guess_text = []
+          begin
+            Timeout.timeout(@s[:timeout]) do
+              guess_text = []
 
-            guess = get_guess(result)
-            guess_text.push(guess) if !guess.nil?
+              google_guess = get_guess_google(t)
+              guess_text.push(google_guess) if !google_guess.nil? && !google_guess.empty?
 
-            begin
-              @last_images[m.channel] = nil
-              guess_microsoft = get_guess_microsoft(result)
-              puts guess_microsoft.inspect
-              if !guess_microsoft.nil?
-                caption = guess_microsoft[:description][:captions][0]
-                guess_text.push(caption[:text]) if caption[:confidence] > 0.25
-                @last_images[m.channel] = guess_microsoft
+              guess_microsoft = get_guess_microsoft(t)
+              guess_text.push(format_guess_microsoft(guess_microsoft)) if !guess_microsoft.nil?
 
-                if guess_microsoft[:adult][:isAdultContent]
-                  guess_text.push('🔞 NSFW 🔞')
-                elsif guess_microsoft[:adult][:isRacyContent]
-                  guess_text.push('maybe NSFW')
-                end
+              if !guess_text.empty?
+                guess_text = guess_text.join(', ')
+                m.reply guess_text
               end
-
-              m.reply(guess_text.join(', ')) if !guess_text.empty?
-            rescue StandardError => e
-              puts "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
             end
+          rescue StandardError => e
+            Bot.log.info "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
           end
         end
-
-        # Prevent double-matching
-        line.gsub!(result, '')
       end
     end
   end
 
+  def format_guess_microsoft(guess)
+    return nil if guess.nil?
+    s = []
+
+    caption = guess[:description][:captions][0]
+    s.push caption[:text].to_s if caption[:confidence] > 0.25
+
+    if guess[:adult][:isAdultContent]
+      s.push '🔞 NSFW 🔞'
+    elsif guess[:adult][:isRacyContent]
+      s.push 'maybe NSFW'
+    end
+
+    s.join(', ')
+  end
+
   def get_guess_microsoft(url)
-    puts "EntitleRI: Getting Microsoft image analysis of #{url}"
+    Bot.log.info "EntitleRI: Getting Microsoft image analysis of #{url}"
     uri = URI('https://api.projectoxford.ai/vision/v1.0/analyze')
     uri.query = URI.encode_www_form(
       'visualFeatures' => 'Categories,Description,Tags,Faces,ImageType,Color,Adult',
@@ -126,15 +104,15 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     end
 
     parsed = JSON.parse(response.body, symbolize_names: true)
-    puts "EntitleRI: parsed image analysis: #{parsed.inspect}"
+    Bot.log.info "EntitleRI: parsed image analysis: #{parsed.inspect}"
     parsed
   rescue StandardError => e
-    puts "Error in Entitleri#get_guess_microsoft: #{e} #{e.backtrace}"
+    Bot.log.info "Error in Entitleri#get_guess_microsoft: #{e} #{e.backtrace}"
     nil
   end
 
-  def get_guess(url)
-    puts "EntitleRI: Getting Google best guess of #{url}"
+  def get_guess_google(url)
+    Bot.log.info "EntitleRI: Getting Google best guess of #{url}"
 
     # Get redirect by spoofing User-Agent
     html = open(@s[:google_query] + url,
@@ -146,10 +124,10 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
     result = doc.css(@s[:guess_selector]).inner_text.strip
-    puts "EntitleRI: Got Google guess: #{result}"
+    Bot.log.info "EntitleRI: Got Google guess: #{result}"
     result
   rescue StandardError => e
-    puts "Error in Entitleri#get_guess: #{e} #{e.backtrace}"
+    Bot.log.info "Error in Entitleri#get_guess: #{e} #{e.backtrace}"
     nil
   end
 end
