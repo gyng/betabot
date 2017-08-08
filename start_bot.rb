@@ -19,6 +19,7 @@ end
 override = File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.user.json')
 default = File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.json')
 settings_path = File.exist?(override) ? override : default
+puts 'Loading settings from #{settings_path}...'
 
 if ARGV[0] == '--dev'
   puts 'Running in dev mode...'
