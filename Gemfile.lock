@@ -109,6 +109,8 @@ GEM
     tilt (2.0.8)
     tzinfo (1.2.3)
       thread_safe (~> 0.1)
+    tzinfo-data (1.2017.2)
+      tzinfo (>= 1.0.0)
     unf (0.1.4)
       unf_ext
     unf_ext (0.0.7.4)
@@ -142,6 +144,8 @@ DEPENDENCIES
   slack-ruby-client
   sqlite3
   thin
+  tzinfo
+  tzinfo-data
   unicode_utils
 
 BUNDLED WITH
