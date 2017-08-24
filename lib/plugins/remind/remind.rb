@@ -14,25 +14,122 @@ class Bot::Plugin::Remind < Bot::Plugin
         remind: [
           :remind, 0,
           'remind <user|me> to|about|of <subject> on|at|in <human time> ' \
-          '[+-<hours_offset=0>|<2-letter country code|timezone identifier] ' \
+          '<hours_offset|2-letter country code|timezone identifier search query> ' \
           'Sets a reminder about something. Eg. '\
           '`remind me to eat pizza at tomorrow 7pm +8`, ' \
-          'remind betabot about cat food at 0500 US/Pacific, ' \
-          '`remind me of dog food on tuesday SG`. ' \
-          'Timers are cleared when the bot is restarted. ' \
-          'List of timezones and country codes: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
+          '`remind betabot about cat food at 0500 US/Pacific`, ' \
+          '`remind world about no generics in golang in 5 minutes`, ' \
+          '`remind me of dog food on tuesday jp`. Timers are cleared when the bot is restarted. ' \
+          'If using `remind me in`, the timezone does not have to be specified. Search for a tz using ' \
+          '`tz country sg` or `tz info asia` List of timezones and country codes: ' \
+          'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
         ],
         timer: [
           :timer, 0,
           'timer <human time> ' \
           'Sets a timer. Eg. `timer 3 min`. ' \
           'Timers are cleared when the bot is restarted.'
+        ],
+        tz: [
+          :tz, 0,
+          'tz country <2-letter country code>, ' \
+          'tz info <tzid search query> '
         ]
       },
       subscribe: false
     }
 
     super(bot)
+  end
+
+  def tz(m)
+    if m.args[1].nil?
+      m.reply @s[:trigger][:tz][2]
+      return
+    end
+
+    case m.mode
+    when 'country'
+      country_tzs(m)
+    when 'info'
+      tzinfo(m)
+    when 'search'
+      tzinfo(m)
+    else
+      m.reply @s[:trigger][:tz][2]
+    end
+  end
+
+  def country_tzs(m)
+    cc = m.args[1].upcase
+    if cc.length != 2
+      m.reply 'Use a 2-letter country code (eg. US, JP, DE, ES, SG).'
+      return
+    end
+
+    begin
+      zones = TZInfo::Country.get(cc).zone_identifiers
+    rescue StandardError
+      m.reply "#{cc} is not a country."
+    end
+
+    s = zones.join(', ')
+    m.reply s
+    s
+  end
+
+  # Finds [partial matches for zone identifiters] xor [an exact match]
+  def find_zone(query)
+    zones = TZInfo::Timezone.all
+
+    matches = zones.find_all do |z|
+      z.identifier.downcase.include?(query.downcase)
+    end
+
+    exact_match = matches.find do |z|
+      z.identifier.downcase == query.downcase # rubocop:disable Performance/Casecmp
+    end
+
+    matches = [exact_match] if !exact_match.nil?
+    matches
+  end
+
+  def tzinfo(m)
+    query = m.args[1]
+    matches = find_zone(query)
+
+    if matches.length == 1
+      z = matches[0]
+      period = z.current_period
+
+      m.reply "#{z.identifier}: #{z.strftime('%c %z').bold} (#{Time.now.utc})"
+      m.reply "#{period.offset.abbreviation} is active." if period.dst?
+
+      format_offset = lambda do |o|
+        hours = o / 60 / 60
+        prefix = if hours.zero? then '±'
+                 elsif hours < 0 then '-'
+                 elsif hours > 0 then '+'
+                 end
+        "#{prefix}#{hours}h"
+      end
+
+      if !period.start_transition.nil?
+        offset = format_offset.call(period.offset.std_offset).bold
+        time = period.start_transition.local_start_time
+        m.reply "#{offset} since #{z.strftime('%c %z', time)} (#{time})"
+      end
+
+      if !period.end_transition.nil?
+        offset = format_offset.call(period.end_transition.offset.std_offset).bold
+        time = period.end_transition.local_end_time
+        m.reply "#{offset} after #{z.strftime('%c %z', time)} (#{time})"
+      end
+    elsif matches.length > 1
+      m.reply matches.map(&:identifier).join(', ')[0, 1000]
+    else
+      m.reply "No zones found for #{query}"
+    end
   end
 
   def timer(m)
@@ -60,13 +157,17 @@ class Bot::Plugin::Remind < Bot::Plugin
     end
 
     m.reply "Timer set for #{time}."
+    time
   end
 
   # The logic is messy as we support multiple TZ declaration formats
   # while needing to hack around Chronic parsing quirks.
   def remind(m)
+    bad_timezone_string = 'Specify a timezone at the end: tzid search (US/Pacific), ' \
+      '2-letter country code (JP), or offset (+8).'
+
     victim = m.args[0] == 'me' ? m.sender : m.args[0]
-    tokens = m.text.match(/^.+(to|about|of)(.+)(on .+|at .+|in .+)([\+\-].*)?$/)
+    tokens = m.text.match(/^.+(to|about|of)(.+)(on .+|at .+|in .+)$/)
 
     if !tokens.nil? && tokens.length < 3
       m.reply 'Syntax error: could not parse reminder'
@@ -77,14 +178,20 @@ class Bot::Plugin::Remind < Bot::Plugin
     subject = tokens[2].strip
     time_s = tokens[3].strip
 
-    # Let tz be either an exact match for a zone identifier
-    tz = get_timezone_from_zone_identifier(m.args.last)
+    tz = get_timezone_from_identifier(m.args.last)
+
     # An exact match from a country code with only one timezone
-    tz = get_timezone_from_country_code(m, m.args.last) if tz.nil?
+    tz = get_timezone_from_country_code(m, m.args.last.upcase) if tz.nil?
     # Abort if the country has multiple timezones
     return if tz == :ambiguous
-    # Or a user-specified numeric timezone offset eg. +8
-    tz = get_numeric_timezone_offset(m, m.args.last) if tz.nil? # defaults to 0
+
+    # special case for relative time, eg. remind me in
+    tz = get_timezone_from_identifier('UTC') if time_s.split(' ')[0] == 'in' && tz.nil?
+
+    if tz.nil?
+      m.reply bad_timezone_string
+      return
+    end
 
     time = parse_time(time_s, tz)
 
@@ -93,7 +200,7 @@ class Bot::Plugin::Remind < Bot::Plugin
       return
     end
 
-    remind_at = tz.is_a?(TZInfo::Timezone) ? tz.local_to_utc(time) : add_numeric_tz_offset(time, tz)
+    remind_at = tz.local_to_utc(time)
     seconds_to_trigger = remind_at - Time.now
 
     if seconds_to_trigger < 0
@@ -106,7 +213,7 @@ class Bot::Plugin::Remind < Bot::Plugin
       m.reply("🔔 -#{hours_ago}h #{m.sender} > #{victim}: #{subject}")
     end
 
-    m.reply "Reminder parsed using timezone #{tz} set for #{remind_at}."
+    m.reply "Reminder parsed using timezone #{tz.identifier} set for #{remind_at}."
   end
 
   private
@@ -134,27 +241,9 @@ class Bot::Plugin::Remind < Bot::Plugin
     end
   end
 
-  def add_numeric_tz_offset(time, tz_offset)
-    time - tz_offset * 60 * 60
-  end
-
-  def get_numeric_timezone_offset(m, arg)
-    tz_offset_matches = arg.match(/^([\+\-].*)$/)
-    # defaults to UTC
-    if !tz_offset_matches.nil? && !tz_offset_matches[1].nil?
-      offset_s = tz_offset_matches[1]
-      return offset_s.to_i
-    end
-
-    m.reply 'Unspecified or unknown timezone: defaulting to UTC.'
-    0
-  end
-
-  def get_timezone_from_zone_identifier(id)
-    TZInfo::Timezone.get(id)
-  rescue StandardError
-    Bot.log.info "Remind: Could not get timezone from zone identifier for #{id}"
-    nil
+  def get_timezone_from_identifier(id)
+    tz = find_zone(id)
+    tz.length == 1 ? tz[0] : nil
   end
 
   def get_timezone_from_country_code(m, cc)
