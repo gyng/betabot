@@ -213,7 +213,8 @@ class Bot::Plugin::Remind < Bot::Plugin
       m.reply("🔔 -#{hours_ago}h #{m.sender} > #{victim}: #{subject}")
     end
 
-    m.reply "Reminder parsed using timezone #{tz.identifier} set for #{remind_at}."
+    in_hours = seconds_to_trigger / 60 / 60
+    m.reply "Reminder in #{in_hours.round(2)}h set for #{remind_at} (#{tz.identifier})."
   end
 
   private
