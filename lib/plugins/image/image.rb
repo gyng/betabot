@@ -1,11 +1,5 @@
+# rubocop:disable Metrics/ClassLength
 class Bot::Plugin::Image < Bot::Plugin
-  require 'digest/md5'
-  require 'digest/sha2'
-  require 'uri'
-  require 'open-uri'
-  require 'fileutils'
-  require 'nokogiri'
-
   # rubocop:disable Metrics/MethodLength
   def initialize(bot)
     @s = {
@@ -14,6 +8,7 @@ class Bot::Plugin::Image < Bot::Plugin
         images: [:images_link, 0, 'Gets the images listing webpage.']
       },
       subscribe: true,
+      content_type_regex: 'image/.*',
       filters: [
         '(http.*png(\/?\?.*)?$)',
         '(http.*gif(\/?\?.*)?$)',
@@ -136,18 +131,45 @@ class Bot::Plugin::Image < Bot::Plugin
     end
   end
 
+  def record_if_match_filter(url, m)
+    @s[:filters].each do |regex_s|
+      regex = Regexp.new(regex_s)
+      next if regex.match(url).nil?
+
+      Bot.log.info "#{self.class.name} - Image detected (filter): #{url}"
+      record(url, m)
+      return true
+    end
+
+    false
+  end
+
+  def record_if_match_content_type(url, m)
+    Thread.new do
+      if valid_content_type?(url)
+        Bot.log.info "#{self.class.name} - Image detected (content-type): #{url}"
+        record(url, m)
+      end
+    end
+  end
+
+  def valid_content_type?(url)
+    res = RestClient.head(url)
+    res.headers[:content_type] =~ Regexp.new(@s[:content_type_regex])
+  rescue StandardError => e
+    Bot.log.info "#{self.class.name} - failed to get HEAD for #{url}: #{e}"
+    false
+  end
+
   def receive(m)
     # Record each URL found in m.text
     tokens = String.new(m.text).split(' ').uniq
-
-    @s[:filters].each do |regex_s|
-      regex = Regexp.new(regex_s)
-
-      tokens.each do |t|
-        next if regex.match(t).nil?
-        Bot.log.info "#{self.class.name} - Image detected: #{t}"
-        record(t, m)
-      end
+    tokens.each do |t|
+      next if t !~ URI.regexp
+      # If it matches our filters we record regardless
+      # Else if it matches content types we will record it,
+      # even if it doesn't match the filter
+      record_if_match_filter(t, m) || record_if_match_content_type(t, m)
     end
   end
 

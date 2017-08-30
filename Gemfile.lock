@@ -22,6 +22,7 @@ GEM
     faye-websocket (0.10.7)
       eventmachine (>= 0.12.0)
       websocket-driver (>= 0.5.1)
+    ffi (1.9.18-x64-mingw32)
     gemoji (3.0.0)
     gli (2.16.1)
     hashie (3.5.6)
@@ -47,6 +48,7 @@ GEM
     mustermann (1.0.0)
     net-http-digest_auth (1.4.1)
     net-http-persistent (2.9.4)
+    netrc (0.11.0)
     nokogiri (1.8.0)
       mini_portile2 (~> 2.2.0)
     nokogiri (1.8.0-x64-mingw32)
@@ -63,6 +65,15 @@ GEM
     rainbow (2.2.2)
       rake
     rake (12.0.0)
+    rest-client (2.0.2)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
+    rest-client (2.0.2-x64-mingw32)
+      ffi (~> 1.9)
+      http-cookie (>= 1.0.2, < 2.0)
+      mime-types (>= 1.16, < 4.0)
+      netrc (~> 0.8)
     rspec (3.6.0)
       rspec-core (~> 3.6.0)
       rspec-expectations (~> 3.6.0)
@@ -136,6 +147,7 @@ DEPENDENCIES
   nokogiri
   open_uri_redirections
   rake
+  rest-client
   rspec
   rubocop
   rubyzip
