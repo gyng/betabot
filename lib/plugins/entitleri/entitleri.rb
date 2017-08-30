@@ -71,7 +71,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   end
 
   def format_guess_microsoft(guess)
-    return nil if guess.nil?
+    return nil if guess.nil? || guess[:description].nil?
     s = []
 
     caption = guess[:description][:captions][0]
