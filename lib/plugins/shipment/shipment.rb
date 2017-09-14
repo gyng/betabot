@@ -122,7 +122,7 @@ class Bot::Plugin::Shipment < Bot::Plugin
   end
 
   def list(m)
-    entries = @s[:tracked_shipments][m.sender.intern].keys
+    entries = @s[:tracked_shipments][m.sender.intern] ? @s[:tracked_shipments][m.sender.intern].keys : []
 
     if entries.empty?
       m.reply 'Empty!'
