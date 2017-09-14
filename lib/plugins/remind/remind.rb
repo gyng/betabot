@@ -98,12 +98,14 @@ class Bot::Plugin::Remind < Bot::Plugin
     query = m.args[1]
     matches = find_zone(query)
 
+    reply = ''
+
     if matches.length == 1
       z = matches[0]
       period = z.current_period
 
-      m.reply "#{z.identifier}: #{z.strftime('%c %z').bold} (#{Time.now.utc})"
-      m.reply "#{period.offset.abbreviation} is active." if period.dst?
+      reply = "🌐 #{z.identifier}: #{z.strftime('%c %z').bold} (#{Time.now.utc})"
+      reply += "🌄 #{period.offset.abbreviation} active" if period.dst?
 
       format_offset = lambda do |o|
         hours = o / 60 / 60
@@ -114,17 +116,15 @@ class Bot::Plugin::Remind < Bot::Plugin
         "#{prefix}#{hours}h"
       end
 
-      if !period.start_transition.nil?
-        offset = format_offset.call(period.offset.std_offset).bold
-        time = period.start_transition.local_start_time
-        m.reply "#{offset} since #{z.strftime('%c %z', time)} (#{time})"
+      if !period.end_transition.nil?
+        start_offset = format_offset.call(period.offset.std_offset) if !period.start_transition.nil?
+        start_time = period.start_transition.local_start_time
+        end_offset = format_offset.call(period.end_transition.offset.std_offset)
+        end_time = period.end_transition.local_end_time
+        reply += " #{start_offset} to #{end_offset}, #{z.strftime('%F', start_time)} to #{z.strftime('%F', end_time)}"
       end
 
-      if !period.end_transition.nil?
-        offset = format_offset.call(period.end_transition.offset.std_offset).bold
-        time = period.end_transition.local_end_time
-        m.reply "#{offset} after #{z.strftime('%c %z', time)} (#{time})"
-      end
+      m.reply reply
     elsif matches.length > 1
       m.reply matches.map(&:identifier).join(', ')[0, 1000]
     else
