@@ -115,7 +115,8 @@ For example: `!ping`, `MyBot: ping`
 
 * **image** &ndash; Saves all image links and records data about them in a database. Images are saved in `./public/i`. The image plugin also gives a random image link from the image database if the web server is running.
 * **entitle** &ndash; Echos titles of uninformative URLs.
-* **entitleri** &ndash; Uses Google reverse image search and Microsoft Computer Vision API to guess what image URLs are. *Usage of MS CV API requires the setup of [>=free subscriptions](https://www.microsoft.com/cognitive-services/en-US/subscriptions)*
+* **entitleri** &ndash; Uses Google reverse image search to guess the contents of image URLs.
+* **shipment** &ndash; Tracks packages using Aftership *[requires setup of API keys](https://secure.aftership.com/#/settings/api)*
 * **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
 * **script/macro** &ndash; Script/Macro definition support.
 * **showtime** &ndash; Checks Anilist for anime airing times *[requires setup of API keys](https://anilist.co/settings/developer)*
