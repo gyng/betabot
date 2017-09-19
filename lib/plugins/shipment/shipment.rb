@@ -92,12 +92,14 @@ class Bot::Plugin::Shipment < Bot::Plugin
       return
     end
 
-    m.reply res[:data][:tracking][:id]
-
-    @s[:tracked_shipments][m.sender] ||= {}
-    @s[:tracked_shipments][m.sender][name] = { id: res[:data][:tracking][:id], slug: res[:data][:tracking][:slug] }
+    @s[:tracked_shipments][m.sender.to_sym] ||= {}
+    @s[:tracked_shipments][m.sender.to_sym][name.to_sym] = {
+      id: res[:data][:tracking][:id],
+      slug: res[:data][:tracking][:slug],
+      created: Time.now.utc
+    }
     save_settings
-    m.reply "Added shipment tracking for \"#{name}\". Use `shipment status <name>` later to get the status."
+    m.reply "Added shipment tracking for \"#{name}\". Use `shipment status #{name}` in a bit to get the status."
   end
 
   def untrack(m)
@@ -127,7 +129,9 @@ class Bot::Plugin::Shipment < Bot::Plugin
     if entries.empty?
       m.reply 'Empty!'
     else
-      m.reply @s[:tracked_shipments][m.sender.intern].keys.map(&:to_s).join(', ')
+      m.reply @s[:tracked_shipments][m.sender.intern].map { |k, v|
+        "#{k.to_s.bold} (#{v[:slug]} #{v[:id]} #{v[:created]})"
+      }.join(', ')
     end
   end
 
@@ -151,8 +155,11 @@ class Bot::Plugin::Shipment < Bot::Plugin
     data = res[:data]
     chk = data[:checkpoint]
 
-    m.reply "#{data[:tag]}: #{chk[:checkpoint_time]} — "\
-      "#{chk[:zip]} #{chk[:city]} #{chk[:state]} #{chk[:country_name]} — #{chk[:message]}"
+    formatted_location = [chk[:zip], chk[:city], chk[:country_name]].reject { |s| s.nil? || s.empty? }.join(' ')
+    formatted_response = [chk[:checkpoint_time], formatted_location, chk[:message]].reject { |s| s.nil? || s.empty? }
+                                                                                   .join(' — ')
+
+    m.reply "#{data[:tag].bold}: #{formatted_response}"
 
     m.reply "🎉 Done! Delete your 🎁 tracking with `shipment delete #{name}`" if data[:tag] == 'Delivered'
   end
