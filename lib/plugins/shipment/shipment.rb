@@ -63,7 +63,7 @@ class Bot::Plugin::Shipment < Bot::Plugin
     results = couriers.find_all { |c| c[:name].downcase.include?(query) || c[:other_name].downcase.include?(query) }
 
     if results.empty?
-      m.reply 'No matching courier found.'
+      m.reply 'No matching courier found. See https://www.aftership.com/couriers for list.'
     else
       m.reply results[0..10].map { |c| c[:slug] }.join(', ')
     end
@@ -87,7 +87,10 @@ class Bot::Plugin::Shipment < Bot::Plugin
     begin
       res = JSON.parse(RestClient.post(url, body, aftership_headers), symbolize_names: true)
     rescue StandardError => e
-      m.reply "Error tracking package. Verify tracking code, or check courier slug using `shipment courier #{courier}`."
+      m.reply 'Error tracking package. Verify tracking code, or check courier slug ' \
+        "using `shipment courier #{courier || '<courier>'}`. " \
+        'Usage: `shipment add <name> <courier_slug> <code>`'
+
       Bot.log.warn "#{self.class.name} - Failed to track package #{e}"
       return
     end
@@ -155,11 +158,12 @@ class Bot::Plugin::Shipment < Bot::Plugin
     data = res[:data]
     chk = data[:checkpoint]
 
-    formatted_location = [chk[:zip], chk[:city], chk[:country_name]].reject { |s| s.nil? || s.empty? }.join(' ')
-    formatted_response = [chk[:checkpoint_time], formatted_location, chk[:message]].reject { |s| s.nil? || s.empty? }
-                                                                                   .join(' — ')
+    code = "(#{data[:slug]} #{data[:tracking_number]})"
+    location = [chk[:zip], chk[:city], chk[:country_name]].reject { |s| s.nil? || s.empty? }.join(' ')
+    formatted_response = [chk[:checkpoint_time], location, chk[:message]].reject { |s| s.nil? || s.empty? }
+                                                                         .join(' — ')
 
-    m.reply "#{data[:tag].bold}: #{formatted_response}"
+    m.reply "#{data[:tag].bold}: #{formatted_response} #{code}"
 
     m.reply "🎉 Done! Delete your 🎁 tracking with `shipment delete #{name}`" if data[:tag] == 'Delivered'
   end
