@@ -3,7 +3,10 @@ class Bot::Plugin::Wolfram < Bot::Plugin
     # http://products.wolframalpha.com/api/
     # https://developer.wolframalpha.com/portal/apisignup.html
     @s = {
-      trigger: { wolfram: [:call, 0, 'wolfram <query>. Querys Wolfram|Alpha.'] },
+      trigger: {
+        wolfram: [:call, 0, 'wolfram <query>. Querys Wolfram|Alpha.'],
+        wa: [:call, 0, 'wa <query>. Querys Wolfram|Alpha.']
+      },
       subscribe: false,
       api_key: '',
       max_depth: 2
