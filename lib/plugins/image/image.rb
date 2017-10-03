@@ -162,6 +162,8 @@ class Bot::Plugin::Image < Bot::Plugin
   end
 
   def receive(m)
+    return if m.text.nil?
+
     # Record each URL found in m.text
     tokens = String.new(m.text).split(' ').uniq
     tokens.each do |t|
