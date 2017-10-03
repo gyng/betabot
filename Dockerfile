@@ -12,6 +12,7 @@ RUN apk --update add --virtual build-dependencies \
   && apk --update add \
     imagemagick \
     sqlite-libs \
+    openssl \
   && gem install bundler --no-ri --no-rdoc
 
 COPY Gemfile Gemfile.lock /app/
