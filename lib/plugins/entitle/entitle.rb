@@ -49,6 +49,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
   end
 
   def check_filter(m)
+    return if m.text.nil?    
+
     tokens = String.new(m.text).split(' ').uniq
     titles = []
 
