@@ -13,7 +13,7 @@
     "dir": "plugins",
     "load_mode": "blacklist",
     "whitelist": [],
-    "blacklist": ["dummy"]
+    "blacklist": ["dummy", "script"]
   },
 
   "databases": {
