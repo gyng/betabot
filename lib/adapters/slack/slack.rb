@@ -62,7 +62,7 @@ class Bot::Adapter::Slack < Bot::Adapter
       m.data     = slack_data
       m.hostname = slack_data.user
       m.origin   = self
-      m.text     = slack_data.text
+      m.text     = ::Slack::Messages::Formatting.unescape(slack_data.text)
       m.user     = slack_data.user
     end
   end
