@@ -5,7 +5,7 @@ betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to
 
 Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).
 
-Has IRC and *basic* Slack adapters. Some useful plugins are also included. Not all plugins support Slack right now.
+Has full IRC and basic Slack and Discord support. Some useful plugins are also included. Not all included plugins support Slack and Discord right now.
 
 ## Installation
 
@@ -84,11 +84,17 @@ Settings, accounts, databases, and the public directory are persisted with usage
   * `./lib/settings/bot_settings.json` (for web server configuration options check below)
   * `./lib/settings/adapters/irc.json` (and any per-adapter settings)
   * `./lib/settings/adapters/slack.json` (and any per-adapter settings)
+  * `./lib/settings/adapters/discord.json` (and any per-adapter settings)
   * (Optional) any plugin settings in `./lib/settings/plugins/`
 
   Add the adapters to be run on startup to the autostart key in `bot_settings.json`. Currently supported adapters are `slack` and `irc`.
 
-  Note that adapter and plugin settings files are generated with default settings on first run for a fresh install as of now. They do not exist before first run.
+  **Note that adapter and plugin settings files are generated with default settings on first run for a fresh install as of now. They do not exist before first run.**
+
+#### Discord
+
+If using Discord, you will need to invite your bot instance to your server. Use the [permissions generator](https://discordapi.com/permissions.html#515136) and insert your client ID.
+An app can be created at the [Discord developer dashboard](https://discordapp.com/developers/applications/me). `api_token` refers to the app bot user's token.
 
 #### Web server configuration details
 
