@@ -6,7 +6,8 @@ class Bot::Plugin::Trivia < Bot::Plugin
       trigger: {
         trivia: [
           :trivia, 0,
-          'trivia [<type>] Gets a trivia question from opentdb.com. type = {empty, anime, games, computers, gadgets}'
+          'trivia [<type>] Gets a trivia question from opentdb.com. ' \
+          'type = {"", anime, games, computers, gadgets, science, sports, history, geography}'
         ],
         'trivia-stats' => [
           :stats, 0,
@@ -23,7 +24,7 @@ class Bot::Plugin::Trivia < Bot::Plugin
     super(bot)
   end
 
-  def trivia(m)
+  def trivia(m) # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
     if @active.key?(m.channel)
       m.reply "Trivia in progress in #{m.channel}!"
       return
@@ -36,6 +37,10 @@ class Bot::Plugin::Trivia < Bot::Plugin
     url += '&category=18' if m.mode == 'computers'
     url += '&category=15' if m.mode == 'games'
     url += '&category=30' if m.mode == 'gadgets'
+    url += '&category=17' if m.mode == 'science'
+    url += '&category=21' if m.mode == 'sports'
+    url += '&category=22' if m.mode == 'geography'
+    url += '&category=23' if m.mode == 'history'
 
     res = RestClient.get(url)
     q = JSON.parse(res, symbolize_names: true)[:results][0]
@@ -76,16 +81,16 @@ class Bot::Plugin::Trivia < Bot::Plugin
   end
 
   def stats(m)
-    channel = @winners.to_a[0]
+    channel = @winners[m.channel]
 
     if channel.nil?
       m.reply "No winners for #{m.channel}!"
       return
     end
 
-    stats = channel[1]
-    m.reply "Rounds: #{@games[m.channel]}, "
-      + stats.to_a.sort_by { |w| w[1][:wins] }.reverse.map { |w| "#{w[1][:name]}: #{w[1][:wins]}" }.join(', ')
+    stats = channel.to_a
+    m.reply "Rounds: #{@games[m.channel]}, " +
+            stats.sort_by { |w| w[1][:wins] }.reverse.map { |w| "#{w[1][:name]}: #{w[1][:wins]}" }.join(', ')
   end
 
   def receive(m)
