@@ -35,6 +35,6 @@ class Web < Sinatra::Base
   configure do
     set :threaded, true
     set :public_folder, 'lib/public'
-    set :show_exceptions, true
+    set :show_exceptions, false
   end
 end
