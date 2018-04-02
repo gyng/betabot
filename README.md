@@ -1,6 +1,15 @@
 # betabot
 [![Build Status](https://travis-ci.org/gyng/betabot.svg?branch=Travis)](https://travis-ci.org/gyng/betabot)
 
+```irc
+* betabot has joined #teatime
+<gyng> ~ping
+<betabot> pong
+<gyng> betabot: remind me about tea in 10 seconds
+<betabot> Reminder in 0.0h set for 1970-01-01 00:00:10 UTC (UTC).
+<betabot> 🔔 -0.0h gyng > gyng: tea
+```
+
 betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to develop for.
 
 Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).

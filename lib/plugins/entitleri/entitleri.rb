@@ -75,7 +75,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     doc.encoding = 'utf-8'
     result = doc.css(@s[:guess_selector]).inner_text.strip
     Bot.log.info "EntitleRI: Got Google guess: #{result}"
-    "Best guess for this image: #{result}"
+    result.to_s.empty? ? nil : "Best guess for this image: #{result}"
   rescue StandardError => e
     Bot.log.info "Error in Entitleri#get_guess: #{e} #{e.backtrace}"
     nil
