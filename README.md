@@ -22,7 +22,7 @@ You can choose either to use or not to use Docker to run betabot.
 
 0. Download or clone this repository
 
-        git clone https://github.com/gyng/betabot.git
+       git clone https://github.com/gyng/betabot.git
 
 ### First run
 
@@ -34,27 +34,27 @@ You can choose either to use or not to use Docker to run betabot.
 
 2. Build the image. You might need to configure the ports used by the webserver and plugins.
 
-        docker build . -t betabot
+       docker build . -t betabot
 
 3. Create an admin account (auth level 5) with the wizard
 
-        docker-compose run --entrypoint sh bot
-        rake make_user
+       docker-compose run --entrypoint sh bot
+       rake make_user
 
-   or the command
+       # or with the command
 
-        docker-compose run --entrypoint sh bot
-        rake make_user_cmd[name,password,auth_level]
+       docker-compose run --entrypoint sh bot
+       rake make_user_cmd[name,password,auth_level]
 
 4. [Configure the bot](#configuration)
 
 5. Start the bot
 
-        docker-compose up
+       docker-compose up
 
-    or in detached mode
+       # or in detached mode
 
-        docker-compose up -d
+       docker-compose up -d
 
 Settings, accounts, databases, and the public directory are persisted with usage of Docker. The image needs to be rebuilt (easily with `docker-compose up --build -d`) when adapters or plugins are changed or added. As of now, the port mappings in `docker-compose.yml` must be changed manually when not using default ports.
 
@@ -64,21 +64,21 @@ Settings, accounts, databases, and the public directory are persisted with usage
 
 2. Install the gems with Bundler. You might need `sqlite-dev` and `imagemagick` packages installed on your system for gem installation.
 
-        bundle install
+       bundle install
 
 3. Create an admin account (auth level 5) with the wizard
 
-        rake make_user
+       rake make_user
 
    or the command
 
-        rake make_user_cmd[name,password,auth_level]
+       rake make_user_cmd[name,password,auth_level]
 
 4. [Configure the bot](#configuration)
 
 5. Start the bot
 
-        ruby start_bot.rb
+       ruby start_bot.rb
 
 ## Usage
 
