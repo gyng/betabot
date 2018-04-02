@@ -21,7 +21,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       ],
       timeout: 20,
       google_query: 'https://www.google.com/searchbyimage?&image_url=',
-      guess_selector: '._hUb',
+      guess_selector: '.fKDtNb',
       user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55.0'
     }
 
@@ -75,7 +75,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     doc.encoding = 'utf-8'
     result = doc.css(@s[:guess_selector]).inner_text.strip
     Bot.log.info "EntitleRI: Got Google guess: #{result}"
-    result
+    "Best guess for this image: #{result}"
   rescue StandardError => e
     Bot.log.info "Error in Entitleri#get_guess: #{e} #{e.backtrace}"
     nil
