@@ -22,6 +22,12 @@ job "betabot" {
   group "neotype" {
     count = 1
 
+    ephemeral_disk {
+      migrate = true
+      size    = "300"
+      sticky  = true
+    }
+
     task "slack" {
       driver = "docker"
 
