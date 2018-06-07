@@ -1,21 +1,71 @@
+// 0. Add Slack token to vault at `secret/betabot/slack` with the key `api_token`
+//
+// 1. Login to vault on deploying machine
+//
+//    vault login --method ldap --address https://vault.example.com username=AzureDiamond
+//
+// 2. Submit the job with vault credentials
+//
+//    VAULT_TOKEN=$(cat ~/.vault-token) nomad run --address https://nomad.example.com extra/betabot.slack.nomad
+
 job "betabot" {
-  datacenters = ["ap-southeast-1a", "ap-southeast-1b"]
+  datacenters = ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"]
+
+  // Add betabot_app policy to access Slack token on Vault
+  // User running this must have the betabot_app policy
+  vault {
+    policies = ["betabot_app"]
+    change_mode = "restart"
+    env = false
+  }
 
   group "neotype" {
     count = 1
 
-    template {
-      data = "{{ key \"example/betabot/slack/bot_settings.json\" }}"
-      destination = "lib/settings/bot_settings.json"
-    }
-
-    template {
-      data = "{{ key \"example/betabot/slack/adapters/slack.json\" }}"
-      destination = "lib/settings/adapters/slack.json"
-    }
-
     task "slack" {
       driver = "docker"
+
+      template {
+        data = <<EOF
+{
+  "short_trigger": "~",
+
+  "adapters": {
+    "dir": "adapters",
+    "load_mode": "blacklist",
+    "autostart": ["slack"],
+    "whitelist": [],
+    "blacklist": ["dummy"]
+  },
+
+  "plugins": {
+    "dir": "plugins",
+    "load_mode": "blacklist",
+    "whitelist": [],
+    "blacklist": ["dummy", "script"]
+  },
+
+  "databases": {
+    "shared_db": true
+  },
+
+  "webserver": {
+    "enabled": true,
+    "link_url": "http://localhost:80",
+    "host": "0.0.0.0",
+    "port": "80"
+  }
+}
+EOF
+        destination = "alloc/lib/settings/bot_settings.json"
+      }
+
+      template {
+        data = <<EOF
+{{- with secret "secret/betabot/slack" -}}{{ .Data | toJSON }}{{- end -}}
+EOF
+        destination = "secrets/slack.json"
+      }
 
       config {
         image = "gyng/betabot"
@@ -31,9 +81,10 @@ job "betabot" {
         }
 
         volumes = [
-          "lib/databases:/app/lib/databases",
-          "lib/public:/app/lib/public",
-          "lib/settings:/app/lib/settings"
+          "alloc/lib/databases:/app/lib/databases",
+          "alloc/lib/public:/app/lib/public",
+          "alloc/lib/settings:/app/lib/settings",
+          "secrets/slack.json:/app/lib/settings/adapters/slack.json:ro"
         ]
       }
 
@@ -43,15 +94,16 @@ job "betabot" {
 
         check {
           name     = "betabot-web-check"
+          path     = "/"
           type     = "tcp"
           interval = "60s"
           timeout  = "5s"
         }
 
-        tags = [
-          "traefik.enable=true",
-          "traefik.frontend.rule=Host:betabot.my.domain.name"
-        ]
+        // tags = [
+        //   "traefik.enable=true",
+        //   "traefik.frontend.rule=Host:betabot.my.domain.name"
+        // ]
       }
 
       resources {
