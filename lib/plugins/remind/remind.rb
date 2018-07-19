@@ -7,6 +7,7 @@ module Chronic
   end
 end
 
+# rubocop:disable Metrics/ClassLength
 class Bot::Plugin::Remind < Bot::Plugin
   def initialize(bot)
     @s = {
@@ -162,12 +163,14 @@ class Bot::Plugin::Remind < Bot::Plugin
 
   # The logic is messy as we support multiple TZ declaration formats
   # while needing to hack around Chronic parsing quirks.
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/PerceivedComplexity
   def remind(m)
     bad_timezone_string = 'Specify a timezone at the end: tzid search (US/Pacific), ' \
       '2-letter country code (JP), or offset (+8).'
 
     victim = m.args[0] == 'me' ? m.sender : m.args[0]
-    tokens = m.text.match(/^.+(to|about|of)(.+)(on .+|at .+|in .+)$/)
+    tokens = m.args.join(' ').match(/(\S+)\s(.+)(on .+|at .+|in .+)$/)
 
     if !tokens.nil? && tokens.length < 3
       m.reply 'Syntax error: could not parse reminder'
@@ -177,6 +180,12 @@ class Bot::Plugin::Remind < Bot::Plugin
 
     subject = tokens[2].strip
     time_s = tokens[3].strip
+
+    # Assume relative time
+    time_s = time_s.gsub(/\W(s|sec|secs)$/, ' seconds')
+    time_s = time_s.gsub(/\W(m|min|mins)$/, ' minutes')
+    time_s = time_s.gsub(/\W(h|hr|hour|hours)$/, ' hours')
+    time_s = time_s.gsub(/\W(d|day|days)$/, ' days')
 
     tz = get_timezone_from_identifier(m.args.last)
 
@@ -208,13 +217,20 @@ class Bot::Plugin::Remind < Bot::Plugin
       return
     end
 
+    hours_ago = (seconds_to_trigger / 60.0 / 60.0)
+    human_time = if hours_ago >= 1
+                   "#{hours_ago.round(1)}h"
+                 elsif hours_ago <= (1 / 60)
+                   "#{(hours_ago * 60).round(0)}m"
+                 else
+                   "#{(hours_ago * 60 * 60).round(0)}s"
+                 end
+
     EventMachine.add_timer(seconds_to_trigger) do
-      hours_ago = (seconds_to_trigger / 60.0 / 60.0).round(1)
-      m.reply("🔔 -#{hours_ago}h #{m.sender} > #{victim}: #{subject}")
+      m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
     end
 
-    in_hours = seconds_to_trigger / 60 / 60
-    m.reply "Reminder in #{in_hours.round(2)}h set for #{remind_at} (#{tz.identifier})."
+    m.reply "Reminder in #{human_time} set for #{remind_at} (#{tz.identifier})."
   end
 
   private
