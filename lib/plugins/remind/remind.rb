@@ -181,12 +181,6 @@ class Bot::Plugin::Remind < Bot::Plugin
     subject = tokens[2].strip
     time_s = tokens[3].strip
 
-    # Assume relative time
-    time_s = time_s.gsub(/\W(s|sec|secs)$/, ' seconds')
-    time_s = time_s.gsub(/\W(m|min|mins)$/, ' minutes')
-    time_s = time_s.gsub(/\W(h|hr|hour|hours)$/, ' hours')
-    time_s = time_s.gsub(/\W(d|day|days)$/, ' days')
-
     tz = get_timezone_from_identifier(m.args.last)
 
     # An exact match from a country code with only one timezone
@@ -195,7 +189,14 @@ class Bot::Plugin::Remind < Bot::Plugin
     return if tz == :ambiguous
 
     # special case for relative time, eg. remind me in
-    tz = get_timezone_from_identifier('UTC') if time_s.split(' ')[0] == 'in' && tz.nil?
+    if time_s.split(' ')[0] == 'in'
+      tz = get_timezone_from_identifier('UTC') if tz.nil?
+
+      time_s = time_s.gsub(/(s|sec|secs)$/, ' seconds')
+      time_s = time_s.gsub(/(m|min|mins)$/, ' minutes')
+      time_s = time_s.gsub(/(h|hr|hour|hours)$/, ' hours')
+      time_s = time_s.gsub(/(d|day|days)$/, ' days')
+    end
 
     if tz.nil?
       m.reply bad_timezone_string
@@ -217,13 +218,15 @@ class Bot::Plugin::Remind < Bot::Plugin
       return
     end
 
-    hours_ago = (seconds_to_trigger / 60.0 / 60.0)
+    mins_ago = seconds_to_trigger / 60.0
+    hours_ago = mins_ago / 60.0
+
     human_time = if hours_ago >= 1
                    "#{hours_ago.round(1)}h"
-                 elsif hours_ago <= (1 / 60)
-                   "#{(hours_ago * 60).round(0)}m"
+                 elsif mins_ago < 1
+                   "#{seconds_to_trigger.round(0)}s"
                  else
-                   "#{(hours_ago * 60 * 60).round(0)}s"
+                   "#{mins_ago.round(0)}m"
                  end
 
     EventMachine.add_timer(seconds_to_trigger) do
