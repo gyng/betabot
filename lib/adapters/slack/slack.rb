@@ -23,6 +23,8 @@ class Bot::Adapter::Slack < Bot::Adapter
     @client.on :message do |data|
       Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'<-'.cyan} #{data}"
 
+      next if data.nil?
+
       m = to_adapter_message(data)
 
       if m.text =~ /^#{Bot::SHORT_TRIGGER}([^ ]*)/i || # !command
@@ -62,7 +64,7 @@ class Bot::Adapter::Slack < Bot::Adapter
       m.data     = slack_data
       m.hostname = slack_data.user
       m.origin   = self
-      m.text     = ::Slack::Messages::Formatting.unescape(slack_data.text)
+      m.text     = ::Slack::Messages::Formatting.unescape(slack_data.text || '')
       m.user     = slack_data.user
     end
   end
