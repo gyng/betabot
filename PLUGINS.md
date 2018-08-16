@@ -1,12 +1,6 @@
 # Plugin development
 
-## Scaffold
-
-There is a rake task to create a skeleton plugin. This uses the Ping plugin as a template.
-
-    rake make_plugin[name]
-
-The created plugin is located at `./lib/plugins/name/name.rb`.
+Please see [betabot-example-plugin](https://github.com/gyng/betabot-example-plugin) for an example of an external (ie. not bundled) plugin.
 
 ## Example plugin
 
@@ -148,9 +142,7 @@ The method `auth_r(level, message)` replies to the message sender if authenticat
 
 ## Packaging plugins
 
-Installable plugins can be packaged with `rake package_plugin[plugin_name]`.
-
-The zip package will be located in the `./packages` folder. This package can be installed by running `rake install_plugin[http://myurl.com/plugin_name.sha31fda.plugin.zip]`. Do not change the filename as it is used in the install process.
+Installable plugins should be an accessible git repository. Please see [betabot-example-plugin](https://github.com/gyng/betabot-example-plugin) for an example of an external (ie. not bundled) plugin.
 
 ## Web hook
 
@@ -183,3 +175,11 @@ end
 ```
 
 Check out the Image plugin for a concrete example.
+
+## Default plugin scaffold
+
+There is a rake task to create a skeleton bundled plugin, but this is not intended for external developers. This uses the Ping plugin as a template.
+
+    rake make_plugin[name]
+
+The created plugin is located at `./lib/plugins/name/name.rb`.

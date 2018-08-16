@@ -1,29 +1,36 @@
 {
-    "short_trigger": "~",
+  "short_trigger": "~",
 
-    "adapters": {
-        "dir": ["adapters"],
-        "load_mode": "whitelist",
-        "autostart": [],
-        "whitelist": ["dummy", "irc"],
-        "blacklist": []
-    },
+  "adapters": {
+    "dir": ["adapters"],
+    "load_mode": "whitelist",
+    "autostart": [],
+    "whitelist": ["dummy", "irc"],
+    "blacklist": []
+  },
 
-    "plugins": {
-        "dir": "plugins",
-        "load_mode": "whitelist",
-        "whitelist": ["dummy"],
-        "blacklist": []
-    },
+  "plugins": {
+    "dir": "plugins",
+    "load_mode": "whitelist",
+    "whitelist": ["dummy"],
+    "blacklist": []
+  },
 
-    "databases": {
-        "shared_db": false
-    },
+  "external_plugins": {
+    "dir": "external_plugins",
+    "load_mode": "blacklist",
+    "whitelist": [],
+    "blacklist": []
+  },
 
-    "webserver": {
-        "enabled": false,
-        "link_url": "http://localhost:80",
-        "host": "0.0.0.0",
-        "port": "80"
-    }
+  "databases": {
+    "shared_db": false
+  },
+
+  "webserver": {
+    "enabled": false,
+    "link_url": "http://localhost:80",
+    "host": "0.0.0.0",
+    "port": "80"
+  }
 }

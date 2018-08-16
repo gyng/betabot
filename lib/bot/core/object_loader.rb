@@ -5,6 +5,7 @@ module Bot::Core::ObjectLoader
   end
 
   def load_objects(type, mode = :all)
+    Bot.log.info "Loading #{type}s..."
     type = type.to_s
     objects_dir = get_objects_dir(type)
 
@@ -20,13 +21,24 @@ module Bot::Core::ObjectLoader
   def load_curry(type)
     proc do |f|
       begin
-        Bot.log.info "Loading #{type} #{f}..."
         path = File.join(get_objects_dir(type), f.to_s)
-        load File.join(path, "#{f}.rb")
+        full_path = File.join(path, "#{f}.rb")
+        Bot.log.info "Loading #{type} #{f} from #{full_path}..."
+        load full_path
+
+        types = {
+          'plugin' => :plugin,
+          'external_plugin' => :plugin,
+          'adapter' => :adapter
+        }
+        actual_type = types[type]
+
         # Initialize the loaded object
-        object = Bot.module_eval(type.capitalize.to_s).const_get(f.capitalize).new(self)
+        object = Bot.module_eval(actual_type.capitalize.to_s).const_get(f.capitalize).new(self)
         # And store a reference to that object in @types (eg. @plugins)
-        instance_eval("@#{type}s")[f.downcase.to_sym] = object
+        # Store external plugins in the plugins list
+        # TODO: check for name collisions
+        instance_eval("@#{actual_type}s")[f.downcase.to_sym] = object
       rescue LoadError, StandardError, SyntaxError => e
         Bot.log.warn "Failed to load #{f} - #{e}\n\t#{e.backtrace.join("\n\t")}"
       end

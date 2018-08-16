@@ -2,6 +2,7 @@ source 'https://rubygems.org'
 
 gem 'activesupport'
 gem 'eventmachine'
+gem 'git'
 gem 'mechanize'
 gem 'nokogiri'
 gem 'open_uri_redirections'

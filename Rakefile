@@ -1,5 +1,3 @@
-# rubocop:disable Metrics/BlockLength
-
 task :make_user do
   require 'io/console'
   require 'json'
@@ -65,64 +63,49 @@ task :make_plugin, :name do |_t, args|
   File.write(File.join(dir, 'settings', '.gitignore'), 'settings.json')
 end
 
-task :package_plugin, :name do |_t, args|
-  require 'zip'
-  require 'fileutils'
-  require 'digest/sha1'
-
-  packages_dir = 'packages'
-  name = args[:name]
-
-  FileUtils.mkdir_p(packages_dir)
-  dir = File.join('lib', 'plugins', name)
-  sha = Digest::SHA1.hexdigest(File.read(File.join(dir, "#{name}.rb")))[0..7]
-  out = File.join(packages_dir, "#{name}.#{sha}.plugin.zip")
-
-  Zip::File.open(out, Zip::File::CREATE) do |zipfile|
-    Dir[File.join(dir, '**', '**')].each do |file|
-      zipfile.add(file.sub(dir + File::SEPARATOR, ''), file)
-    end
-  end
-  puts "Package created in #{out}."
-end
-
 task :install_plugin, :url do |_t, args|
-  require 'zip'
-  require 'fileutils'
-  require 'openssl'
+  require 'git'
+  require 'json'
   require 'open-uri'
-  require 'uri'
 
   url = args[:url]
-  packages_dir = 'packages'
-  FileUtils.mkdir_p(packages_dir)
 
-  package_name = File.basename(URI.parse(url).path)
-  package_path = File.join(packages_dir, package_name)
+  puts "ℹ Grabbing manifest from #{url}..."
+  manifest = open(url).read
 
-  puts "Downloading package from #{url}"
-  open(url, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE) do |f|
-    File.open(package_path, 'wb') do |file|
-      file.puts f.read
-    end
+  puts 'ℹ Parsing manifest JSON...'
+  parsed = JSON.parse(manifest, symbolize_names: true)
+  puts "ℹ Parsed manifest: #{parsed}"
+
+  repo = parsed[:git]
+  plugin_name = parsed[:name]
+  puts "ℹ Git repo is at #{repo}"
+
+  plugins_dir = 'lib/plugins'
+  FileUtils.mkdir_p(plugins_dir)
+  plugin_path = File.join(plugins_dir, plugin_name)
+
+  if File.directory?(plugin_path)
+    puts "🔥 Directory #{plugin_path} already exists! Delete it first or run `rake update_plugin[#{plugin_name}]`"
+    next
   end
 
-  puts 'Package downloaded. Extracting...'
-  plugin_name = package_name.match(/(?<name>.+?)\..+/)[:name]
-  plugin_dir = File.join('lib', 'plugins', plugin_name)
-  FileUtils.mkdir_p(plugin_dir)
+  puts 'ℹ Cloning plugin...'
+  Git.clone(repo, plugin_name, path: plugins_dir)
 
-  Zip::File.open(package_path) do |zip_file|
-    zip_file.each do |f|
-      f_path = File.join(plugin_dir, f.name)
-      FileUtils.mkdir_p(File.dirname(f_path))
-      zip_file.extract(f, f_path) unless File.exist?(f_path)
-    end
-  end
+  puts "ℹ Plugin #{plugin_name} installed. Run `bundle install` if needed."
+end
 
-  puts 'Cleaning up downloaded files...'
-  File.delete(package_path)
+task :update_plugin, :name do |_t, args|
+  require 'git'
 
-  puts '\nPlugin #{plugin_name} installed to #{plugin_dir}!\n' \
-       'Run `bundle install` to install plugin dependencies.'
+  name = args[:name]
+  plugin_path = File.join('lib', 'external_plugins', name)
+
+  puts "ℹ Updating plugin #{name} at #{plugin_path}..."
+
+  g = Git.open(plugin_path)
+  g.pull
+
+  puts "ℹ Plugin #{name} updated to #{g.show('HEAD')}."
 end

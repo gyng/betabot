@@ -34,6 +34,7 @@ GEM
     ffi (1.9.18)
     ffi (1.9.18-x64-mingw32)
     gemoji (3.0.0)
+    git (1.5.0)
     gli (2.16.1)
     hashie (3.5.6)
     http-cookie (1.0.3)
@@ -162,6 +163,7 @@ DEPENDENCIES
   eventmachine
   faye-websocket
   gemoji
+  git
   mechanize
   nokogiri
   open_uri_redirections

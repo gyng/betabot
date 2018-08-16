@@ -50,7 +50,13 @@ You can choose either to use or not to use Docker to run betabot.
 
 4. [Configure the bot](#configuration)
 
-5. Start the bot
+5. Install external plugins if wanted
+
+  ```
+  rake install_plugin[https://example.com/manifest.json]
+  ```
+
+6. Start the bot
 
        docker-compose up
 
@@ -142,7 +148,7 @@ For example: `!ping`, `MyBot: ping`
 * **unicode** &ndash; Search for Unicode characters or emoji by description, and identify Unicode characters
 * **wolfram** &ndash; Queries Wolfram|Alpha. *[requires setup of API keys](https://developer.wolframalpha.com/portal/apisignup.html)*
 
-For all plugins, see the plugin directory.
+For all plugins, see the plugins and external_plugins directory.
 
 #### A few core commands
 
@@ -166,8 +172,8 @@ For all plugins, see the plugin directory.
 
 To install a plugin from a URL:
 
-1. Run `rake install_plugin[http://www.example.com/myplugin.af84ad46.package.zip]`.
-2. Run `bundle install` to install plugin dependencies.
+1. Run `rake install_plugin[$MANIFEST_URL]`. An example can be installed using `rake install_plugin[https://raw.githubusercontent.com/gyng/betabot-example-plugin/master/manifest.json]`.
+2. Run `bundle install` to install plugin dependencies, if needed.
 3. If there is a running bot instance, `reload` to reload all plugins.
 
 ### Plugin development
@@ -176,7 +182,7 @@ See: [Plugin development](PLUGINS.md)
 
 ## Tests
 
-Tests can be run with `rspec`. Current test coverage is very limited.
+Tests can be run with `bundle exec rspec`. Current test coverage is very limited. Ruocop can be run with `bundle exec rubocop`.
 
 The EventMachine reactor has to be set up and torn down for most specs so there is a helper method `with_em(&block)` included in `spec_helper.rb`.
 

@@ -48,6 +48,7 @@ module Bot
 
       initialize_objects(:adapter)
       initialize_objects(:plugin)
+      initialize_objects(:external_plugin)
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
       @s[:adapters][:autostart].each { |regex| start_adapters(regex) }
     end
@@ -61,11 +62,12 @@ module Bot
       end
 
       # rubocop:disable Style/GuardClause
-      if type == :plugin || type.nil?
+      if type == :plugin || type == :external_plugin || type.nil?
         @plugins = {}
         @plugin_mapping = {}
         @subscribed_plugins = []
         load_objects(:plugin, mode)
+        load_objects(:external_plugin, mode)
       end
       # rubocop:enable Style/GuardClause
     end
@@ -93,6 +95,7 @@ module Bot
           restart
         when 'reload'
           reload(:plugin)
+          reload(:external_plugin)
           m.reply 'Reloaded.' if m.respond_to? :reply
         when 'useradd'
           @authenticator.make_account(m.args[0], m.args[1], m.args[2])
@@ -109,6 +112,7 @@ module Bot
         when 'unblacklist_plugin'
           unblacklist(:plugin, m.args[0])
           m.reply "Plugin #{m.args[0]} unblacklisted. Reload for this to take effect."
+        # TODO: Blacklist external plugins
         when 'blacklist'
           m.reply 'Adapters: ' + @s[:adapters][:blacklist].join(', ')
           m.reply 'Plugins: ' + @s[:plugins][:blacklist].join(', ')
@@ -199,6 +203,7 @@ module Bot
         @plugins = nil
         initialize_objects(:adapter)
         initialize_objects(:plugin)
+        initialize_objects(:external_plugin)
       elsif name.nil?
         initialize_objects(type)
       else

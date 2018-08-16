@@ -16,6 +16,13 @@
     "blacklist": ["dummy", "script"]
   },
 
+  "external_plugins": {
+    "dir": "external_plugins",
+    "load_mode": "blacklist",
+    "whitelist": [],
+    "blacklist": []
+  },
+
   "databases": {
     "shared_db": true
   },
