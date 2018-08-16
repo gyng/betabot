@@ -52,9 +52,8 @@ You can choose either to use or not to use Docker to run betabot.
 
 5. Install external plugins if wanted
 
-  ```
-  rake install_plugin[https://example.com/manifest.json]
-  ```
+       # for example
+       rake install_plugin[https://example.com/manifest.json]
 
 6. Start the bot
 
