@@ -55,18 +55,19 @@ You can choose either to use or not to use Docker to run betabot.
 
 4. [Configure the bot](#configuration)
 
-5. Install external plugins if wanted
-
-       # for example
-       rake install_plugin[https://example.com/manifest.json]
-
-6. Start the bot
+5. Start the bot
 
        docker-compose up
 
        # or in detached mode
 
        docker-compose up -d
+
+6. Install external plugins if wanted
+
+       # for example, as an admin
+       ~login user pass
+       ~install https://raw.githubusercontent.com/gyng/betabot-example-plugin/master/manifest.json
 
 Settings, accounts, databases, and the public directory are persisted with usage of Docker. The image needs to be rebuilt (easily with `docker-compose up --build -d`) when adapters or plugins are changed or added. As of now, the port mappings in `docker-compose.yml` must be changed manually when not using default ports.
 
