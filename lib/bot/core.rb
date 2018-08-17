@@ -63,7 +63,9 @@ module Bot
 
         @s[:external_plugins][:include].each do |plugin_config|
           manifest_url = plugin_config[:manifest]
+          Bot.log.info "Getting manifest at #{url}..."
           manifest = get_manifest(manifest_url)
+          Bot.log.info "Parsed manifest at #{url}: #{manifest.inspect}"
           reload_needed ||= plugin_install(manifest)
         end
 
@@ -112,6 +114,7 @@ module Bot
       url = m.args[0]
       Bot.log.info "Getting manifest at #{url}..."
       manifest = get_manifest(url)
+      Bot.log.info "Parsed manifest at #{url}: #{manifest.inspect}"
       installed = plugin_install(manifest, true, m)
 
       return if !installed
