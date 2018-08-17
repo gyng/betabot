@@ -29,7 +29,14 @@ end
 
 # Plugin Gemfiles
 plugins_path = File.join(File.dirname(__FILE__), 'lib', 'plugins', '**', 'Gemfile')
+external_plugins_path = File.join(File.dirname(__FILE__), 'lib', 'external_plugins', '**', 'Gemfile')
+
 Dir.glob(plugins_path) do |gemfile|
+  # Dangerous!
+  eval(IO.read(gemfile), binding)
+end
+
+Dir.glob(external_plugins_path) do |gemfile|
   # Dangerous!
   eval(IO.read(gemfile), binding)
 end
