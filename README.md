@@ -69,6 +69,14 @@ You can choose either to use or not to use Docker to run betabot.
        ~login user pass
        ~install https://raw.githubusercontent.com/gyng/betabot-example-plugin/master/manifest.json
 
+7. See commands
+
+       # For plugins
+       ~help
+
+       # For core triggers (admin)
+       ~help core
+
 Settings, accounts, databases, and the public directory are persisted with usage of Docker. The image needs to be rebuilt (easily with `docker-compose up --build -d`) when adapters or plugins are changed or added. As of now, the port mappings in `docker-compose.yml` must be changed manually when not using default ports.
 
 #### Without Docker
@@ -155,31 +163,34 @@ For example: `!ping`, `MyBot: ping`
 
 For all plugins, see the plugins and external_plugins directory.
 
-#### A few core commands
+#### Core commands
+
+Use `~help core` for help with core commands.
 
 * help
-* help plugin
-* install external_plugin_manifest_json_url
-* install external_plugin_manifest_json_url save
-* update external_plugin_name
-* update external_plugin_name save
-* remove external_plugin_name
-* remove external_plugin_name save
+* help [plugin]
+* help core
+* install [external_plugin_manifest_json_url]
+* install [external_plugin_manifest_json_url] save
+* update [external_plugin_name]
+* update [external_plugin_name] save
+* remove [external_plugin_name]
+* remove [external_plugin_name] save
 * plugin_check_list
-* reset_plugin plugin_name
+* reset_plugin [plugin_name]
 * blacklist
-* blacklist_adapter name
-* blacklist_plugin name
-* unblacklist_adapter name
-* unblacklist_plugin name
-* login nick pass
+* blacklist_adapter [name]
+* blacklist_plugin [name]
+* unblacklist_adapter [name]
+* unblacklist_plugin [name]
+* login [nick] [pass]
 * logout
-* reload (reloads plugins)
+* reload  # (reloads plugins)
 * restart
 * reconnect
-* disconnect (closes the connection but does not stop the bot)
+* disconnect
 * shutdown
-* useradd accountname password authlevel
+* useradd [accountname] [password] [authlevel 0-5]
 
 ### Plugin management
 
