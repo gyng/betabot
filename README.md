@@ -96,21 +96,21 @@ Settings, accounts, databases, and the public directory are persisted with usage
 
 ### Configuration
 
-  For bot settings, betabot will read from `bot_settings.user.json` instead of `bot_settings.json` if it exists. `bot_settings.user.json` is ignored in `.gitignore`, which makes it easier to update betabot using git.
+  For bot settings, betabot will read from `bot_settings.user.json`. This file will be automatically created on startup if it does not exist. `bot_settings.user.json` is ignored in `.gitignore`, which makes it easier to update betabot using git.
 
   ```
   cd lib/settings
-  cp bot_settings.json bot_settings.user.json
+  cp bot_settings.default.json bot_settings.user.json
   ```
 
   Settings files that may need changing:<br>
-  * `./lib/settings/bot_settings.json` (for web server configuration options check below)
+  * `./lib/settings/bot_settings.user.json` (for web server configuration options check below)
   * `./lib/settings/adapters/irc.json` (and any per-adapter settings)
   * `./lib/settings/adapters/slack.json` (and any per-adapter settings)
   * `./lib/settings/adapters/discord.json` (and any per-adapter settings)
   * (Optional) any plugin settings in `./lib/settings/plugins/`
 
-  Add the adapters to be run on startup to the autostart key in `bot_settings.json`. Currently supported adapters are `slack` and `irc`.
+  Add the adapters to be run on startup to the autostart key in `bot_settings.user.json`. Currently supported adapters are `slack` and `irc`.
 
   **Note that adapter and plugin settings files are generated with default settings on first run for a fresh install as of now. They do not exist before first run.**
 
@@ -195,7 +195,7 @@ As an admin account (auth >= 5):
 ~plugin_check_list
 ```
 
-If `save` is supplied, the plugin will be added to the list of plugins to be checked for installation/updates on startup. These settings are saved to `bot_settings.json`.
+If `save` is supplied, the plugin will be added to the list of plugins to be checked for installation/updates on startup. These settings are saved to `bot_settings.user.json`.
 
 The plugin might require dependencies. If so, run `bundle install` and restart the bot.
 
@@ -207,7 +207,7 @@ rake update_plugin[$PLUGIN_NAME]
 rake remove_plugin[$PLUGIN_NAME]
 ```
 
-These commands do not provide options to update `bot_settings.json` and are therefore not recommended.
+These commands do not provide options to update `bot_settings.user.json` and are therefore not recommended.
 
 ### Plugin development
 

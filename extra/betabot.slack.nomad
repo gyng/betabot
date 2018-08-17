@@ -70,7 +70,7 @@ job "betabot" {
   }
 }
 EOF
-        destination = "alloc/lib/settings/bot_settings.json"
+        destination = "alloc/lib/settings/bot_settings.user.json"
       }
 
       template {

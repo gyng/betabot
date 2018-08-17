@@ -169,7 +169,7 @@ if defined?(Web)
 end
 ```
 
-This will make available the route `http://yourconfiguredurl/mypath` (configured in `settings/bot_settings.json`) which just displays the string "Hello, world!".
+This will make available the route `http://yourconfiguredurl/mypath` (configured in `settings/bot_settings.user.json`) which just displays the string "Hello, world!".
 
 You will probably need to access instance variables used by your plugin for your web route. Use a closure like this:
 
