@@ -168,7 +168,7 @@ class Bot::Plugin::Image < Bot::Plugin
     # Record each URL found in m.text
     tokens = String.new(m.text).split(' ').uniq
     tokens.each do |t|
-      next if t !~ URI.DEFAULT_PARSER.make_regexp
+      next if t !~ URI::DEFAULT_PARSER.make_regexp
       # If it matches our filters we record regardless
       # Else if it matches content types we will record it,
       # even if it doesn't match the filter
