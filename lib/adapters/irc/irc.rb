@@ -74,7 +74,7 @@ class Bot::Adapter::Irc < Bot::Adapter
   def trigger_plugin(trigger, m)
     case trigger
     when 'reconnect' then reconnect
-    when 'quit' then quit
+    when 'disconnect' then quit
     when 'join' then m.origin.join(m.args[0], m.args[1] || []) if @bot.auth(4, m)
     when 'part' then m.origin.part(m.args[0], m.args[1] || '') if @bot.auth(4, m)
     when 'nick' then m.origin.nick(m.args[0])

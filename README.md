@@ -177,7 +177,7 @@ For all plugins, see the plugins and external_plugins directory.
 * reload (reloads plugins)
 * restart
 * reconnect
-* quit (closes the connection but does not stop the bot)
+* disconnect (closes the connection but does not stop the bot)
 * shutdown
 * useradd accountname password authlevel
 
