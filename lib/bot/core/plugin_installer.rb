@@ -12,8 +12,7 @@ def puts_or_reply(msg, m)
   end
 end
 
-# This method uses puts because Bot.log might not be loaded from the Rakefile.
-def plugin_install(manifest_url, m = nil)
+def get_manifest(manifest_url, m = nil)
   puts_or_reply "ℹ Grabbing manifest from #{manifest_url.bold}…", m
   manifest = open(manifest_url).read
 
@@ -21,9 +20,21 @@ def plugin_install(manifest_url, m = nil)
   parsed = JSON.parse(manifest, symbolize_names: true)
   puts "ℹ Parsed manifest: #{parsed}"
 
-  repo = parsed[:git]
-  plugin_name = parsed[:name]
-  has_dependencies = parsed[:has_dependencies]
+  parsed
+rescue
+  nil
+end
+
+# This method uses puts because Bot.log might not be loaded from the Rakefile.
+def plugin_install(manifest, update_if_exists = true, m = nil)
+  if !manifest
+    puts_or_reply 'Bad manifest, aborting install', m
+    return
+  end
+
+  repo = manifest[:git]
+  plugin_name = manifest[:name]
+  has_dependencies = manifest[:has_dependencies]
   puts "ℹ Git repo is at #{repo}"
 
   FileUtils.mkdir_p(EXTERNAL_PLUGINS_DIR)
@@ -31,6 +42,9 @@ def plugin_install(manifest_url, m = nil)
 
   if File.directory?(plugin_path)
     puts_or_reply "ℹ #{plugin_name.bold.cyan} already exists! Updating it instead…", m
+
+    return false if !update_if_exists
+
     updated = plugin_update(plugin_name, 'master', m)
     return updated
   else

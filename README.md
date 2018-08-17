@@ -9,7 +9,7 @@
 <betabot> Reminder in 0.0h set for 1970-01-01 00:00:10 UTC (UTC).
 <betabot> 🔔 -0.0h gyng > gyng: tea
 
-<gyng> ~install https://plugin.example.com/my_plugin/manifest.json
+<gyng> ~install https://plugin.example.com/my_plugin/manifest.json save
 <betabot> 🎉 Plugin pong installed.
 <gyng> ~pong
 <betabot> peng
@@ -17,7 +17,7 @@
 
 betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to develop for.
 
-Features network adapters and plugin framework goodies (database ORM, web hooks, settings, packaging, install).
+Features network adapters and plugin framework goodies (database ORM, web hooks, settings, install).
 
 Has full IRC and basic Slack and Discord support. Some useful plugins are also included. Not all included plugins support Slack and Discord right now.
 
@@ -159,8 +159,12 @@ For all plugins, see the plugins and external_plugins directory.
 * help
 * help plugin
 * install external_plugin_manifest_json_url
+* install external_plugin_manifest_json_url save
 * update external_plugin_name
+* update external_plugin_name save
 * remove external_plugin_name
+* remove external_plugin_name save
+* plugin_check_list
 * blacklist
 * blacklist_adapter name
 * blacklist_plugin name
@@ -177,17 +181,24 @@ For all plugins, see the plugins and external_plugins directory.
 
 ### Plugin management
 
-#### As a command
+#### As a command (Recommended)
 
 As an admin account (auth >= 5):
 
 ```
 ~install <manifest_url>
+~install <manifest_url> save
 ~update <plugin_name>
 ~remove <plugin_name>
+~remove <plugin_name> save
+~plugin_check_list
 ```
 
-#### CLI
+If `save` is supplied, the plugin will be added to the list of plugins to be checked for installation/updates on startup. These settings are saved to `bot_settings.json`.
+
+The plugin might require dependencies. If so, run `bundle install` and restart the bot.
+
+#### CLI (Not recommended)
 
 ```
 rake install_plugin[$MANIFEST_URL]
@@ -195,9 +206,7 @@ rake update_plugin[$PLUGIN_NAME]
 rake remove_plugin[$PLUGIN_NAME]
 ```
 
-1. Run `rake install_plugin[$MANIFEST_URL]`. An example can be installed using `rake install_plugin[https://raw.githubusercontent.com/gyng/betabot-example-plugin/master/manifest.json]`.
-2. Run `bundle install` to install plugin dependencies, if needed.
-3. If there is a running bot instance, `reload` to reload all plugins.
+These commands do not provide options to update `bot_settings.json` and are therefore not recommended.
 
 ### Plugin development
 

@@ -1,32 +1,46 @@
 {
   "short_trigger": "~",
-
   "adapters": {
     "dir": "adapters",
     "load_mode": "blacklist",
-    "autostart": ["irc"],
-    "whitelist": [],
-    "blacklist": ["dummy"]
-  },
+    "autostart": [
+      "irc"
+    ],
+    "whitelist": [
 
+    ],
+    "blacklist": [
+      "dummy"
+    ]
+  },
   "plugins": {
     "dir": "plugins",
     "load_mode": "blacklist",
-    "whitelist": [],
-    "blacklist": ["dummy", "script"]
-  },
+    "whitelist": [
 
+    ],
+    "blacklist": [
+      "dummy",
+      "script"
+    ]
+  },
   "external_plugins": {
     "dir": "external_plugins",
     "load_mode": "blacklist",
-    "whitelist": [],
-    "blacklist": []
-  },
+    "whitelist": [
 
+    ],
+    "blacklist": [
+
+    ],
+    "check_after_startup": true,
+    "include": [
+
+    ]
+  },
   "databases": {
     "shared_db": true
   },
-
   "webserver": {
     "enabled": false,
     "link_url": "http://localhost:80",

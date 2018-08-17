@@ -8,6 +8,7 @@ module Bot
   require_relative 'plugin'
   require_relative 'util/logger'
 
+  # rubocop:disable Metrics/ClassLength
   class Core
     require_relative 'database'
     require_relative 'core/message'
@@ -52,6 +53,27 @@ module Bot
       initialize_objects(:external_plugin)
       Bot.log.info "#{@adapters.length} adapter(s) and #{@plugins.length} plugin(s) loaded."
       @s[:adapters][:autostart].each { |regex| start_adapters(regex) }
+      check_external_plugins if @s[:external_plugins][:check_after_startup]
+    end
+
+    def check_external_plugins
+      Bot.log.info 'Checking updates for external plugins...'
+      Thread.new do ||
+        reload_needed = false
+
+        @s[:external_plugins][:include].each do |plugin_config|
+          manifest_url = plugin_config[:manifest]
+          manifest = get_manifest(manifest_url)
+          reload_needed ||= plugin_install(manifest)
+        end
+
+        if reload_needed
+          reload(:external_plugin)
+          Bot.log.info 'Plugins updated. Bot reloaded.'
+        else
+          Bot.log.info 'No updates to external plugins.'
+        end
+      end.join
     end
 
     def initialize_objects(type)
@@ -86,8 +108,59 @@ module Bot
       selected.each { |_, v| v.send(method) }
     end
 
+    def core_install_plugin(m)
+      url = m.args[0]
+      manifest = get_manifest(url)
+      installed = plugin_install(manifest, true, m)
+
+      return if !installed
+
+      reload(:external_plugin)
+      m.reply 'Reloaded.' if m.respond_to? :reply
+
+      return if m.args[1] != 'save'
+
+      config = {
+        name: manifest[:name],
+        git: manifest[:git]
+      }
+      @s[:external_plugins][:include].push(config).uniq!
+      save_settings
+      m.reply 'Configuration saved.'
+    end
+
+    def core_remove_plugin(m)
+      name = m.args[0]
+      removed = plugin_remove(name, m)
+
+      return if !removed
+
+      reload(:external_plugin)
+      m.reply 'Reloaded.' if m.respond_to? :reply
+
+      return if m.args[1] != 'save'
+
+      config = @s[:external_plugins][:include].find { |c| c[:name] == name }
+      if config
+        deleted = @s[:external_plugins][:include].delete(config)
+        save_settings if deleted
+        m.reply "Configuration was #{deleted ? '' : 'not '}saved."
+      else
+        m.reply 'Plugin was not in startup plugin check list.'
+      end
+    end
+
+    def core_update_plugin(m)
+      name = m.args[0]
+      updated = plugin_update(name, 'master', m)
+
+      return if !updated
+
+      reload(:external_plugin)
+      m.reply 'Reloaded.' if m.respond_to? :reply
+    end
+
     # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/MethodLength
     def core_triggers(trigger, m)
       if auth(5, m)
@@ -101,6 +174,7 @@ module Bot
           reload(:external_plugin)
           m.reply 'Reloaded.' if m.respond_to? :reply
         when 'useradd'
+          # Fix: check auth levels
           @authenticator.make_account(m.args[0], m.args[1], m.args[2])
           m.reply "User #{m.args[0]} added."
         when 'blacklist_adapter'
@@ -120,26 +194,15 @@ module Bot
           m.reply 'Adapters: ' + @s[:adapters][:blacklist].join(', ')
           m.reply 'Plugins: ' + @s[:plugins][:blacklist].join(', ')
         when 'install'
-          installed = plugin_install(m.args[0], m)
-
-          if installed
-            reload(:external_plugin)
-            m.reply 'Reloaded.' if m.respond_to? :reply
-          end
+          core_install_plugin(m)
         when 'remove'
-          removed = plugin_remove(m.args[0], m)
-
-          if removed
-            reload(:external_plugin)
-            m.reply 'Reloaded.' if m.respond_to? :reply
-          end
+          core_remove_plugin(m)
         when 'update'
-          updated = plugin_update(m.args[0], 'master', m)
-
-          if updated
-            reload(:external_plugin)
-            m.reply 'Reloaded.' if m.respond_to? :reply
-          end
+          core_update_plugin(m)
+        when 'plugin_check_list'
+          checking = @s[:external_plugins][:check_after_startup]
+          list = @s[:external_plugins][:include].inspect
+          m.reply "Checking on startup: #{checking}, #{list}"
         else
           false
         end
@@ -160,7 +223,6 @@ module Bot
       end
     end
     # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/MethodLength
 
     def blacklist(type, name)

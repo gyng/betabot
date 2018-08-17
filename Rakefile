@@ -72,7 +72,8 @@ task :install_plugin, :url do |_t, args|
   if url.nil?
     puts 'USAGE: rake install_plugin[$MANIFEST_URL]'
   else
-    plugin_install(url)
+    manifest = get_manifest(url)
+    plugin_install(manifest)
   end
 end
 

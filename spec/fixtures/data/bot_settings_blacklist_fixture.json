@@ -20,7 +20,9 @@
     "dir": "external_plugins",
     "load_mode": "blacklist",
     "whitelist": [],
-    "blacklist": []
+    "blacklist": [],
+    "check_after_startup": true,
+    "include": []
   },
 
   "databases": {
