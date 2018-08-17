@@ -35,6 +35,8 @@ def plugin_install(manifest, update_if_exists = true, m = nil)
     return
   end
 
+  puts_or_reply "ℹ Installing plugin #{manifest[:name].bold.cyan}..."
+
   repo = manifest[:git]
   plugin_name = manifest[:name]
   has_dependencies = manifest[:has_dependencies]
