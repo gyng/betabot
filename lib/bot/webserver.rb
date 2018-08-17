@@ -23,7 +23,8 @@ def start_sinatra(s, web_app)
     app:    dispatch,
     server: server,
     Host:   host,
-    Port:   port
+    Port:   port,
+    signals: false
   )
 end
 
