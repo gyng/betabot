@@ -51,6 +51,13 @@ job "betabot" {
     "blacklist": ["dummy", "script"]
   },
 
+  "external_plugins": {
+    "dir": "external_plugins",
+    "load_mode": "blacklist",
+    "whitelist": [],
+    "blacklist": []
+  },
+
   "databases": {
     "shared_db": true
   },
@@ -90,6 +97,7 @@ EOF
           "alloc/lib/databases:/app/lib/databases",
           "alloc/lib/public:/app/lib/public",
           "alloc/lib/settings:/app/lib/settings",
+          "alloc/lib/external_plugins:/app/lib/external_plugins",
           "secrets/slack.json:/app/lib/settings/adapters/slack.json:ro"
         ]
       }
