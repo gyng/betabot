@@ -8,4 +8,8 @@ Gem::Specification.new do |s|
   s.files       = Dir['lib/**/*.rb'] + Dir['lib/betabot.rb']
   s.homepage    = 'https://github.com/gyng/betabot/'
   s.metadata    = {}
+
+  s.add_development_dependency 'sequel'
+  s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'git'
 end
