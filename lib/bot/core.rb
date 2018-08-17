@@ -110,8 +110,8 @@ module Bot
 
     def core_install_plugin(m)
       url = m.args[0]
-      manifest = get_manifest(url)
       Bot.log.info "Getting manifest at #{url}..."
+      manifest = get_manifest(url)
       installed = plugin_install(manifest, true, m)
 
       return if !installed

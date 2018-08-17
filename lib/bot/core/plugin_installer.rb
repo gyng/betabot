@@ -31,6 +31,7 @@ end
 def plugin_install(manifest, update_if_exists = true, m = nil)
   if !manifest
     puts_or_reply 'Bad manifest, aborting install', m
+    puts "Manifest: #{manifest.inspect}"
     return
   end
 
