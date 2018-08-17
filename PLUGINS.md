@@ -1,6 +1,6 @@
 # Plugin development
 
-Please see [betabot-example-plugin](https://github.com/gyng/betabot-example-plugin) for an example of an external (ie. not bundled) plugin.
+Please see [betabot-example-plugin](https://github.com/gyng/betabot-example-plugin) for a complete example of an external (ie. not bundled) plugin.
 
 ## Example plugin
 
@@ -33,7 +33,20 @@ Include your gem dependencies in the plugin's Gemfile (as you would usually do f
 
 ## Tests
 
-Include your tests inside a `spec` directory, in the plugin directory. See the ping plugin for a concrete example.
+### External plugins
+
+Include your tests inside a `spec` directory, in the plugin directory. See [betabot-example-plugin](https://github.com/gyng/betabot-example-plugin) for a concrete example.
+
+```ruby
+group :test do
+  gem 'betabot', git: 'git@github.com:gyng/betabot.git'
+  gem 'rspec'
+end
+```
+
+### Bundled plugins
+
+For bundled plugins, do the same. The specfiles will be picked up by `rspec`. See `Ping` for an example.
 
 ## Gotchas
 

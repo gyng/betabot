@@ -165,6 +165,7 @@ For all plugins, see the plugins and external_plugins directory.
 * remove external_plugin_name
 * remove external_plugin_name save
 * plugin_check_list
+* reset_plugin plugin_name
 * blacklist
 * blacklist_adapter name
 * blacklist_plugin name

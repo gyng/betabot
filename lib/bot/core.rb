@@ -160,6 +160,18 @@ module Bot
       m.reply 'Reloaded.' if m.respond_to? :reply
     end
 
+    def reset_plugin(m)
+      name = m.args[0]
+      path = File.join('lib', 'settings', 'plugins', "#{name.downcase}.json")
+
+      if File.file?(path)
+        File.rename(path, "#{path}.bak")
+        m.reply "Settings for #{name} have been reset."
+      else
+        m.reply "Settings file for #{name} was not found."
+      end
+    end
+
     # rubocop:disable Metrics/CyclomaticComplexity
     # rubocop:disable Metrics/MethodLength
     def core_triggers(trigger, m)
@@ -203,6 +215,8 @@ module Bot
           checking = @s[:external_plugins][:check_after_startup]
           list = @s[:external_plugins][:include].inspect
           m.reply "Checking on startup: #{checking}, #{list}"
+        when 'reset_plugin'
+          reset_plugin(m)
         else
           false
         end
