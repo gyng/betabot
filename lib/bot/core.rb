@@ -222,6 +222,8 @@ module Bot
           m.reply "Checking on startup: #{checking}, #{list}"
         when 'reset_plugin'
           reset_plugin(m)
+        when 'version'
+          m.reply $version
         else
           false
         end
@@ -240,7 +242,8 @@ module Bot
         'update' => 'update <plugin_name> Updates an external plugin.',
         'remove' => 'remove <plugin_name> Removes an external plugin.',
         'plugin_check_list' => 'plugin_check_list Shows a list of installed and saved plugins.',
-        'reset_plugin' => 'reset_plugin <name> Resets a plugin\'s settings to the defaults.'
+        'reset_plugin' => 'reset_plugin <name> Resets a plugin\'s settings to the defaults.',
+        'version' => 'version Shows the current version.'
       }
 
       case trigger

@@ -28,7 +28,7 @@ Style/Documentation:
   Enabled: false
 
 Style/GlobalVars:
-  AllowedVariables: [$shutdown, $restart]
+  AllowedVariables: [$shutdown, $restart, $version]
 
 Style/ClassAndModuleChildren:
   EnforcedStyle: compact

@@ -12,6 +12,7 @@ require './lib/bot/core'
 
 $shutdown = false
 $restart = false
+$version = 'unknown'
 
 # Loads .rb patches intended to be run only once.
 patch_dir = File.join(Dir.pwd, 'lib', 'patches')
@@ -28,6 +29,20 @@ File.copy(default, override) if !File.exist?(override)
 
 settings_path = File.exist?(override) ? override : default
 puts "\033[34mLoading settings from #{settings_path}...\033[0m"
+
+begin
+  require 'git'
+  g = Git.open('.')
+  sha = g.object('HEAD^1').sha
+  date = g.object('HEAD^1').date
+
+  if sha
+    $version = "#{sha[0..7]} <#{date}>"
+    puts "VERSION: #{$version}"
+  end
+rescue StandardError => e
+  puts "Warning: could not open current directory as a git repo #{e}"
+end
 
 EM.run { Bot::Core.new(settings_path) }
 if $restart

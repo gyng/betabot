@@ -191,6 +191,7 @@ Use `~help core` for help with core commands.
 * disconnect
 * shutdown
 * useradd [accountname] [password] [authlevel 0-5]
+* version
 
 ### Plugin management
 
