@@ -126,6 +126,7 @@ module Bot
 
       config = {
         name: manifest[:name],
+        manifest: url,
         git: manifest[:git]
       }
       @s[:external_plugins][:include].push(config).uniq!
