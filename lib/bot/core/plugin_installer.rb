@@ -35,7 +35,7 @@ def plugin_install(manifest, update_if_exists = true, m = nil)
     return
   end
 
-  puts_or_reply "ℹ Installing plugin #{manifest[:name].bold.cyan}..."
+  puts_or_reply "ℹ Installing plugin #{manifest[:name].bold.cyan}...", m
 
   repo = manifest[:git]
   plugin_name = manifest[:name]
@@ -67,6 +67,7 @@ def plugin_install(manifest, update_if_exists = true, m = nil)
   end
 rescue StandardError => e
   puts_or_reply "🔥 Failed to install plugin: #{e}", m
+  puts e.backtrace
   false
 end
 
@@ -102,6 +103,7 @@ def plugin_update(name, branch = 'master', m = nil)
   updated
 rescue StandardError => e
   puts_or_reply "🔥 Failed to update plugin: #{e}", m
+  puts e.backtrace
   false
 end
 
@@ -117,5 +119,6 @@ def plugin_remove(name, m = nil)
   true
 rescue StandardError => e
   puts_or_reply "🔥 Failed to remove plugin: #{e}", m
+  puts e.backtrace
   false
 end
