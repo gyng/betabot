@@ -17,9 +17,16 @@ class Bot::Plugin::Wolfram < Bot::Plugin
   def call(m)
     m.reply 'Wolfram API key has not been configured.' if @s[:api_key].empty?
 
-    Thread.new do
-      m.reply format_wolfram(wolfram(m.args.join(' ')))
-    end
+    operation = proc {
+      Timeout.timeout(30) do
+        format_wolfram(wolfram(m.args.join(' ')))
+      end
+    }
+    callback = proc { |result|
+      m.reply result
+    }
+    errback = proc { |e| Bot.log.info "Woflram: Failed to get query #{e}" }
+    EM.defer(operation, callback, errback)
   end
 
   def wolfram(search_term, depth = 1)

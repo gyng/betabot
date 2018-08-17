@@ -47,16 +47,16 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       tokens.each do |t|
         next if regex.match(t).nil?
 
-        Thread.new do
-          begin
-            Timeout.timeout(@s[:timeout]) do
-              google_guess = get_guess_google(t)
-              m.reply google_guess if !google_guess.nil? && !google_guess.empty?
-            end
-          rescue StandardError => e
-            Bot.log.info "EntitleRI: Error in formulating guess: #{e} #{e.backtrace}"
+        operation = proc {
+          Timeout.timeout(@s[:timeout]) do
+            get_guess_google(t)
           end
-        end
+        }
+        callback = proc { |google_guess|
+          m.reply google_guess if !google_guess.nil? && !google_guess.empty?
+        }
+        errback = proc { |e| Bot.log.info "EntitleRI: Failed to get guess #{e}" }
+        EM.defer(operation, callback, errback)
       end
     end
   end

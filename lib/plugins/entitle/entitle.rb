@@ -59,14 +59,17 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
       tokens.each do |t|
         next if regex.match(t).nil?
-
-        Thread.new do
+        operation = proc {
           Timeout.timeout(@s[:timeout]) do
-            title = get_title(t)
-            m.reply(title) if !title.nil? && !titles.include?(title)
-            titles.push(title)
+            get_title(t)
           end
-        end
+        }
+        callback = proc { |title|
+          m.reply(title) if !title.nil? && !titles.include?(title)
+          titles.push(title)
+        }
+        errback = proc { |e| Bot.log.info "Entitle: Failed to get title #{e}" }
+        EM.defer(operation, callback, errback)
       end
     end
   end
