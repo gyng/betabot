@@ -8,6 +8,11 @@
 <gyng> betabot: remind me about tea in 10 seconds
 <betabot> Reminder in 0.0h set for 1970-01-01 00:00:10 UTC (UTC).
 <betabot> 🔔 -0.0h gyng > gyng: tea
+
+<gyng> ~install https://plugin.example.com/my_plugin/manifest.json
+<betabot> 🎉 Plugin pong installed.
+<gyng> ~pong
+<betabot> peng
 ```
 
 betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to develop for.
@@ -153,6 +158,9 @@ For all plugins, see the plugins and external_plugins directory.
 
 * help
 * help plugin
+* install external_plugin_manifest_json_url
+* update external_plugin_name
+* remove external_plugin_name
 * blacklist
 * blacklist_adapter name
 * blacklist_plugin name
@@ -167,9 +175,25 @@ For all plugins, see the plugins and external_plugins directory.
 * shutdown
 * useradd accountname password authlevel
 
-### Installing plugins
+### Plugin management
 
-To install a plugin from a URL:
+#### As a command
+
+As an admin account (auth >= 5):
+
+```
+~install <manifest_url>
+~update <plugin_name>
+~remove <plugin_name>
+```
+
+#### CLI
+
+```
+rake install_plugin[$MANIFEST_URL]
+rake update_plugin[$PLUGIN_NAME]
+rake remove_plugin[$PLUGIN_NAME]
+```
 
 1. Run `rake install_plugin[$MANIFEST_URL]`. An example can be installed using `rake install_plugin[https://raw.githubusercontent.com/gyng/betabot-example-plugin/master/manifest.json]`.
 2. Run `bundle install` to install plugin dependencies, if needed.

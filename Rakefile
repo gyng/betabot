@@ -64,48 +64,40 @@ task :make_plugin, :name do |_t, args|
 end
 
 task :install_plugin, :url do |_t, args|
-  require 'git'
-  require 'json'
-  require 'open-uri'
+  load 'lib/patches/ansi_string.rb'
+  load 'lib/bot/core/plugin_installer.rb'
 
   url = args[:url]
 
-  puts "ℹ Grabbing manifest from #{url}..."
-  manifest = open(url).read
-
-  puts 'ℹ Parsing manifest JSON...'
-  parsed = JSON.parse(manifest, symbolize_names: true)
-  puts "ℹ Parsed manifest: #{parsed}"
-
-  repo = parsed[:git]
-  plugin_name = parsed[:name]
-  puts "ℹ Git repo is at #{repo}"
-
-  plugins_dir = 'lib/plugins'
-  FileUtils.mkdir_p(plugins_dir)
-  plugin_path = File.join(plugins_dir, plugin_name)
-
-  if File.directory?(plugin_path)
-    puts "🔥 Directory #{plugin_path} already exists! Delete it first or run `rake update_plugin[#{plugin_name}]`"
-    next
+  if url.nil?
+    puts 'USAGE: rake install_plugin[$MANIFEST_URL]'
+  else
+    plugin_install(url)
   end
-
-  puts 'ℹ Cloning plugin...'
-  Git.clone(repo, plugin_name, path: plugins_dir)
-
-  puts "ℹ Plugin #{plugin_name} installed. Run `bundle install` if needed."
 end
 
 task :update_plugin, :name do |_t, args|
-  require 'git'
+  load 'lib/patches/ansi_string.rb'
+  load 'lib/bot/core/plugin_installer.rb'
 
   name = args[:name]
-  plugin_path = File.join('lib', 'external_plugins', name)
 
-  puts "ℹ Updating plugin #{name} at #{plugin_path}..."
+  if name.nil?
+    puts 'USAGE: rake update_plugin[$NAME]'
+  else
+    plugin_update(name, 'master')
+  end
+end
 
-  g = Git.open(plugin_path)
-  g.pull
+task :remove_plugin, :name do |_t, args|
+  load 'lib/patches/ansi_string.rb'
+  load 'lib/bot/core/plugin_installer.rb'
 
-  puts "ℹ Plugin #{name} updated to #{g.show('HEAD')}."
+  name = args[:name]
+
+  if name.nil?
+    puts 'USAGE: rake remove_plugin[$NAME]'
+  else
+    plugin_remove(name)
+  end
 end

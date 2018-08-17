@@ -13,6 +13,7 @@ module Bot
     require_relative 'core/message'
     require_relative 'core/object_loader'
     require_relative 'core/authenticator'
+    require_relative 'core/plugin_installer'
     require_relative 'util/settings'
 
     include Bot::Core::ObjectLoader
@@ -86,6 +87,8 @@ module Bot
     end
 
     # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/MethodLength
     def core_triggers(trigger, m)
       if auth(5, m)
         case trigger
@@ -116,6 +119,27 @@ module Bot
         when 'blacklist'
           m.reply 'Adapters: ' + @s[:adapters][:blacklist].join(', ')
           m.reply 'Plugins: ' + @s[:plugins][:blacklist].join(', ')
+        when 'install'
+          installed = plugin_install(m.args[0], m)
+
+          if installed
+            reload(:external_plugin)
+            m.reply 'Reloaded.' if m.respond_to? :reply
+          end
+        when 'remove'
+          removed = plugin_remove(m.args[0], m)
+
+          if removed
+            reload(:external_plugin)
+            m.reply 'Reloaded.' if m.respond_to? :reply
+          end
+        when 'update'
+          updated = plugin_update(m.args[0], 'master', m)
+
+          if updated
+            reload(:external_plugin)
+            m.reply 'Reloaded.' if m.respond_to? :reply
+          end
         else
           false
         end
@@ -136,6 +160,8 @@ module Bot
       end
     end
     # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
+    # rubocop:enable Metrics/MethodLength
 
     def blacklist(type, name)
       @s["#{type}s".to_sym][:blacklist].push(name).uniq!
