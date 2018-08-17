@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name        = 'betabot-lib'
+  s.name        = 'betabot'
   s.version     = '0.0.1'
   s.licenses    = ['MIT']
   s.summary     = "Betabot as a lib."
