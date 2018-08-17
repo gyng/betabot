@@ -20,19 +20,12 @@ class Bot::Plugin::Shipment < Bot::Plugin
   end
 
   def get_entry(username, name)
-    puts @s[:tracked_shipments], username, name
-
-    if @s[:tracked_shipments][username.intern]
-      return @s[:tracked_shipments][username.intern][name.intern]
-    end
-
+    return @s[:tracked_shipments][username.intern][name.intern] if @s[:tracked_shipments][username.intern]
     nil
   end
 
   def shipment(m)
-    if !@s[:aftership_api_key]
-      m.reply 'Get an API key from https://secure.aftership.com/#/settings/api'
-    end
+    m.reply 'Get an API key from https://secure.aftership.com/#/settings/api' if !@s[:aftership_api_key]
 
     case m.mode
     when 'add'

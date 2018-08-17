@@ -53,7 +53,7 @@ class Bot::Core::Authenticator
       else
         File.write(@authentications_path, {}.to_json)
       end
-    rescue
+    rescue StandardError
       File.write(@authentications_path, {}.to_json)
     end
 

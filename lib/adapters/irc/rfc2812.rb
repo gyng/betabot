@@ -285,3 +285,4 @@ module Bot::Adapter::Irc::RFC2812
     away ''
   end
 end
+# rubocop:enable Metrics/ModuleLength, Metrics/ParameterLists

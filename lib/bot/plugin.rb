@@ -24,9 +24,7 @@ class Bot::Plugin
       @s[:trigger].each { |trigger, opts| bot.register_trigger(trigger, @plugin_name, *opts) }
     end
 
-    if @s[:subscribe] == true && bot.methods.include?(:subscribe_plugin)
-      bot.subscribe_plugin(@plugin_name)
-    end
+    bot.subscribe_plugin(@plugin_name) if @s[:subscribe] == true && bot.methods.include?(:subscribe_plugin)
 
     Bot.log.info("Loaded plugin #{self.class.name}")
   end

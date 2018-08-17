@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'https://github.com/gyng/betabot/'
   s.metadata    = {}
 
+  s.add_runtime_dependency 'git'
   s.add_runtime_dependency 'sequel'
   s.add_runtime_dependency 'sqlite3'
-  s.add_runtime_dependency 'git'
 end

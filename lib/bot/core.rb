@@ -20,7 +20,7 @@ module Bot
     include Bot::Core::ObjectLoader
     include Bot::Util::Settings
 
-    attr_reader :adapters, :plugins, :s, :shared_db, :auth
+    attr_reader :adapters, :plugins, :s, :shared_db
     START_TIME = Time.now
 
     def initialize(bot_settings_path)
@@ -58,7 +58,7 @@ module Bot
 
     def check_external_plugins
       Bot.log.info 'Checking updates for external plugins...'
-      Thread.new do ||
+      Thread.new do
         reload_needed = false
 
         @s[:external_plugins][:include].each do |plugin_config|
@@ -328,4 +328,5 @@ module Bot
       end
     end
   end
+  # rubocop:enable Metrics/ClassLength
 end

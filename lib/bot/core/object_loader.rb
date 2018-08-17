@@ -11,9 +11,7 @@ module Bot::Core::ObjectLoader
 
     Dir.foreach(objects_dir) do |f|
       next if ['.', '..'].include?(f)
-      if File.directory?(File.join(objects_dir, f)) && accepted?(type, f, mode)
-        load_curry(type).call(f)
-      end
+      load_curry(type).call(f) if File.directory?(File.join(objects_dir, f)) && accepted?(type, f, mode)
     end
   end
 
@@ -38,7 +36,9 @@ module Bot::Core::ObjectLoader
         # And store a reference to that object in @types (eg. @plugins)
         # Store external plugins in the plugins list
         # TODO: check for name collisions
+        # rubocop:disable Style/EvalWithLocation
         instance_eval("@#{actual_type}s")[f.downcase.to_sym] = object
+        # rubocop:enable Style/EvalWithLocation
       rescue LoadError, StandardError, SyntaxError => e
         Bot.log.warn "Failed to load #{f} - #{e}\n\t#{e.backtrace.join("\n\t")}"
       end

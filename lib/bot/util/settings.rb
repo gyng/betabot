@@ -5,7 +5,7 @@ module Bot::Util
       save_settings unless File.file?(path)
       begin
         @s = JSON.parse(File.read(path).force_encoding('utf-8'), symbolize_names: true)
-      rescue
+      rescue StandardError
         FileUtils.cp(path, "#{path}.bad") # Bad settings file, revert to defaults
         save_settings
       end

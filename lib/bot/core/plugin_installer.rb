@@ -14,14 +14,16 @@ end
 
 def get_manifest(manifest_url, m = nil)
   puts_or_reply "ℹ Grabbing manifest from #{manifest_url.bold}…", m
+  # rubocop:disable Security/Open
   manifest = open(manifest_url).read
+  # rubocop:enable Security/Open
 
   puts 'ℹ Parsing manifest JSON…'
   parsed = JSON.parse(manifest, symbolize_names: true)
   puts "ℹ Parsed manifest: #{parsed}"
 
   parsed
-rescue
+rescue StandardError
   nil
 end
 

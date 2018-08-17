@@ -24,6 +24,7 @@ class String
   def pure_string
     loop { self[/\033\[\d+m/] = '' }
   rescue IndexError
-    return self
+    self
   end
 end
+# rubocop:enable Style/SingleLineMethods, Layout/EmptyLineBetweenDefs

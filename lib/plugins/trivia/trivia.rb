@@ -1,4 +1,4 @@
-require 'uri'
+require 'cgi'
 
 class Bot::Plugin::Trivia < Bot::Plugin
   def initialize(bot)
@@ -47,9 +47,9 @@ class Bot::Plugin::Trivia < Bot::Plugin
 
     q.each do |k, v|
       if v.is_a? Array
-        q[k] = v.map { |opt| URI.unescape(opt).strip }
+        q[k] = v.map { |opt| CGI.unescape(opt).strip }
       elsif v.is_a? String
-        q[k] = URI.unescape(v).strip
+        q[k] = CGI.unescape(v).strip
       end
     end
 
@@ -70,7 +70,7 @@ class Bot::Plugin::Trivia < Bot::Plugin
     @games[m.channel] += 1
 
     @active[m.channel] = {
-      time: DateTime.now,
+      time: Time.now,
       answer: q[:correct_answer],
       answer_key: answer_key,
       options: options,

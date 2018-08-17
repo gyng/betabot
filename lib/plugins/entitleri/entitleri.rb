@@ -65,11 +65,13 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     Bot.log.info "EntitleRI: Getting Google best guess of #{url}"
 
     # Get redirect by spoofing User-Agent
+    # rubocop:disable Security/Open
     html = open(@s[:google_query] + url,
                 'User-Agent' => @s[:user_agent],
                 allow_redirections: :all,
                 ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
                 read_timeout: @s[:timeout])
+    # rubocop:enable Security/Open
 
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'

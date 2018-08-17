@@ -88,7 +88,9 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
   end
 
   def now_playing(m = nil)
+    # rubocop:disable Security/Open
     doc      = Nokogiri::HTML(open(@control_addr))
+    # rubocop:enable Security/Open
     filepath = doc.search('//td[@colspan="4"]/a[1]').inner_text
     filename = filepath.to_s.split('\\').last
     cur_time = doc.search('//td[@id="time"]').inner_text

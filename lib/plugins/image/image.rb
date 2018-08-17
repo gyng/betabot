@@ -108,6 +108,7 @@ class Bot::Plugin::Image < Bot::Plugin
         </html>'
     end
   end
+  # rubocop:enable Metrics/MethodLength
 
   def random_images(n)
     @db[:images].order(Sequel.lit('RANDOM()')).limit(n).to_a
@@ -167,7 +168,7 @@ class Bot::Plugin::Image < Bot::Plugin
     # Record each URL found in m.text
     tokens = String.new(m.text).split(' ').uniq
     tokens.each do |t|
-      next if t !~ URI.regexp
+      next if t !~ URI.DEFAULT_PARSER.make_regexp
       # If it matches our filters we record regardless
       # Else if it matches content types we will record it,
       # even if it doesn't match the filter
@@ -190,7 +191,9 @@ class Bot::Plugin::Image < Bot::Plugin
       # Grab file. TODO: setup a timeout
       begin
         File.open(temp_path, 'wb') do |f|
+          # rubocop:disable Security/Open
           f.write(open(url).read)
+          # rubocop:enable Security/Open
         end
       rescue StandardError => e
         Bot.log.info("Failed to open image #{url} #{e}")
@@ -233,6 +236,7 @@ class Bot::Plugin::Image < Bot::Plugin
 
       Bot.log.info "#{self.class.name} - #{url} saved."
     end
+    # rubocop:enable Metrics/BlockLength
   end
 
   def get_guess(url)
@@ -244,12 +248,14 @@ class Bot::Plugin::Image < Bot::Plugin
       user_agent = 'Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0'
 
       # Get redirect by spoofing User-Agent
+      # rubocop:disable Security/Open
       html = open(
         query + url,
         'User-Agent' => user_agent,
         allow_redirections: :all,
         ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
       )
+      # rubocop:enable Security/Open
 
       doc = Nokogiri::HTML(html.read)
       doc.encoding = 'utf-8'
@@ -259,3 +265,4 @@ class Bot::Plugin::Image < Bot::Plugin
     end
   end
 end
+# rubocop:enable Metrics/ClassLength

@@ -17,7 +17,7 @@ class Bot::Database
     else
       super
     end
-  rescue => e
+  rescue StandardError => e
     Bot.log.error "Bot::Database - #{@path}: #{e}\n#{e.backtrace.join("\n")}"
   end
 

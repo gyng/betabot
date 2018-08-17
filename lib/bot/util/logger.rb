@@ -1,7 +1,5 @@
 module Bot
   class << self
-    attr_accessor :log
-
     def log
       unless @log
         @log = Logger.new(STDOUT)

@@ -235,6 +235,8 @@ class Bot::Plugin::Remind < Bot::Plugin
 
     m.reply "Reminder in #{human_time} set for #{remind_at} (#{tz.identifier})."
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/PerceivedComplexity
 
   private
 
@@ -282,3 +284,4 @@ class Bot::Plugin::Remind < Bot::Plugin
     nil
   end
 end
+# rubocop:enable Metrics/ClassLength

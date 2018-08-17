@@ -74,7 +74,9 @@ class Bot::Plugin::Entitle < Bot::Plugin
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
     # Storing into local var `html` bypasses bad unicode handling by Nokogiri
+    # rubocop:disable Security/Open
     html = open(url, allow_redirections: :all)
+    # rubocop:enable Security/Open
     doc = Nokogiri::HTML(html.read)
     doc.encoding = 'utf-8'
     doc.at_css('title').text.gsub(/ *\n */, ' ').strip

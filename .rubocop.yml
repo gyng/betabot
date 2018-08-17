@@ -1,5 +1,7 @@
 AllCops:
-  TargetRubyVersion: 2.0
+  TargetRubyVersion: 2.2
+  Exclude:
+    - 'lib/external_plugins'
 
 Metrics/LineLength:
   Max: 120
@@ -47,4 +49,10 @@ Metrics/BlockLength:
     - lib/plugins/**/spec/*
 
 Layout/EndOfLine:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Naming/UncommunicativeMethodParamName:
   Enabled: false
