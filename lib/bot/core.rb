@@ -178,6 +178,7 @@ module Bot
     end
 
     # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/MethodLength
     def core_triggers(trigger, m)
       if auth(5, m)
@@ -257,19 +258,28 @@ module Bot
           if core_triggers_help.key?(query)
             m.reply core_triggers_help[query]
           else
-            m.reply "#{'Core triggers'.blue}: #{core_triggers_help.keys.join(', ')}. Use help core <trigger> for details."
+            msg = [
+              "#{'Core triggers'.blue}: #{core_triggers_help.keys.join(', ')}.",
+              'Use help core <trigger> for details.'
+            ].join(' ')
+            m.reply msg
           end
         else
           query = m.args[0].to_sym if m.args[0].is_a?(String)
           if @plugin_mapping.key?(query)
             m.reply @plugin_mapping[query][:help]
           else
-            m.reply "#{'Plugin triggers'.green}: #{@plugin_mapping.keys.join(', ')}. Use help <trigger> for details. Use help core for core triggers."
+            msg = [
+              "#{'Plugin triggers'.green}: #{@plugin_mapping.keys.join(', ')}.",
+              'Use help <trigger> for details. Use help core for core triggers.'
+            ].join(' ')
+            m.reply msg
           end
         end
       end
     end
     # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/PerceivedComplexity
     # rubocop:enable Metrics/MethodLength
 
     def blacklist(type, name)
