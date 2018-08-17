@@ -29,15 +29,20 @@ end
 
 # Plugin Gemfiles
 plugins_path = File.join(File.dirname(__FILE__), 'lib', 'plugins', '**', 'Gemfile')
-external_plugins_path = File.join(File.dirname(__FILE__), 'lib', 'external_plugins', '**', 'Gemfile')
+external_plugins_path = File.join(File.dirname(__FILE__), 'lib', 'external_plugins', '**')
 
 Dir.glob(plugins_path) do |gemfile|
   # Dangerous!
   eval(IO.read(gemfile), binding)
 end
 
-Dir.glob(external_plugins_path) do |gemfile|
+Dir.glob(external_plugins_path) do |dir|
+  path = File.join(dir, 'manifest.json')
+  next if !File.file? path
+
+  manifest = JSON.parse(File.read(path), symbolize_names: true)
+  has_dependencies = manifest[:has_dependencies]
   # Dangerous!
-  eval(IO.read(gemfile), binding)
+  eval(IO.read(gemfile), binding) if has_dependencies
 end
 # rubocop:enable Security/Eval
