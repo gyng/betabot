@@ -67,6 +67,7 @@ end
 
 def plugin_update(name, branch = 'master', m = nil)
   plugin_path = File.join(EXTERNAL_PLUGINS_DIR, name)
+  manifest_path = File.join(plugin_path, 'manifest.json')
   gemfile_path = File.join(plugin_path, 'Gemfile')
 
   puts_or_reply "ℹ Updating plugin #{name.bold.cyan}…", m
@@ -82,12 +83,13 @@ def plugin_update(name, branch = 'master', m = nil)
   new_gemfile = File.file?(gemfile_path) ? File.read(gemfile_path) : nil
 
   updated = new_sha != current_sha
+  has_dependencies = JSON.parse(File.read(manifest_path), symbolize_names: true)
   updated_gemfile = new_gemfile != current_gemfile
 
   action = updated ? 'updated to' : 'already at'
   puts_or_reply "🎉 Plugin #{name.bold.cyan} #{action} #{new_sha[0..7]} <#{new_date}> (#{branch}).", m
 
-  if updated_gemfile
+  if has_dependencies && updated_gemfile
     puts_or_reply "🎉 Plugin's Gemfile has changed. Running `bundle install`...", m
     `bundle install`
   end
