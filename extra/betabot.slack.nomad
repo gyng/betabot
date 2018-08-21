@@ -1,4 +1,6 @@
-// 0. Add Slack token to vault at `secret/betabot/slack` with the key `api_token`
+// 0. Add Slack token to vault at `secret/betabot/slack` under the key `api_token`
+//    Add authentication.json at `secret/betabot/authentication` under the key `authentication`
+//    authentication.json
 //
 // 1. Login to vault on deploying machine
 //
@@ -80,6 +82,13 @@ EOF
         destination = "secrets/slack.json"
       }
 
+      template {
+        data = <<EOF
+{{- with secret "secret/betabot/authentication" -}}{{ .Data.authentication }}{{- end -}}
+EOF
+        destination = "secrets/authentication.json"
+      }
+
       config {
         image = "gyng/betabot"
         command = "bundle"
@@ -98,7 +107,8 @@ EOF
           "alloc/lib/public:/app/lib/public",
           "alloc/lib/settings:/app/lib/settings",
           "alloc/lib/external_plugins:/app/lib/external_plugins",
-          "secrets/slack.json:/app/lib/settings/adapters/slack.json:ro"
+          "secrets/slack.json:/app/lib/settings/adapters/slack.json:ro",
+          "secrets/authentication.json:/app/lib/settings/authentication.json:ro"
         ]
       }
 
