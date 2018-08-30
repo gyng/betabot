@@ -25,7 +25,7 @@ end
 
 override = File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.user.json')
 default = File.join(Dir.pwd, 'lib', 'settings', 'bot_settings.default.json')
-File.copy(default, override) if !File.exist?(override)
+FileUtils.copy(default, override) if !File.exist?(override)
 
 settings_path = File.exist?(override) ? override : default
 puts "\033[34mLoading settings from #{settings_path}...\033[0m"
