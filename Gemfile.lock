@@ -43,7 +43,6 @@ GEM
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.1)
-    json (2.1.0)
     mechanize (2.7.6)
       domain_name (~> 0.5, >= 0.5.1)
       http-cookie (~> 1.0)
@@ -114,7 +113,6 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.10.0)
-    rubyzip (1.2.1)
     sequel (5.11.0)
     sinatra (2.0.3)
       mustermann (~> 1.0)
@@ -167,7 +165,6 @@ DEPENDENCIES
   faye-websocket
   gemoji
   git
-  json
   mechanize
   nokogiri
   open_uri_redirections
@@ -175,7 +172,6 @@ DEPENDENCIES
   rest-client
   rspec
   rubocop
-  rubyzip
   sequel
   sinatra
   slack-ruby-client
@@ -186,4 +182,4 @@ DEPENDENCIES
   unicode_utils
 
 BUNDLED WITH
-   1.16.2
+   1.16.3
