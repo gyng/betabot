@@ -73,7 +73,7 @@ class Bot::Plugin::Script < Bot::Plugin
   end
 
   class Bot::Plugin::Script::Context
-    def get_binding # rubocop:disable Style/AccessorMethodName
+    def get_binding # rubocop:disable Naming/AccessorMethodName
       binding
     end
   end
