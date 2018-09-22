@@ -8,7 +8,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
     @s = {
       trigger: { showtime: [
         :showtime, 0,
-        'showtime <showname> - Returns airing details of matching anime from anime.yshi.org'
+        'showtime <showname> - Returns airing details of matching anime from anilist.co'
       ] },
       anilist: {
         client_id: 'https://anilist.co/settings/developer',
@@ -33,7 +33,9 @@ class Bot::Plugin::Showtime < Bot::Plugin
   def showtime(m)
     refresh_anilist_token if !valid_anilist_token?
     query = m.args[0..-1].join(' ').force_encoding('UTF-8')
-    candidates_uri = URI.parse(CGI.escape("#{@anilist[:endpoints][:search]}/#{query}"))
+    # rubocop:disable Lint/UriEscapeUnescape
+    candidates_uri = URI.parse(URI.escape("#{@anilist[:endpoints][:search]}/#{query}"))
+    # rubocop:enable Lint/UriEscapeUnescape
     candidates_res = get_anilist_api(candidates_uri)
 
     if candidates_res.is_a? Net::HTTPSuccess
@@ -47,7 +49,9 @@ class Bot::Plugin::Showtime < Bot::Plugin
       m.reply "No currently airing shows were found for 「#{query}」." if candidate_ids.empty?
 
       candidate_ids[0..@anilist[:max_results]].each do |id|
-        anime_uri = URI.parse(CGI.escape("#{@anilist[:endpoints][:anime]}/#{id}"))
+        # rubocop:disable Lint/UriEscapeUnescape
+        anime_uri = URI.parse(URI.escape("#{@anilist[:endpoints][:anime]}/#{id}"))
+        # rubocop:enable Lint/UriEscapeUnescape
         m.reply prettify(JSON.parse(get_anilist_api(anime_uri).body, symbolize_names: true))
       end
     else
