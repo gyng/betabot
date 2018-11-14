@@ -230,7 +230,14 @@ class Bot::Plugin::Remind < Bot::Plugin
                  end
 
     EventMachine.add_timer(seconds_to_trigger) do
-      m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
+      begin
+        # reconnect persistence hack
+        current_handler = @bot.adapters[m.adapter].handler
+        m.origin = current_handler if current_handler != m.origin
+        m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
+      rescue StandardError
+        m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
+      end
     end
 
     m.reply "Reminder in #{human_time} set for #{remind_at} (#{tz.identifier})."

@@ -1,6 +1,8 @@
 require 'discordrb'
 
 class Bot::Adapter::Discord < Bot::Adapter
+  attr_accessor :handler
+
   def initialize(bot)
     require_relative 'message'
 
@@ -16,6 +18,7 @@ class Bot::Adapter::Discord < Bot::Adapter
 
   def connect
     @client = Discordrb::Bot.new token: @s[:api_token], client_id: @s[:client_id]
+    @handler = @client
 
     @client.message do |data|
       Bot.log.info "#{self.class.name} #{@s[:client_id]}\n\t#{'<-'.cyan} #{data.message.inspect}"

@@ -1,6 +1,8 @@
 require 'slack-ruby-client'
 
 class Bot::Adapter::Slack < Bot::Adapter
+  attr_accessor :handler
+
   def initialize(bot)
     require_relative 'message'
 
@@ -19,6 +21,7 @@ class Bot::Adapter::Slack < Bot::Adapter
 
   def connect
     @client = ::Slack::RealTime::Client.new(token: @s[:api_token], logger: @slack_logger)
+    @handler = @client
 
     @client.on :message do |data|
       Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'<-'.cyan} #{data}"

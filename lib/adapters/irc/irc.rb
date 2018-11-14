@@ -1,5 +1,6 @@
 class Bot::Adapter::Irc < Bot::Adapter
   attr_accessor :latency
+  attr_accessor :handler
 
   def initialize(bot)
     require_relative 'message'
@@ -40,7 +41,8 @@ class Bot::Adapter::Irc < Bot::Adapter
       begin
         host = s[:hostname].sample
         Bot.log.info "IRC: Connecting to #{host}..."
-        @connections[s[:name].to_sym] = EM.connect(host, s[:port], Handler, self, s)
+        @handler = EM.connect(host, s[:port], Handler, self, s)
+        @connections[s[:name].to_sym] = @handler
       rescue StandardError => e
         EM.add_timer(@reconnect_delay) { connect(s[:name]) }
         Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, retrying in #{@reconnect_delay}s"
