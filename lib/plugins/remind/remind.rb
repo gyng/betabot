@@ -163,6 +163,7 @@ class Bot::Plugin::Remind < Bot::Plugin
 
   # The logic is messy as we support multiple TZ declaration formats
   # while needing to hack around Chronic parsing quirks.
+  # rubocop:disable Metrics/MethodLength
   # rubocop:disable Metrics/CyclomaticComplexity
   # rubocop:disable Metrics/PerceivedComplexity
   def remind(m)
@@ -231,7 +232,8 @@ class Bot::Plugin::Remind < Bot::Plugin
 
     EventMachine.add_timer(seconds_to_trigger) do
       begin
-        # reconnect persistence hack
+        # Reconnect persistence hack
+        # @origin changes when reconnecting, so we mutate! the original message
         current_handler = @bot.adapters[m.adapter].handler
         m.origin = current_handler if current_handler != m.origin
         m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
@@ -242,6 +244,7 @@ class Bot::Plugin::Remind < Bot::Plugin
 
     m.reply "Reminder in #{human_time} set for #{remind_at} (#{tz.identifier})."
   end
+  # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
 
