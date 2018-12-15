@@ -12,16 +12,23 @@ class Bot::Plugin::Pick < Bot::Plugin
   end
 
   def pick(m)
-    picks = m.args[0] =~ /[0-9]+/ ? m.args[0].to_i : 1
-    m.reply m.args[1..-1].sample(picks).join(', ')
+    picks_arg = m.args[0] =~ /[0-9]+/
+    picks = picks_arg ? m.args[0].to_i : 1
+    picks = picks > 2_147_483_647 ? 2_147_483_647 : picks
+    starting_index = numeric?(picks_arg) ? 1 : 0
+    m.reply m.args[starting_index..-1].join(' ').split(',').sample(picks).map(&:strip).join(', ')
   end
 
   def shuffle(m)
-    m.reply m.args.shuffle.join(', ')
+    m.reply m.args.join(' ').split(',').shuffle.map(&:strip).join(', ')
   end
 
   def dice(m)
     sides = !m.args.empty? ? m.args[0].to_i : 6
     m.reply Random.rand(sides)
+  end
+
+  def numeric?(obj)
+    obj.to_s.match(/\A[+-]?\d+?(\.\d+)?\Z/).nil? ? false : true
   end
 end
