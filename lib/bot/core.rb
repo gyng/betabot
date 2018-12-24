@@ -212,6 +212,7 @@ module Bot
           m.reply 'Adapters: ' + @s[:adapters][:blacklist].join(', ')
           m.reply 'Plugins: ' + @s[:plugins][:blacklist].join(', ')
           m.reply 'Users: ' + @s[:users][:blacklist].join(', ')
+          m.reply 'Content: ' + @s[:contents][:blacklist].join(', ')
         when 'blacklist_user'
           blacklist(:user, m.args[0])
           m.reply "Ignoring user #{m.args[0]}."
