@@ -316,7 +316,7 @@ module Bot
       regices.each do |re|
         if re.match(value)
           Bot.log.info("Bot::Core - Blacklist check for #{type} returned false for value #{value}")
-          return true 
+          return true
         end
       end
 
@@ -329,7 +329,9 @@ module Bot
     def trigger_plugin(trigger, m)
       unless core_triggers(trigger, m)
         # Check if plugin responds to trigger after core triggers
-        return :blacklist if blacklisted?(:user, m.hostname) || blacklisted?(:user, m.sender) || blacklisted?(:user, m.real_name)
+        return :blacklist if blacklisted?(:user, m.hostname) ||
+                             blacklisted?(:user, m.sender) ||
+                             blacklisted?(:user, m.real_name)
         return :blacklist if blacklisted?(:content, m.text)
 
         if @plugin_mapping.key?(trigger.to_sym)
@@ -351,7 +353,9 @@ module Bot
     end
 
     def publish(m)
-      return :blacklist if blacklisted?(:user, m.hostname) || blacklisted?(:user, m.sender) || blacklisted?(:user, m.real_name)
+      return :blacklist if blacklisted?(:user, m.hostname) ||
+                           blacklisted?(:user, m.sender) ||
+                           blacklisted?(:user, m.real_name)
       return :blacklist if blacklisted?(:content, m.text)
 
       # Plugin listens in to all other messages

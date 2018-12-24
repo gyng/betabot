@@ -2,6 +2,7 @@ AllCops:
   TargetRubyVersion: 2.2
   Exclude:
     - 'lib/external_plugins'
+    - 'vendor/**/*'
 
 Metrics/LineLength:
   Max: 120
