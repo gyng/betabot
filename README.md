@@ -181,8 +181,12 @@ Use `~help core` for help with core commands.
 * blacklist
 * blacklist_adapter [name]
 * blacklist_plugin [name]
+* blacklist_user [name regex]
+* blacklist_content [name regex]
 * unblacklist_adapter [name]
 * unblacklist_plugin [name]
+* unblacklist_user [name regex]
+* unblacklist_content [name regex]
 * login [nick] [pass]
 * logout
 * reload  # (reloads plugins)
