@@ -42,21 +42,59 @@ describe Bot::Core do
         expect(bot.s).to eq settings_fixture
       end
     end
+  end
+
+  context 'Blacklist' do
+    before do
+      @bot = Bot::Core.new(settings_filename_blacklist_fixture)
+      adapter = Bot::Adapter::Irc.new(true)
+      handler = Bot::Adapter::Irc::Handler.new(@adapter, {})
+
+      blacklisted_user = ':nick!blacklisted_user@test.com PRIVMSG #test :test'
+      @blacklisted_user_msg = handler.parse_data(blacklisted_user)
+      ok_user = ':nick!ok_user@test.com PRIVMSG #test :test'
+      @ok_user_msg = handler.parse_data(ok_user)
+
+      @blacklisted_content_msg = handler.parse_data(ok_user)
+      @blacklisted_content_msg.text = "blacklisted_content"
+      @ok_content_msg = handler.parse_data(ok_user)
+      @ok_content_msg.text = "ok_content"
+    end
 
     it 'does not load adapters in blacklist' do
-      with_em do
-        bot = Bot::Core.new(settings_filename_blacklist_fixture)
-        expect(bot.adapters).to have_key(:dummy)
-        expect(bot.adapters).to_not have_key(:irc)
-      end
+      expect(@bot.adapters).to have_key(:dummy)
+      expect(@bot.adapters).to_not have_key(:irc)
     end
 
     it 'does not load plugins in blacklist' do
-      with_em do
-        bot = Bot::Core.new(settings_filename_whitelist_fixture)
-        expect(bot.plugins).to have_key(:ping)
-        expect(bot.plugins).to_not have_key(:dummy)
-      end
+      bot = Bot::Core.new(settings_filename_whitelist_fixture)
+      expect(bot.plugins).to have_key(:ping)
+      expect(bot.plugins).to_not have_key(:dummy)
+    end
+
+    it 'checks against blacklist for a given type' do
+      expect(@bot.blacklisted?(:user, "blacklisted_user")).to be true
+      expect(@bot.blacklisted?(:user, "safe user")).to be false
+    end
+
+    it 'does not trigger plugins for messages from blacklisted users' do
+      expect(@bot.trigger_plugin("not_a_core_trigger", @blacklisted_user_msg)).to be :blacklist
+      expect(@bot.trigger_plugin("not_a_core_trigger", @ok_user_msg)).to_not be :blacklist
+    end
+
+    it 'does not publish for messages from blacklisted users' do
+      expect(@bot.publish(@blacklisted_user_msg)).to be :blacklist
+      expect(@bot.publish(@ok_user_msg)).to_not be :blacklist
+    end
+
+    it 'does not trigger plugins for messages with blacklisted content' do
+      expect(@bot.trigger_plugin("not_a_core_trigger", @blacklisted_content_msg)).to be :blacklist
+      expect(@bot.trigger_plugin("not_a_core_trigger", @ok_content_msg)).to_not be :blacklist
+    end
+
+    it 'does not publish for messages from blacklisted users' do
+      expect(@bot.publish(@blacklisted_content_msg)).to be :blacklist
+      expect(@bot.publish(@ok_content_msg)).to_not be :blacklist
     end
   end
 

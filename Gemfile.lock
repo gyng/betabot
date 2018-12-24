@@ -43,6 +43,7 @@ GEM
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
     jaro_winkler (1.5.1)
+    json (1.8.3)
     mechanize (2.7.6)
       domain_name (~> 0.5, >= 0.5.1)
       http-cookie (~> 1.0)
@@ -165,6 +166,7 @@ DEPENDENCIES
   faye-websocket
   gemoji
   git
+  json
   mechanize
   nokogiri
   open_uri_redirections
@@ -182,4 +184,4 @@ DEPENDENCIES
   unicode_utils
 
 BUNDLED WITH
-   1.16.3
+   1.17.2

@@ -25,6 +25,14 @@
     "include": []
   },
 
+  "users": {
+    "blacklist": [".*blacklisted_user.*"]
+  },
+
+  "contents": {
+    "blacklist": [".*blacklisted_content.*"]
+  },
+
   "databases": {
     "shared_db": false
   },

@@ -211,6 +211,19 @@ module Bot
         when 'blacklist'
           m.reply 'Adapters: ' + @s[:adapters][:blacklist].join(', ')
           m.reply 'Plugins: ' + @s[:plugins][:blacklist].join(', ')
+          m.reply 'Users: ' + @s[:users][:blacklist].join(', ')
+        when 'blacklist_user'
+          blacklist(:user, m.args[0])
+          m.reply "Ignoring user #{m.args[0]}."
+        when 'unblacklist_user'
+          unblacklist(:user, m.args[0])
+          m.reply "User #{m.args[0]} unblacklisted."
+        when 'blacklist_content'
+          blacklist(:content, m.args[0])
+          m.reply "Ignoring content #{m.args[0]}."
+        when 'unblacklist_content'
+          unblacklist(:content, m.args[0])
+          m.reply "Content #{m.args[0]} unblacklisted."
         when 'install'
           core_install_plugin(m)
         when 'remove'
@@ -239,6 +252,10 @@ module Bot
         'unblacklist_adapter' => 'unblacklist_adapter <adapter>',
         'blacklist_plugin' => 'blacklist_plugin <plugin>',
         'unblacklist_plugin' => 'unblacklist_plugin <plugin>',
+        'blacklist_user' => 'blacklist_user <user_regex>',
+        'unblacklist_user' => 'unblacklist_user <user_regex>',
+        'blacklist_content' => 'blacklist_content <content_regex>',
+        'unblacklist_content' => 'unblacklist_content <content_regex>',
         'install' => 'install <external_plugin_manifest_url> (save) Save will add it to bot_settings.',
         'update' => 'update <plugin_name> Updates an external plugin.',
         'remove' => 'remove <plugin_name> Removes an external plugin.',
@@ -292,9 +309,28 @@ module Bot
       save_settings
     end
 
+    def blacklisted?(type, value)
+      # Very inefficient, but way less code to write
+      regices = @s["#{type}s".to_sym][:blacklist].map { |str| Regexp.compile(str) }
+      regices.each do |re|
+        if re.match(value)
+          Bot.log.info("Bot::Core - Blacklist check for #{type} returned false for value #{value}")
+          return true 
+        end
+      end
+
+      false
+    rescue StandardError => e
+      Bot.log.warn("Bot::Core - Blacklist check error: #{e}")
+      false
+    end
+
     def trigger_plugin(trigger, m)
       unless core_triggers(trigger, m)
         # Check if plugin responds to trigger after core triggers
+        return :blacklist if blacklisted?(:user, m.hostname) || blacklisted?(:user, m.sender) || blacklisted?(:user, m.real_name)
+        return :blacklist if blacklisted?(:content, m.text)
+
         if @plugin_mapping.key?(trigger.to_sym)
           plugin = @plugin_mapping[trigger.to_sym][:plugin]
           method = @plugin_mapping[trigger.to_sym][:method]
@@ -314,7 +350,10 @@ module Bot
     end
 
     def publish(m)
-      # Plugin listens in to all messages
+      return :blacklist if blacklisted?(:user, m.hostname) || blacklisted?(:user, m.sender) || blacklisted?(:user, m.real_name)
+      return :blacklist if blacklisted?(:content, m.text)
+
+      # Plugin listens in to all other messages
       @subscribed_plugins.each { |p| @plugins[p].receive(m) }
     end
 
