@@ -20,10 +20,10 @@ def start_sinatra(s, web_app)
   end
 
   Rack::Server.start(
-    app:    dispatch,
+    app: dispatch,
     server: server,
-    Host:   host,
-    Port:   port,
+    Host: host,
+    Port: port,
     signals: false
   )
 end

@@ -21,6 +21,7 @@ class Bot::Plugin::Shipment < Bot::Plugin
 
   def get_entry(username, name)
     return @s[:tracked_shipments][username.intern][name.intern] if @s[:tracked_shipments][username.intern]
+
     nil
   end
 

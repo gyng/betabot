@@ -10,6 +10,7 @@ class Bot::Core::Authenticator
 
   def login(m)
     return false if m.args.length < 2
+
     user = m.args[0]
     user_info = @authentications[user.to_sym]
     salt = user_info[:salt]
@@ -36,12 +37,14 @@ class Bot::Core::Authenticator
 
   def logout(m)
     return if !@authenticated_hostnames.delete(m.hostname)
+
     m.reply 'You have been logged out.'
     Bot.log.info 'A user has logged out.'
   end
 
   def auth(level, m)
     return true if level <= 0
+
     authed_user = @authenticated_hostnames[m.hostname]
     !authed_user.nil? && authed_user.to_i >= level
   end

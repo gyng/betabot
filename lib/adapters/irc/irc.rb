@@ -94,9 +94,9 @@ class Bot::Adapter::Irc < Bot::Adapter
       "\033[35m" => "\x0313", # magenta
       "\033[36m" => "\x0311", # cyan
       "\033[37m" => "\x0314", # gray
-      "\033[0m"  => "\x03",   # color end
-      "\033[1m"  => "\x02",   # bold start
-      "\033[22m" => "\x02"    # bold end
+      "\033[0m" => "\x03", # color end
+      "\033[1m" => "\x02", # bold start
+      "\033[22m" => "\x02" # bold end
     }
 
     s = string.to_s

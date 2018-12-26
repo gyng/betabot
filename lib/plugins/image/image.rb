@@ -169,6 +169,7 @@ class Bot::Plugin::Image < Bot::Plugin
     tokens = String.new(m.text).split(' ').uniq
     tokens.each do |t|
       next if t !~ URI::DEFAULT_PARSER.make_regexp
+
       # If it matches our filters we record regardless
       # Else if it matches content types we will record it,
       # even if it doesn't match the filter
@@ -212,11 +213,11 @@ class Bot::Plugin::Image < Bot::Plugin
         image_path = File.join(*@s[:image_directory], "#{sha256}#{filetype}")
         FileUtils.mv(temp_path, image_path) if !File.file?(image_path)
         @db.from(:images).insert(
-          sha256:             sha256,
-          md5:                Digest::MD5.file(image_path).to_s,
-          path:               image_path,
+          sha256: sha256,
+          md5: Digest::MD5.file(image_path).to_s,
+          path: image_path,
           google_description: get_guess(url),
-          bytesize:           File.size(image_path)
+          bytesize: File.size(image_path)
         )
       else
         # Duplicate
@@ -226,12 +227,12 @@ class Bot::Plugin::Image < Bot::Plugin
 
       # Record source
       @db.from(:sources).insert(
-        image_id:    matched_image.to_a.first[:id],
-        timestamp:   Time.now,
-        url:         url,
+        image_id: matched_image.to_a.first[:id],
+        timestamp: Time.now,
+        url: url,
         source_name: m.sender,
-        context:     m.text,
-        filename:    File.basename(URI.parse(url).path)
+        context: m.text,
+        filename: File.basename(URI.parse(url).path)
       )
 
       Bot.log.info "#{self.class.name} - #{url} saved."

@@ -69,6 +69,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
   def valid_anilist_token?
     token = @anilist[:token]
     return token[:expires] > Time.now.to_i if token && token[:expires]
+
     false
   end
 

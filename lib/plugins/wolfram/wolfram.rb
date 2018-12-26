@@ -31,6 +31,7 @@ class Bot::Plugin::Wolfram < Bot::Plugin
 
   def wolfram(search_term, depth = 1)
     return if depth > @s[:max_depth]
+
     search_term = CGI.escape(search_term)
     url = "http://api.wolframalpha.com/v2/query?appid=#{@s[:api_key]}&format=plaintext&input=\'#{search_term}\'"
     # rubocop:disable Security/Open

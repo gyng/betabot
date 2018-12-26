@@ -59,6 +59,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
       tokens.each do |t|
         next if regex.match(t).nil?
+
         operation = proc {
           Timeout.timeout(@s[:timeout]) do
             get_title(t)

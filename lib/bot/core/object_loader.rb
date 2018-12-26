@@ -11,6 +11,7 @@ module Bot::Core::ObjectLoader
 
     Dir.foreach(objects_dir) do |f|
       next if ['.', '..'].include?(f)
+
       load_curry(type).call(f) if File.directory?(File.join(objects_dir, f)) && accepted?(type, f, mode)
     end
   end
