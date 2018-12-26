@@ -3,6 +3,7 @@ RSpec.configure do |config|
   config.filter_run :focus
 
   ENV['TEST'] = 'true'
+  ENV['DISCORDRB_NONACL'] = 'SUPPRESS'
 
   # Loads .rb patches intended to be run only once.
   patch_dir = File.join(Dir.pwd, 'lib', 'patches')

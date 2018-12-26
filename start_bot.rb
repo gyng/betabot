@@ -1,3 +1,6 @@
+ENV['SINATRA_ACTIVESUPPORT_WARNING'] = 'false'
+ENV['DISCORDRB_NONACL'] = 'SUPPRESS'
+
 require 'rubygems'
 require 'bundler/setup'
 Bundler.require(:default)
