@@ -6,9 +6,9 @@ class Bot::Plugin::Unicode < Bot::Plugin
   def initialize(bot)
     @s = {
       trigger: {
-        u: [:find, 0, 'u <query> - Search for characters by Unicode description and emoji aliases.'],
-        uid: [:name, 0, 'uid <query> - Returns the name of the Unicode characters of a string.'],
-        e: [:emoji, 0, 'e <emoji +> - Search for emoji by aliases (exact match)']
+        ufind: [:find, 0, 'ufind <query> - Search for characters by Unicode description and emoji aliases.'],
+        u: [:name, 0, 'u <query> - Returns the name of the Unicode characters of a string.'],
+        efind: [:emoji, 0, 'e <emoji +> - Search for emoji by aliases (exact match)']
       },
       subscribe: false
     }
