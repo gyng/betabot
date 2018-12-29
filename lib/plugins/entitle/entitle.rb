@@ -18,7 +18,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
         'http.+?=.\S+',
         'http.+\/\d+\/?[^\.]+$',
         'http.*?youtu\.be.\S+'
-      ]
+      ],
+      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) Gecko/20100101 Firefox/64.0'
     }
     super(bot)
   end
@@ -77,12 +78,17 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
-    # Storing into local var `html` bypasses bad unicode handling by Nokogiri
-    # rubocop:disable Security/Open
-    html = open(url, allow_redirections: :all)
-    # rubocop:enable Security/Open
-    doc = Nokogiri::HTML(html.read)
+
+    response = RestClient.get(url, user_agent: @s[:user_agent]).body
+    doc = Nokogiri::HTML(response)
     doc.encoding = 'utf-8'
-    doc.at_css('title').text.gsub(/ *\n */, ' ').strip
+
+    html_title = doc.at_css('title').text.gsub(/ *\n */, ' ').strip
+    meta_desc = (doc.at("meta[name='description']") || {})['content']
+    meta_og_title = (doc.at("meta[property='og:title']") || {})['content']
+    meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
+    meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
+
+    html_title || meta_og_title || meta_og_twitter_title || meta_desc || meta_og_desc
   end
 end
