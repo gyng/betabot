@@ -89,6 +89,15 @@ class Bot::Plugin::Entitle < Bot::Plugin
     meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
 
+    # Special cases
+    # document.title - YouTube
+    doc_title_regex = /^\s.*document.title\s?=\s?["'](.*)["'];$/
+
+    js_title = response.each_line do |l|
+      matches = l.match(doc_title_regex)
+      return matches[1] if matches && !matches[1].nil?
+    end
+
     html_title || meta_og_title || meta_og_twitter_title || meta_desc || meta_og_desc
   end
 end
