@@ -93,7 +93,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     # document.title - YouTube
     doc_title_regex = /^\s.*document.title\s?=\s?["'](.*)["'];$/
 
-    js_title = response.each_line do |l|
+    response.each_line do |l|
       matches = l.match(doc_title_regex)
       return matches[1] if matches && !matches[1].nil?
     end
