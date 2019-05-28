@@ -88,7 +88,7 @@ class Bot::Plugin::Remind < Bot::Plugin
     end
 
     exact_match = matches.find do |z|
-      z.identifier.downcase == query.downcase # rubocop:disable Performance/Casecmp
+      z.identifier.downcase == query.downcase
     end
 
     matches = [exact_match] if !exact_match.nil?
