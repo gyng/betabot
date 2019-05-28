@@ -111,8 +111,8 @@ class Bot::Plugin::Remind < Bot::Plugin
       format_offset = lambda do |o|
         hours = o / 60 / 60
         prefix = if hours.zero? then '±'
-                 elsif hours < 0 then '-'
-                 elsif hours > 0 then '+'
+                 elsif hours.negative? then '-'
+                 elsif hours.positive? then '+'
                  end
         "#{prefix}#{hours}h"
       end
@@ -147,7 +147,7 @@ class Bot::Plugin::Remind < Bot::Plugin
 
     seconds_to_trigger = time - Time.now
 
-    if seconds_to_trigger < 0
+    if seconds_to_trigger.negative?
       m.reply 'I cannot travel back in time!'
       return
     end
@@ -214,7 +214,7 @@ class Bot::Plugin::Remind < Bot::Plugin
     remind_at = tz.local_to_utc(time)
     seconds_to_trigger = remind_at - Time.now
 
-    if seconds_to_trigger < 0
+    if seconds_to_trigger.negative?
       m.reply 'I cannot travel back in time!'
       return
     end

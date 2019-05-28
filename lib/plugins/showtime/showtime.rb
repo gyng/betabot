@@ -112,9 +112,9 @@ class Bot::Plugin::Showtime < Bot::Plugin
     h = h % 24
     s = s.floor
 
-    "#{d.to_s + 'd ' if d > 0}" \
-    "#{h.to_s + 'h ' if h > 0}" \
-    "#{m.to_s + 'm ' if m > 0}" \
-    "#{s.to_s + 's' if s > 0}"
+    "#{d.to_s + 'd ' if d.positive?}" \
+    "#{h.to_s + 'h ' if h.positive?}" \
+    "#{m.to_s + 'm ' if m.positive?}" \
+    "#{s.to_s + 's' if s.positive?}"
   end
 end
