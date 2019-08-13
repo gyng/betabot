@@ -19,7 +19,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
         'http.+\/\d+\/?[^\.]+$',
         'http.*?youtu\.be.\S+'
       ],
-      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:64.0) Gecko/20100101 Firefox/64.0'
+      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/68.0'
     }
     super(bot)
   end
@@ -79,24 +79,24 @@ class Bot::Plugin::Entitle < Bot::Plugin
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
 
-    response = RestClient.get(url, user_agent: @s[:user_agent]).body
+    # Special handling needed for YouTube links
+    # https://stackoverflow.com/a/30795206
+    # rubocop:disable Metrics/LineLength
+    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\-_]+)$}
+    # rubocop:enable Metrics/LineLength
+    is_youtube_url = url.match(youtube_url_regex)
+    user_agent = is_youtube_url ? 'curl/7.65.3' : @s[:user_agent]
+
+    response = RestClient.get(url, user_agent: user_agent).body
     doc = Nokogiri::HTML(response)
     doc.encoding = 'utf-8'
 
+    # Resume regular web-citizen processing
     html_title = doc.at_css('title').text.gsub(/ *\n */, ' ').strip
     meta_desc = (doc.at("meta[name='description']") || {})['content']
     meta_og_title = (doc.at("meta[property='og:title']") || {})['content']
     meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
-
-    # Special cases
-    # document.title - YouTube
-    doc_title_regex = /^\s.*document.title\s?=\s?["'](.*)["'];$/
-
-    response.each_line do |l|
-      matches = l.match(doc_title_regex)
-      return matches[1] if matches && !matches[1].nil?
-    end
 
     html_title || meta_og_title || meta_og_twitter_title || meta_desc || meta_og_desc
   end
