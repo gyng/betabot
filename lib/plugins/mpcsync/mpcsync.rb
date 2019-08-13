@@ -73,7 +73,7 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
 
   def cock(m)
     if @cock_state != :cocked
-      @listen_sock.close_connection if @listen_sock
+      @listen_sock&.close_connection
       @listen_sock = EM.open_datagram_socket('0.0.0.0', @s[:sync_listen_port], SyncListener, self, m)
       @cock_state = :cocked
     end
@@ -82,7 +82,7 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
   end
 
   def decock(m = nil)
-    @listen_sock.close_connection if @listen_sock
+    @listen_sock&.close_connection
     @cock_state = :uncocked
     m.reply 'Decocked.' if m.respond_to?(:reply)
   end
@@ -116,7 +116,7 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
 
   def sync(m)
     countdown_override = m.args[0].to_i
-    remaining = countdown_override > 0 ? countdown_override : @s[:sync_countdown]
+    remaining = countdown_override.positive? ? countdown_override : @s[:sync_countdown]
 
     countdown = EventMachine.add_periodic_timer(1) do
       m.reply remaining

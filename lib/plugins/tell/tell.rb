@@ -24,11 +24,9 @@ class Bot::Plugin::Tell < Bot::Plugin
     when :irc
       if m.type == :privmsg || m.type == :join
         tells = @stored_messages.delete(m.sender)
-        unless tells.nil?
-          tells.each do |t|
-            m.reply("#{m.sender}: #{t[:from]} wanted to tell you ``#{t[:message]}'', " \
-                    "#{((Time.now.to_i - t[:at]) / 60.0 / 60.0).round(2)} hours ago")
-          end
+        tells&.each do |t|
+          m.reply("#{m.sender}: #{t[:from]} wanted to tell you ``#{t[:message]}'', " \
+                  "#{((Time.now.to_i - t[:at]) / 60.0 / 60.0).round(2)} hours ago")
         end
       end
     end
