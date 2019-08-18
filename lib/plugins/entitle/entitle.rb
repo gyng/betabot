@@ -82,9 +82,10 @@ class Bot::Plugin::Entitle < Bot::Plugin
     # Special handling needed for YouTube links
     # https://stackoverflow.com/a/30795206
     # rubocop:disable Metrics/LineLength
-    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\-_]+)$}
+    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\-_]+)}
     # rubocop:enable Metrics/LineLength
     is_youtube_url = url.match(youtube_url_regex)
+    Bot.log.info("Entitle: this is a YouTube URL") if is_youtube_url
     user_agent = is_youtube_url ? 'curl/7.65.3' : @s[:user_agent]
 
     response = RestClient.get(url, user_agent: user_agent).body
