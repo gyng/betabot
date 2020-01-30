@@ -410,7 +410,7 @@ module Bot
       $shutdown = true
       EM.add_timer(1) do
         stop_adapters
-        Web.quit!
+        Web.quit! if defined?(Web)
         EM.stop
       end
     end
