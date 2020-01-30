@@ -19,7 +19,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
         'http.+\/\d+\/?[^\.]+$',
         'http.*?youtu\.be.\S+'
       ],
-      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/68.0'
+      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/68.0',
+      curl_user_agent: 'curl/7.68.0'
     }
     super(bot)
   end
@@ -78,15 +79,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
-
-    # Special handling needed for YouTube links
-    # https://stackoverflow.com/a/30795206
-    # rubocop:disable Metrics/LineLength
-    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\-_]+)}
-    # rubocop:enable Metrics/LineLength
-    is_youtube_url = url.match(youtube_url_regex)
-    Bot.log.info("Entitle: this is a YouTube URL") if is_youtube_url
-    user_agent = is_youtube_url ? 'curl/7.65.3' : @s[:user_agent]
+    user_agent = curl_needed?(url) ? @s[:curl_user_agent] : @s[:user_agent]
 
     response = RestClient.get(url, user_agent: user_agent).body
     doc = Nokogiri::HTML(response)
@@ -100,5 +93,20 @@ class Bot::Plugin::Entitle < Bot::Plugin
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
 
     html_title || meta_og_title || meta_og_twitter_title || meta_desc || meta_og_desc
+  end
+
+  def curl_needed?(url)
+    # Special handling needed for cerntain popular sites
+    # https://stackoverflow.com/a/30795206
+    # rubocop:disable Metrics/LineLength
+    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\-_]+)}
+    twitter_url_regex = %r{^(?:https?:\/\/)?(?:www\.)?twitter\.com\/([a-zA-Z0-9_]+)}
+    # rubocop:enable Metrics/LineLength
+    is_youtube_url = url.match(youtube_url_regex)
+    is_twitter_url = url.match(twitter_url_regex)
+    Bot.log.info('Entitle: this is a YouTube URL') if is_youtube_url
+    Bot.log.info('Entitle: this is a Twitter URL') if is_twitter_url
+
+    is_youtube_url || is_twitter_url
   end
 end
