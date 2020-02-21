@@ -96,7 +96,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     # Special handling needed for cerntain popular sites
     # https://stackoverflow.com/a/30795206
     # rubocop:disable Metrics/LineLength
-    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\-_]+)}
+    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com)}
     twitter_url_regex = %r{^(?:https?:\/\/)?(?:www\.)?twitter\.com\/([a-zA-Z0-9_]+)}
     # rubocop:enable Metrics/LineLength
     is_youtube_url = url.match(youtube_url_regex)
