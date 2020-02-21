@@ -14,10 +14,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
       subscribe: true,
       timeout: 10,
       filters: [
-        'http.*?google\.com\S*',
-        'http.+?=.\S+',
-        'http.+\/\d+\/?[^\.]+$',
-        'http.*?youtu\.be.\S+'
+        'http.*'
       ],
       user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:67.0) Gecko/20100101 Firefox/68.0',
       curl_user_agent: 'curl/7.68.0'
