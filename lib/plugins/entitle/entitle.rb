@@ -77,7 +77,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
-    twitter_url_regex = %r{^(?:https?:\/\/)?(?:www\.)?twitter\.com\/([a-zA-Z0-9_]+)}
+    twitter_url_regex = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)}
 
     if url.match(twitter_url_regex)
       handle_twitter(url)
@@ -107,7 +107,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
   def handle_twitter(url)
     Bot.log.info("Entitle: handling as Twitter tweet")
   
-    status_regex = %r{^(?:https?:\/\/)?(?:www\.)?twitter\.com\/([a-zA-Z0-9_]+)\/status\/(.+)\/?}
+    status_regex = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)\/status\/(.+)\/?}
     matches = url.match(status_regex)
     user = matches[1]
     id = matches[2]
