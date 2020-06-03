@@ -115,7 +115,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     new_url = "https://publish.twitter.com/oembed?url=https://twitter.com/#{user}/status/#{id}"
     response_json = RestClient.get(new_url, user_agent: @s[:user_agent]).body
     response = JSON.parse(response_json, symbolize_names: true)
-    html = response[:html]
+    html = response[:html].gsub("&mdash;", "&nbsp;&mdash;")
 
     doc = Nokogiri::HTML(html)
     doc.encoding = 'utf-8'
