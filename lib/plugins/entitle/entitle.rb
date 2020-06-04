@@ -20,6 +20,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
       user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
       curl_user_agent: 'curl/7.68.0'
     }
+    @TWITTER_STATUS_REGEX = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)\/status\/(\d+)\/?}
     super(bot)
   end
 
@@ -77,9 +78,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
-    twitter_url_regex = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)}
 
-    if url.match(twitter_url_regex)
+    if url.match(@TWITTER_STATUS_REGEX)
       handle_twitter(url)
     else
       handle_default(url)
@@ -95,7 +95,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     doc.encoding = 'utf-8'
 
     # Resume regular web-citizen processing
-    html_title = doc.at_css('title').text.gsub(/ *\n */, ' ').strip
+    html_title = doc.at_css('title').text.gsub(/ *\n */, ' ').strip if doc.at_css('title')
     meta_desc = (doc.at("meta[name='description']") || {})['content']
     meta_og_title = (doc.at("meta[property='og:title']") || {})['content']
     meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
@@ -107,8 +107,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
   def handle_twitter(url)
     Bot.log.info("Entitle: handling as Twitter tweet")
   
-    status_regex = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)\/status\/(.+)\/?}
-    matches = url.match(status_regex)
+    matches = url.match(@TWITTER_STATUS_REGEX)
     user = matches[1]
     id = matches[2]
 
