@@ -101,7 +101,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
 
-    html_title || meta_og_title || meta_og_twitter_title || meta_desc || meta_og_desc
+    meta_og_title || meta_og_twitter_title || html_title || meta_desc || meta_og_desc
   end
 
   def handle_twitter(url)
@@ -114,12 +114,15 @@ class Bot::Plugin::Entitle < Bot::Plugin
     new_url = "https://publish.twitter.com/oembed?url=https://twitter.com/#{user}/status/#{id}"
     response_json = RestClient.get(new_url, user_agent: @s[:user_agent]).body
     response = JSON.parse(response_json, symbolize_names: true)
-    html = response[:html].gsub("&mdash;", "&nbsp;&mdash;")
+    html = response[:html].gsub("</p>&mdash; ", "__DASH__")
+    html = html.gsub("<br>", "__BR__")
 
     doc = Nokogiri::HTML(html)
     doc.encoding = 'utf-8'
 
     tweet = doc.at_css('.twitter-tweet').text.gsub(/ *\n */, ' ').strip
+    tweet = tweet.gsub("__BR__", " ↵ ".gray)
+    tweet = tweet.gsub("__DASH__", " — ")
     tweet
   end
 
