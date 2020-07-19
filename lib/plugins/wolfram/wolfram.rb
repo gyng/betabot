@@ -43,7 +43,7 @@ class Bot::Plugin::Wolfram < Bot::Plugin
     pods.each do |pod|
       results.push(
         title: pod['title'].strip,
-        text: pod.inner_text.strip.gsub("\n", ' · ').strip.gsub(/  +/, ' ')
+        text: pod.inner_text.strip.gsub("\n", ' ⋯ '.gray).strip.gsub(/  +/, ' ')
       )
     end
 
