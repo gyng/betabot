@@ -163,8 +163,11 @@ class Bot::Plugin::Entitle < Bot::Plugin
       display_name = response[:stream][:channel][:display_name]
       title = response[:stream][:channel][:status]
       game = response[:stream][:game]
-      viewers = response[:stream][:viewers]
-      "#{'[LIVE]'.red} #{display_name} — #{title} (#{game}, #{viewers} viewers)"
+      is_rerun = response[:stream][:broadcast_platform] == 'other'
+      live = is_rerun ? '[RERUN]'.blue : '[LIVE]'.red
+      viewers = is_rerun ? '' : ", #{response[:stream][:viewers]} viewers"
+
+      "#{live} #{display_name} — #{title} (#{game}#{viewers})"
     else
       Bot.log.info('Entitle: Twitch channel not live, getting channel info')
       channel_api_url = "https://api.twitch.tv/kraken/channels/#{channel_id}"
