@@ -8,7 +8,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     @s = {
       trigger: { entitle: [
         :call, 0,
-        'entitle list, entitle add <filter>, entitle delete <filter>. ' \
+        'entitle list, entitle add <filter>, entitle delete <filter>, entitle twitch_client_id <id>. ' \
         'Filters are regular expressions. Using these filters ' \
         'Entitle looks for uninformative URLs and blurts their titles out.'
       ] },
@@ -18,9 +18,12 @@ class Bot::Plugin::Entitle < Bot::Plugin
         'http.*'
       ],
       user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
-      curl_user_agent: 'curl/7.68.0'
+      curl_user_agent: 'curl/7.68.0',
+      # https://dev.twitch.tv/console/apps, redirect to http://localhost
+      twitch_client_id: ''
     }
-    @TWITTER_STATUS_REGEX = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)\/status\/(\d+)\/?}
+    @twitter_status_regex = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)\/status\/(\d+)\/?}
+    @twitch_stream_regex = %r{^(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)\/?}
     super(bot)
   end
 
@@ -39,6 +42,12 @@ class Bot::Plugin::Entitle < Bot::Plugin
         @s[:filters].delete(m.args[1])
         save_settings
         m.reply('Filter deleted.')
+      end
+    when 'twitch_client_id'
+      if @bot.auth(4, m)
+        @s[:twitch_client_id] = m.args[1]
+        save_settings
+        m.reply('Twitch client ID updated.')
       end
     else
       check_filter(m)
@@ -79,15 +88,21 @@ class Bot::Plugin::Entitle < Bot::Plugin
   def get_title(url)
     Bot.log.info("Entitle: getting title of #{url}")
 
-    if url.match(@TWITTER_STATUS_REGEX)
+    if url.match(@twitter_status_regex)
       handle_twitter(url)
+    elsif url.match(@twitch_stream_regex)
+      if !@s[:twitch_client_id]
+        Bot.log.info('Entitle: Twitch stream detected but Twitch API key not set up')
+        return
+      end
+      handle_twitch(url)
     else
       handle_default(url)
     end
   end
 
   def handle_default(url)
-    Bot.log.info("Entitle: handling as default URL type")
+    Bot.log.info('Entitle: handling as default URL type')
 
     user_agent = curl_needed?(url) ? @s[:curl_user_agent] : @s[:user_agent]
     response = RestClient.get(url, user_agent: user_agent).body
@@ -105,25 +120,63 @@ class Bot::Plugin::Entitle < Bot::Plugin
   end
 
   def handle_twitter(url)
-    Bot.log.info("Entitle: handling as Twitter tweet")
-  
-    matches = url.match(@TWITTER_STATUS_REGEX)
+    Bot.log.info('Entitle: handling as Twitter tweet')
+    matches = url.match(@twitter_status_regex)
     user = matches[1]
     id = matches[2]
 
     new_url = "https://publish.twitter.com/oembed?url=https://twitter.com/#{user}/status/#{id}"
     response_json = RestClient.get(new_url, user_agent: @s[:user_agent]).body
     response = JSON.parse(response_json, symbolize_names: true)
-    html = response[:html].gsub("</p>&mdash; ", "__DASH__")
-    html = html.gsub("<br>", "__BR__")
+    html = response[:html].gsub('</p>&mdash; ', '__DASH__')
+    html = html.gsub('<br>', '__BR__')
 
     doc = Nokogiri::HTML(html)
     doc.encoding = 'utf-8'
 
     tweet = doc.at_css('.twitter-tweet').text.gsub(/ *\n */, ' ').strip
-    tweet = tweet.gsub("__BR__", " ↵ ".gray)
-    tweet = tweet.gsub("__DASH__", " — ")
+    tweet = tweet.gsub('__BR__', ' ↵ '.gray)
+    tweet = tweet.gsub('__DASH__', ' — ')
     tweet
+  end
+
+  def handle_twitch(url)
+    Bot.log.info('Entitle: handling as Twitch channel')
+    matches = url.match(@twitch_stream_regex)
+    channel = matches[1]
+    headers = {
+      user_agent: @s[:user_agent],
+      'Accept' => 'application/vnd.twitchtv.v5+json',
+      'Client-ID' => @s[:twitch_client_id]
+    }
+
+    user_api_url = "https://api.twitch.tv/kraken/users?login=#{channel}"
+    user_response_json = RestClient.get(user_api_url, headers).body
+    user_response = JSON.parse(user_response_json, symbolize_names: true)
+    channel_id = user_response[:users][0][:_id]
+
+    api_url = "https://api.twitch.tv/kraken/streams/#{channel_id}"
+    response_json = RestClient.get(api_url, headers).body
+    response = JSON.parse(response_json, symbolize_names: true)
+
+    if response[:stream]
+      display_name = response[:stream][:channel][:display_name]
+      title = response[:stream][:channel][:status]
+      game = response[:stream][:game]
+      viewers = response[:stream][:viewers]
+      "#{'[LIVE]'.red} #{display_name} — #{title} (#{game}, #{viewers} viewers)"
+    else
+      Bot.log.info('Entitle: Twitch channel not live, getting channel info')
+      channel_api_url = "https://api.twitch.tv/kraken/channels/#{channel_id}"
+      channel_response_json = RestClient.get(channel_api_url, headers).body
+      channel_response = JSON.parse(channel_response_json, symbolize_names: true)
+
+      status = channel_response[:status]
+      display_name = channel_response[:display_name]
+      description = channel_response[:description]
+      game = channel_response[:game]
+      "#{'[OFFLINE]'.gray} #{display_name} — #{status} (#{game}, #{description})"
+    end
   end
 
   def curl_needed?(url)
