@@ -1,5 +1,4 @@
 # betabot
-[![Build Status](https://travis-ci.org/gyng/betabot.svg?branch=Travis)](https://travis-ci.org/gyng/betabot)
 
 ```irc
 * betabot has joined #teatime
@@ -231,6 +230,8 @@ These commands do not provide options to update `bot_settings.user.json` and are
 See: [Plugin development](PLUGINS.md)
 
 ## Tests
+
+Docker: `docker-compose -f docker-compose.test.yml up --build
 
 Tests can be run with `bundle exec rspec`. Current test coverage is very limited. Ruocop can be run with `bundle exec rubocop`.
 
