@@ -16,7 +16,7 @@ RUN apk --update add --virtual build-dependencies \
     openssl \
     git
 
-COPY Gemfile Gemfile.lock .bundle /app/
+COPY Gemfile Gemfile.lock /app/
 RUN bundle install --without development test --jobs=3 --retry=3
 
 ENV RACK_ENV production
