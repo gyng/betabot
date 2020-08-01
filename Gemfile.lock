@@ -1,11 +1,12 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (5.2.4.3)
+    activesupport (6.0.3.2)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
+      zeitwerk (~> 2.2, >= 2.2.2)
     ast (2.4.1)
     concurrent-ruby (1.1.6)
     connection_pool (2.2.2)
@@ -21,7 +22,7 @@ GEM
     http-accept (1.7.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
-    i18n (1.8.4)
+    i18n (1.8.5)
       concurrent-ruby (~> 1.0)
     mechanize (2.7.6)
       domain_name (~> 0.5, >= 0.5.1)
@@ -118,6 +119,7 @@ GEM
     unf_ext (0.0.7.7-x64-mingw32)
     unicode-display_width (1.7.0)
     webrobots (0.1.2)
+    zeitwerk (2.4.0)
 
 PLATFORMS
   ruby
