@@ -1,4 +1,5 @@
 require 'tzinfo'
+require 'active_support/time'
 
 # Chronic can't do timezones at all!
 module Chronic
