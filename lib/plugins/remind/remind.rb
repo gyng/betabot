@@ -149,7 +149,7 @@ class Bot::Plugin::Remind < Bot::Plugin
     seconds_to_trigger = time - Time.now
 
     if seconds_to_trigger.negative?
-      m.reply 'I cannot travel back in time!'
+      m.reply "I cannot travel back in time! (#{time})"
       return
     end
 
@@ -190,6 +190,8 @@ class Bot::Plugin::Remind < Bot::Plugin
     # Abort if the country has multiple timezones
     return if tz == :ambiguous
 
+    time_s = time_s.gsub(m.args.last, '').strip if tz
+
     # special case for relative time, eg. remind me in
     if time_s.split(' ')[0] == 'in'
       tz = get_timezone_from_identifier('UTC') if tz.nil?
@@ -215,9 +217,16 @@ class Bot::Plugin::Remind < Bot::Plugin
     remind_at = tz.local_to_utc(time)
     seconds_to_trigger = remind_at - Time.now
 
+    treat_as_next_day = false
     if seconds_to_trigger.negative?
-      m.reply 'I cannot travel back in time!'
-      return
+      seconds_in_day = 60 * 60 * 24
+      if seconds_to_trigger.abs < seconds_in_day
+        treat_as_next_day = true
+        seconds_to_trigger = seconds_to_trigger + seconds_in_day
+      else
+        m.reply "I cannot travel back in time! (#{time_s}, #{tz})"
+        return
+      end
     end
 
     mins_ago = seconds_to_trigger / 60.0
@@ -243,7 +252,8 @@ class Bot::Plugin::Remind < Bot::Plugin
       end
     end
 
-    m.reply "Reminder in #{human_time} set for #{remind_at} (#{tz.identifier})."
+    m.reply "Reminder in #{human_time.bold.red} set for " \
+      "#{treat_as_next_day ? 'tomorrow '.red.bold : ''}#{remind_at} (#{tz.identifier})."
   end
   # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/CyclomaticComplexity
