@@ -135,7 +135,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     doc.encoding = 'utf-8'
 
     tweet = doc.at_css('.twitter-tweet').text.gsub(/ *\n */, ' ').strip
-    tweet = tweet.gsub('__BR__', ' ↵ '.gray)
+    tweet = tweet.gsub('__BR__', " #{'↵'.gray} ")
     tweet = tweet.gsub('__DASH__', ' — ')
     tweet
   end
