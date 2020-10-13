@@ -98,12 +98,47 @@ class Bot::Adapter::Irc < Bot::Adapter
 
   def trigger_plugin(trigger, m)
     case trigger
-    when 'reconnect' then reconnect
-    when 'disconnect' then quit
+    when 'reconnect' then reconnect if @bot.auth(4, m)
+    when 'disconnect' then quit if @bot.auth(4, m)
     when 'join' then m.origin.join(m.args[0], m.args[1] || []) if @bot.auth(4, m)
     when 'part' then m.origin.part(m.args[0], m.args[1] || '') if @bot.auth(4, m)
-    when 'nick' then m.origin.nick(m.args[0])
+    when 'nick' then m.origin.nick(m.args[0]) if @bot.auth(4, m)
+    when 'defaultchan-add' then
+      if @bot.auth(4, m)
+        server = m.args[0]
+        channel = m.args[1]
+        target = @s[:servers].find { |s| s[:name] == server }
+        if target
+          target[:default_channels].push(channel).uniq
+          save_settings
+          m.reply "Updated default channels."
+        else
+          m.reply "Could not add default channel. Check server group."
+        end
+      end
+    when 'defaultchan-rm' then
+      if @bot.auth(4, m)
+        server = m.args[0]
+        channel = m.args[1]
+        target = @s[:servers].find { |s| s[:name] == server }
+        if target
+          found = target[:default_channels].delete(channel)
+          if found
+            save_settings
+            m.reply "Updated default channels."
+          else
+            m.reply "Could not remove default channel. Check channel name."
+          end
+        else
+          m.reply "Could not remove default channel. Check server group."
+        end
+      end
+    when 'defaultchan-ls' then
+      if @bot.auth(4, m)
+        m.reply "#{@s[:servers]}"
+      end
     end
+
     super(trigger, m)
   end
 

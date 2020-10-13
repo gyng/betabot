@@ -192,11 +192,22 @@ Use `~help core` for help with core commands.
 * logout
 * reload  # (reloads plugins)
 * restart
-* reconnect
-* disconnect
 * shutdown
 * useradd [accountname] [password] [authlevel 0-5]
 * version
+
+##### IRC core commands
+
+Auth level 4 needed.
+
+* reconnect
+* disconnect
+* join [channel]
+* part [channel]
+* nick [nick]
+* defaultchan-add [server] [channel]
+* defaultchan-rm [server] [channel]
+* defaultchan-ls
 
 ### Plugin management
 
