@@ -34,20 +34,43 @@ class Bot::Adapter::Irc < Bot::Adapter
     super
   end
 
+  # server_name.channel
+  # eg. myserver.#mychannel
+  def prepare_message(irc_addr)
+    combo = irc_addr.split('.')
+
+    if combo.length != 2
+      Bot.log.info("IRC: Bad address #{irc_addr}")
+      return
+    end
+
+    server, target = combo
+    conn = @connections[server.to_sym]
+
+    if !conn
+      Bot.log.error("IRC: Cannot find connection named #{server}")
+      return
+    end
+
+    conn.prepare_privmsg(target)
+  end
+
   def connect(regex = '.*')
     selected = @s[:servers].select { |s| s[:name].match(/#{regex}/i) }
 
     selected.each do |s|
-      begin
-        host = s[:hostname].sample
-        Bot.log.info "IRC: Connecting to #{host}..."
-        @handler = EM.connect(host, s[:port], Handler, self, s)
-        @connections[s[:name].to_sym] = @handler
-      rescue StandardError => e
-        EM.add_timer(@reconnect_delay) { connect(s[:name]) }
-        Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, retrying in #{@reconnect_delay}s"
-      end
+      host = s[:hostname].sample
+      Bot.log.info "IRC: Connecting to #{host}..."
+      @handler = EM.connect(host, s[:port], Handler, self, s)
+      @connections[s[:name].to_sym] = @handler
+    rescue StandardError => e
+      EM.add_timer(@reconnect_delay) { connect(s[:name]) }
+      Bot.log.warn "Failed to connect to server #{s[:name]}: #{e}, retrying in #{@reconnect_delay}s"
     end
+  end
+
+  def on_connect(conn)
+    @bot.on_connect(self, conn)
   end
 
   def quit(regex = '.*')

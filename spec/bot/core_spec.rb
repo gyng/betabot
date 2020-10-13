@@ -118,4 +118,14 @@ describe Bot::Core do
 
     # pending 'reloads adapters' do end
   end
+
+  context 'addressing' do
+    it 'parses an address' do
+      with_em do
+        bot = Bot::Core.new(settings_filename_fixture)
+        addr = bot.address(:dummy, 'asdf')
+        expect(addr).to be_nil
+      end
+    end
+  end
 end

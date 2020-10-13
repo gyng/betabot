@@ -36,6 +36,25 @@ describe Bot::Adapter::Irc::Handler do
     end
   end
 
+  context 'addressing' do
+    it 'parses an address' do
+      adapter = Bot::Adapter::Irc.new(true)
+      handler = Bot::Adapter::Irc::Handler.new(@adapter, {})
+      adapter.instance_variable_set(:@connections, { foo: handler })
+      msg = adapter.prepare_message('foo.#baz')
+      expect(msg.channel).to eq('#baz')
+      expect(msg.origin).to be(handler)
+    end
+
+    it 'handles bad addresses' do
+      adapter = Bot::Adapter::Irc.new(true)
+      handler = Bot::Adapter::Irc::Handler.new(@adapter, {})
+      adapter.instance_variable_set(:@connections, { foo: handler })
+      msg = adapter.prepare_message('badbad')
+      expect(msg).to be_nil
+    end
+  end
+
   context 'on socket close' do
     # No idea how to cancel timers: can 'hack' by setting timer length
     # but that doesn't fix the problem. Ideally we should intercept

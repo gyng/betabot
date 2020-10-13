@@ -43,6 +43,10 @@ class Bot::Adapter::Discord < Bot::Adapter
     @client.run
   end
 
+  def prepare_message(discord_addr)
+    Bot.log.error("#{self.class.name}: prepare_message not implemented; tried parsing #{discord_addr}")
+  end
+
   def message(channel, text)
     @client.message(channel: channel, text: text)
   end

@@ -19,30 +19,28 @@ module Bot::Core::ObjectLoader
   # Loads object type and adds a reference to it
   def load_curry(type)
     proc do |f|
-      begin
-        path = File.join(get_objects_dir(type), f.to_s)
-        full_path = File.join(path, "#{f}.rb")
-        Bot.log.info "Loading #{type} #{f} from #{full_path}..."
-        load full_path
+      path = File.join(get_objects_dir(type), f.to_s)
+      full_path = File.join(path, "#{f}.rb")
+      Bot.log.info "Loading #{type} #{f} from #{full_path}..."
+      load full_path
 
-        types = {
-          'plugin' => :plugin,
-          'external_plugin' => :plugin,
-          'adapter' => :adapter
-        }
-        actual_type = types[type]
+      types = {
+        'plugin' => :plugin,
+        'external_plugin' => :plugin,
+        'adapter' => :adapter
+      }
+      actual_type = types[type]
 
-        # Initialize the loaded object
-        object = Bot.module_eval(actual_type.capitalize.to_s).const_get(f.capitalize).new(self)
-        # And store a reference to that object in @types (eg. @plugins)
-        # Store external plugins in the plugins list
-        # TODO: check for name collisions
-        # rubocop:disable Style/EvalWithLocation
-        instance_eval("@#{actual_type}s")[f.downcase.to_sym] = object
-        # rubocop:enable Style/EvalWithLocation
-      rescue LoadError, StandardError, SyntaxError => e
-        Bot.log.warn "Failed to load #{f} - #{e}\n\t#{e.backtrace.join("\n\t")}"
-      end
+      # Initialize the loaded object
+      object = Bot.module_eval(actual_type.capitalize.to_s).const_get(f.capitalize).new(self)
+      # And store a reference to that object in @types (eg. @plugins)
+      # Store external plugins in the plugins list
+      # TODO: check for name collisions
+      # rubocop:disable Style/EvalWithLocation
+      instance_eval("@#{actual_type}s")[f.downcase.to_sym] = object
+      # rubocop:enable Style/EvalWithLocation
+    rescue LoadError, StandardError, SyntaxError => e
+      Bot.log.warn "Failed to load #{f} - #{e}\n\t#{e.backtrace.join("\n\t")}"
     end
   end
 

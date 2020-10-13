@@ -50,8 +50,7 @@ def plugin_install(manifest, update_if_exists = true, m = nil)
 
     return false if !update_if_exists
 
-    updated = plugin_update(plugin_name, 'master', m)
-    return updated
+    plugin_update(plugin_name, 'master', m)
   else
     puts 'ℹ Cloning plugin…'
     Git.clone(repo, plugin_name, path: EXTERNAL_PLUGINS_DIR)
@@ -63,7 +62,7 @@ def plugin_install(manifest, update_if_exists = true, m = nil)
       `bundle install`
     end
 
-    return true
+    true
   end
 rescue StandardError => e
   puts_or_reply "🔥 Failed to install plugin: #{e}", m

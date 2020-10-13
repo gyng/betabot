@@ -31,6 +31,10 @@ class Bot::Adapter
     @bot.publish(m)
   end
 
+  def prepare_message(address)
+    # Prepares a message that can be sent to an adapter-defined address
+  end
+
   def format(m)
     # Does formatting of ANSI-formatted strings before sending
     # Handled per-adapter. ANSI -> IRC is different from ANSI -> HTML

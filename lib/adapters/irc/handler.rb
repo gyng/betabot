@@ -27,6 +27,14 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     @state = :connected
   end
 
+  def prepare_privmsg(to)
+    Bot::Adapter::Irc::Message.new do |m|
+      m.origin = self
+      m.type = 'PRIVMSG'
+      m.channel = to
+    end
+  end
+
   def send_data(data)
     Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'->'.green} #{data}"
     super @adapter.format(data) + "\n"
@@ -109,6 +117,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     when :"001"
       @registered = true
       @s[:default_channels].each { |c| join(c) }
+      @adapter.on_connect(self)
     when :"433"
       nick = m.raw.split(' ')[3]
       register(nick + '_')

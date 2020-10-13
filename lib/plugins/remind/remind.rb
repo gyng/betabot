@@ -222,7 +222,7 @@ class Bot::Plugin::Remind < Bot::Plugin
       seconds_in_day = 60 * 60 * 24
       if seconds_to_trigger.abs < seconds_in_day
         treat_as_next_day = true
-        seconds_to_trigger = seconds_to_trigger + seconds_in_day
+        seconds_to_trigger += seconds_in_day
       else
         m.reply "I cannot travel back in time! (#{time_s}, #{tz})"
         return
@@ -241,15 +241,13 @@ class Bot::Plugin::Remind < Bot::Plugin
                  end
 
     EventMachine.add_timer(seconds_to_trigger) do
-      begin
-        # Reconnect persistence hack
-        # @origin changes when reconnecting, so we mutate! the original message
-        current_handler = @bot.adapters[m.adapter].handler
-        m.origin = current_handler if current_handler != m.origin
-        m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
-      rescue StandardError
-        m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
-      end
+      # Reconnect persistence hack
+      # @origin changes when reconnecting, so we mutate! the original message
+      current_handler = @bot.adapters[m.adapter].handler
+      m.origin = current_handler if current_handler != m.origin
+      m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
+    rescue StandardError
+      m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
     end
 
     m.reply "Reminder in #{human_time.bold.red} set for " \

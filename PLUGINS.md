@@ -24,6 +24,12 @@ class Bot::Plugin::Ping < Bot::Plugin
   # The method called if subscribe is true.
   def receive(m)
   end
+
+  # The method called when an adapter is full ready
+  # Eg, when the bot has registered its nickname with the IRC server
+  def on_connect(adapter, connection)
+    @bot.address_str("irc:::myserver:::mychannel").reply("Betabot is here!")
+  end
 end
 ```
 
@@ -86,6 +92,23 @@ Check out the *image* plugin for an example of using a plugin-created database.
 ## Listen to all messages
 
 If the required plugin setting `@s[:subscribe]` is set to `true`, the plugin will receive all messages published by adapters via `#receive(message)`.
+
+## Sending unsolicited messages
+
+Save `bot` from `def initialize(bot)` as an instance variable
+
+```rb
+def initialize(bot)
+  @bot = bot
+  super(bot)
+end
+```
+
+Then use `address` or `address_str` from `bot` to send a message to a target.
+
+```rb
+@bot.address_str("irc:::myserver:::mychannel").reply("Betabot is here!")
+```
 
 ## Triggers
 

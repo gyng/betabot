@@ -56,6 +56,10 @@ class Bot::Adapter::Slack < Bot::Adapter
     @client.start!
   end
 
+  def prepare_message(slack_addr)
+    Bot.log.error("#{self.class.name}: prepare_message not implemented; tried parsing #{slack_addr}")
+  end
+
   def message(channel, text)
     @client.message(channel: channel, text: text)
   end

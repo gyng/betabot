@@ -85,6 +85,8 @@ Settings, accounts, databases, and the public directory are persisted with usage
 2. Install the gems with Bundler. You might need `sqlite-dev` and `imagemagick` packages installed on your system for gem installation.
 
        bundle install
+       # or
+       bundle install --path vendor
 
 3. Create an admin account (auth level 5) with the wizard
 

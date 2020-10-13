@@ -13,12 +13,10 @@ class Bot::Plugin::Script < Bot::Plugin
     }
     super(bot)
     @s[:macros].each do |trigger, opts|
-      begin
-        register_trigger(trigger, opts)
-      rescue StandardError => e
-        Bot.log.info "Failed to load macro #{trigger}: #{e}"
-        next
-      end
+      register_trigger(trigger, opts)
+    rescue StandardError => e
+      Bot.log.info "Failed to load macro #{trigger}: #{e}"
+      next
     end
   end
 
@@ -62,13 +60,11 @@ class Bot::Plugin::Script < Bot::Plugin
 
   def run_script(m, script)
     Thread.start do
-      begin
-        $SAFE = 1
-        b = Context.new.get_binding
-        Timeout.timeout(@s[:timeout]) { m.reply "=> #{b.eval(script).inspect}" }
-      rescue StandardError => e
-        m.reply "=> #{e.inspect}"
-      end
+      $SAFE = 1
+      b = Context.new.get_binding
+      Timeout.timeout(@s[:timeout]) { m.reply "=> #{b.eval(script).inspect}" }
+    rescue StandardError => e
+      m.reply "=> #{e.inspect}"
     end
   end
 

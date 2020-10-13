@@ -33,6 +33,11 @@ class Bot::Plugin
     Bot.log.info("Called empty plugin #{self.class.name}")
   end
 
+  def on_connect(adapter, conn)
+    # Callback when a connection to a server is ready and finalized (eg, registered with IRC)
+    # @bot.address_str("irc:::myserver:::mychannel").reply("Betabot is here!")
+  end
+
   def receive(m)
     # Receives every message from bot
   end

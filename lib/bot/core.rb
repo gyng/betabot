@@ -380,6 +380,10 @@ module Bot
       @subscribed_plugins.push(plugin.to_sym)
     end
 
+    def on_connect(adapter, conn)
+      @plugins.each { |_, v| v.on_connect(adapter, conn) if defined? v.on_connect }
+    end
+
     def auth(level, m)
       @authenticator.auth(level, m)
     end
@@ -412,6 +416,27 @@ module Bot
         stop_adapters
         Web.quit! if defined?(Web)
         EM.stop
+      end
+    end
+
+    def address_str(str)
+      combo = str.split(':::')
+
+      if combo.length != 2
+        Bot.log.error("Core: Bad address #{str}, called by #{caller}")
+        return nil
+      end
+
+      address(combo[0].to_sym, combo[1])
+    end
+
+    def address(protocol, addr)
+      adapter = @adapters[protocol]
+
+      if adapter
+        adapter.prepare_message(addr)
+      else
+        Bot.log.error("Core: Bad protocol #{protocol}; could not find adapter")
       end
     end
   end
