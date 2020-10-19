@@ -1,5 +1,7 @@
+require 'date'
 require 'tzinfo'
 require 'active_support/time'
+require 'securerandom'
 
 # Chronic can't do timezones at all!
 module Chronic
@@ -26,6 +28,10 @@ class Bot::Plugin::Remind < Bot::Plugin
           '`tz country sg` or `tz info asia` List of timezones and country codes: ' \
           'https://en.wikipedia.org/wiki/List_of_tz_database_time_zones'
         ],
+        cancel: [
+          :cancel, 0,
+          'cancel <list|all|id>'
+        ],
         timer: [
           :timer, 0,
           'timer <human time> ' \
@@ -40,6 +46,8 @@ class Bot::Plugin::Remind < Bot::Plugin
       },
       subscribe: false
     }
+
+    @timers = {}
 
     super(bot)
   end
@@ -153,12 +161,17 @@ class Bot::Plugin::Remind < Bot::Plugin
       return
     end
 
-    EventMachine.add_timer(seconds_to_trigger) do
+    handle = EventMachine::Timer.new(seconds_to_trigger) do
       min_ago = (seconds_to_trigger / 60.0).round(1)
       m.reply("🕛 -#{min_ago}m #{m.sender}")
     end
 
-    m.reply "Timer set for #{time}."
+    time_s = human_time(seconds_to_trigger)
+
+    hash = add_timer_entry(handle, m.sender, time_s, get_fut_timestamp_sec(seconds_to_trigger))
+
+    cancel_s = "(cancel id #{hash} to cancel)".gray
+    m.reply "Timer in #{time_s.bold.red} set for #{time}. #{cancel_s}"
     time
   end
 
@@ -229,35 +242,108 @@ class Bot::Plugin::Remind < Bot::Plugin
       end
     end
 
-    mins_ago = seconds_to_trigger / 60.0
-    hours_ago = mins_ago / 60.0
+    time_s = human_time(seconds_to_trigger)
 
-    human_time = if hours_ago >= 1
-                   "#{hours_ago.round(1)}h"
-                 elsif mins_ago < 1
-                   "#{seconds_to_trigger.round(0)}s"
-                 else
-                   "#{mins_ago.round(0)}m"
-                 end
-
-    EventMachine.add_timer(seconds_to_trigger) do
+    handle = EventMachine::Timer.new(seconds_to_trigger) do
       # Reconnect persistence hack
       # @origin changes when reconnecting, so we mutate! the original message
       current_handler = @bot.adapters[m.adapter].handler
       m.origin = current_handler if current_handler != m.origin
-      m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
+      m.reply("🔔 -#{time_s} #{m.sender} > #{victim}: #{subject}")
     rescue StandardError
-      m.reply("🔔 -#{human_time} #{m.sender} > #{victim}: #{subject}")
+      m.reply("🔔 -#{time_s} #{m.sender} > #{victim}: #{subject}")
     end
 
-    m.reply "Reminder in #{human_time.bold.red} set for " \
-      "#{treat_as_next_day ? 'tomorrow '.red.bold : ''}#{remind_at} (#{tz.identifier})."
+    hash = add_timer_entry(handle, m.sender, subject, get_fut_timestamp_sec(seconds_to_trigger))
+
+    cancel_s = "(cancel id #{hash} to cancel)".gray
+    m.reply "Reminder in #{time_s.bold.red} set for " \
+      "#{treat_as_next_day ? 'tomorrow '.red.bold : ''}#{remind_at} (#{tz.identifier}). #{cancel_s}"
   end
   # rubocop:enable Metrics/MethodLength
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
 
+  def cancel(m)
+    case m.mode
+    when 'all'
+      rm = clear_timers_by_user_id(m.sender)
+      m.reply "Timers removed: #{rm.length}."
+    when 'list'
+      timers = get_timers_by_user_id(m.sender)
+      if timers.empty?
+        m.reply timers
+          .map { |_, v| "(#{v[:hash]}, #{v[:subject]}, #{v[:timestamp]})" }
+          .join(', ')
+      else
+        m.reply 'You have no pending timers.'
+      end
+    when 'id'
+      rm = remove_timer_entry(m.sender, m.args[1])
+      if rm
+        m.reply "Removed (#{rm[:hash]}, #{rm[:subject]}, #{rm[:timestamp]})."
+      else
+        m.reply "No entry found for #{m.args[1]}."
+      end
+    else
+      m.reply "Unknown mode #{m.mode}. <all|list|id hash>."
+    end
+  end
+
   private
+
+  def human_time(seconds_to_trigger)
+    mins_ago = seconds_to_trigger / 60.0
+    hours_ago = mins_ago / 60.0
+    if hours_ago >= 1
+      "#{hours_ago.round(1)}h"
+    elsif mins_ago < 1
+      "#{seconds_to_trigger.round(0)}s"
+    else
+      "#{mins_ago.round(0)}m"
+    end
+  end
+
+  def get_fut_timestamp_sec(sec)
+    timestamp = Time.now.to_i + sec
+    Time.at(timestamp)
+  end
+
+  def add_timer_entry(timer_handle, user_id, subject, timestamp)
+    hash = SecureRandom.hex(2)
+    # Collision
+    hash = SecureRandom.hex(3) if @timers[hash]
+
+    @timers[hash] = {
+      hash: hash,
+      user_id: user_id,
+      timer_handle: timer_handle,
+      subject: subject,
+      timestamp: timestamp
+    }
+    hash
+  end
+
+  def remove_timer_entry(user_id, hash)
+    to_remove = @timers[hash]
+    if to_remove && to_remove[:user_id] == user_id
+      to_remove[:timer_handle].cancel
+      @timers.delete to_remove[:hash]
+      return to_remove
+    end
+    nil
+  end
+
+  def clear_timers_by_user_id(user_id)
+    to_clear = get_timers_by_user_id(user_id)
+    to_clear.each { |_, v| EventMachine.cancel_timer(v[:timer_handle]) }
+    @timers.delete_if { |_, v| v[:user_id] == user_id }
+    to_clear
+  end
+
+  def get_timers_by_user_id(user_id)
+    @timers.filter { |_, v| v[:user_id] == user_id }
+  end
 
   def parse_time(time_s, tz)
     # Required Chronic hack.
