@@ -145,7 +145,7 @@ class Bot::Adapter::Irc < Bot::Adapter
   # rubocop:enable Metrics/PerceivedComplexity
 
   def format(string)
-    zwnj = "\u0200c"
+    zwnj = "\u{0200c}"
     ansi_to_irc_table = {
       "\033[30m" => "\x031#{zwnj}",  # black
       "\033[31m" => "\x034#{zwnj}",  # red
@@ -154,7 +154,7 @@ class Bot::Adapter::Irc < Bot::Adapter
       "\033[34m" => "\x032#{zwnj}",  # blue
       "\033[35m" => "\x0313#{zwnj}", # magenta
       "\033[36m" => "\x0311#{zwnj}", # cyan
-      "\033[37m" => "\x031#{zwnj}4", # gray
+      "\033[37m" => "\x031#{zwnj}", # gray
       "\033[0m" => "\x03#{zwnj}", # color end
       "\033[1m" => "\x02#{zwnj}", # bold start
       "\033[22m" => "\x02#{zwnj}" # bold end
