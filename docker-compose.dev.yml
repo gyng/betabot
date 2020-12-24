@@ -10,3 +10,4 @@ services:
       - ./:/app
     restart: always
     tty: true
+    user: ${CURRENT_UID}

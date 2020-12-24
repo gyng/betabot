@@ -83,9 +83,17 @@ Settings, accounts, databases, and the public directory are persisted with usage
 This launches betabot in docker dev mode: the entire directory is mounted in an alpine container, and the bot is started. Note: `restart: always` is enabled, so you need to kill it to stop it.
 
 ```
-docker-compose -f docker-compose.dev.yml up --build
-docker-compose -f docker-compose.dev.yml up --build --detach
+CURRENT_UID=$(id -u):$(id -g) docker-compose -f docker-compose.dev.yml up --build
+CURRENT_UID=$(id -u):$(id -g) docker-compose -f docker-compose.dev.yml up --build --detach
 ```
+
+or run the script which runs docker-dev in detached mode
+
+```
+./docker-dev.sh
+```
+
+logs can be followed with `docker log -f`, and the ID can be found using `docker ps`.
 
 #### Without Docker
 
