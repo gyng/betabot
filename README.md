@@ -78,6 +78,15 @@ You can choose either to use or not to use Docker to run betabot.
 
 Settings, accounts, databases, and the public directory are persisted with usage of Docker. The image needs to be rebuilt (easily with `docker-compose up --build -d`) when adapters or plugins are changed or added. As of now, the port mappings in `docker-compose.yml` must be changed manually when not using default ports.
 
+##### In dev mode
+
+This launches betabot in docker dev mode: the entire directory is mounted in an alpine container, and the bot is started. Note: `restart: always` is enabled, so you need to kill it to stop it.
+
+```
+docker-compose -f docker-compose.dev.yml up --build
+docker-compose -f docker-compose.dev.yml up --build --detach
+```
+
 #### Without Docker
 
 1. Requirements: [Ruby version >= 2.7](https://www.ruby-lang.org/en/downloads/), [Bundler](http://bundler.io/).

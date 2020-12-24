@@ -81,11 +81,13 @@ def plugin_update(name, branch = 'master', m = nil)
   g.branch(branch).checkout
   current_sha = g.object('HEAD^1').sha.dup
   current_gemfile = File.file?(gemfile_path) ? File.read(gemfile_path) : nil
+  puts_or_reply "ℹ Local SHA #{current_sha.cyan}", m
 
   g.pull
   new_sha = g.object('HEAD^1').sha
   new_date = g.object('HEAD^1').date
   new_gemfile = File.file?(gemfile_path) ? File.read(gemfile_path) : nil
+  puts_or_reply "ℹ Remote SHA #{current_sha.cyan}", m
 
   updated = new_sha != current_sha
   has_dependencies = JSON.parse(File.read(manifest_path), symbolize_names: true)

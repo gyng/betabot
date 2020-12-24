@@ -2,6 +2,7 @@ module Bot
   class << self
     def log
       unless @log
+        STDOUT.sync = true
         @log = Logger.new(STDOUT)
         @log.level = Logger::WARN if ENV['TEST'] # Set in spec_helper.rb
         @log.formatter = lambda do |severity, datetime, _progname, message|

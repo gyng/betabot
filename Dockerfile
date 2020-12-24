@@ -17,7 +17,8 @@ RUN apk --update add --virtual build-dependencies \
     git
 
 COPY Gemfile Gemfile.lock /app/
-RUN bundle install --without development test --jobs=3 --retry=3
+RUN bundle config set without 'development test' \
+  && bundle install --jobs=3 --retry=3
 
 ENV RACK_ENV production
 ENV LANG C.UTF-8
@@ -25,5 +26,6 @@ EXPOSE $PORT_WEB
 EXPOSE $PORT_SYNC_LISTENER
 
 COPY . /app
-RUN bundle install --without development test --jobs=3 --retry=3
+RUN bundle config set without 'development test' \
+  && bundle install --jobs=3 --retry=3
 CMD ["bundle", "exec", "ruby", "start_bot.rb"]

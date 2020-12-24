@@ -1,2 +1,4 @@
 .git
 lib/external_plugins/**
+docker-compose.*
+lib/public/i
