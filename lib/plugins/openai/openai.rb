@@ -116,8 +116,9 @@ class Bot::Plugin::Openai < Bot::Plugin
       'Content-Type' => 'application/json',
       'Authorization' => "Bearer #{@s[:openai_api_key]}"
     }
+
     body = {
-      prompt: prompt,
+      prompt: prompt.force_encoding("UTF-8"),
       temperature: 0.9,
       max_tokens: max_tokens,
       top_p: 1,
