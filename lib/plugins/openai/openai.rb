@@ -3,7 +3,11 @@ class Bot::Plugin::Openai < Bot::Plugin
     @s = {
       trigger: {
         ai: [:prompt, 0, 'ai <OpenAI prompt>'],
-        chat: [:chat, 0, 'chat [personality=cute anime girl]'],
+        ask: [:ask, 0, 'ask <your question>'],
+        chat: [:chat, 0, 'chat <message>'],
+        chatroom: [:chatroom, 0, 'chatroom [personality=cute anime girl]'],
+        choose: [:choose, 0, 'choose <item list>'],
+        quip: [:quip, 0, 'quip [personality=sensible]'],
         tldr: [:tldr, 0, 'tldr']
       },
       subscribe: true,
@@ -29,32 +33,65 @@ class Bot::Plugin::Openai < Bot::Plugin
     m.reply api_call(m.args.join(' '))
   end
 
+  def choose(m)
+    text = m.args.join(' ')
+    prompt = "Q: choose an item from this list and tell me why you picked it: #{text}\nA:"
+    m.reply api_call(prompt, 64, ["\n", 'Q:'])
+  end
+
   def chat(m)
+    personality = 'great'
+    text = m.args.join(' ')
+    prompt = "'#{text}'. A #{personality} reply to that is:"
+    m.reply api_call(prompt, 64)
+  end
+
+  def chatroom(m)
     personality = m.args.join(' ') || 'a cute anime girl'
-    buf = last_n(m, 3)
+    buf = last_n_chat(m, 3)
     prompt = "The following is a conversation in an online chatroom.\n" \
       "I am #{personality} and will continue the conversation.\n\n" \
       "Me: Hello\n" \
       "#{buf}"
-    m.reply api_call(prompt, 32, ['EOF'])
+    m.reply api_call(prompt, 64, ['EOF'])
   end
 
   def tldr(m)
-    buf = last_n(m, 1)
+    buf = last_n_chat(m, 1)
     prompt = "#{buf}\n\ntl;dr:"
-    m.reply api_call(prompt, 16)
+    m.reply api_call(prompt, 32)
+  end
+
+  def quip(m)
+    personality = m.args.join(' ') || 'sensible'
+    text = last_n_chat(m, 1)
+
+    prompt = "'#{text}' A #{personality} response to that statement is:"
+    m.reply api_call(prompt, 32)
+  end
+
+  def ask(m)
+    text = m.args.join(' ')
+    prompt = "Q: #{text}\nA:"
+    m.reply api_call(prompt, 64)
   end
 
   private
 
   # n up to 3
-  def last_n(m, n)
+  def last_n_chat(m, n)
     curbuf = @chat_buf[m.channel] || []
 
     buf = curbuf[0..n].reverse.map do |msg|
       "#{msg[:user]}: #{msg[:text]}"
     end.join("\n")
 
+    buf
+  end
+
+  def last_n(m, n)
+    curbuf = @chat_buf[m.channel] || []
+    buf = curbuf[0..n].reverse
     buf
   end
 
