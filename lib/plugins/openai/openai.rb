@@ -26,7 +26,7 @@ class Bot::Plugin::Openai < Bot::Plugin
   end
 
   def prompt(m)
-    m.reply api_call(m.text)
+    m.reply api_call(m.args.join(' '))
   end
 
   def chat(m)
