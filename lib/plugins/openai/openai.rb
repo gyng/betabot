@@ -68,13 +68,13 @@ class Bot::Plugin::Openai < Bot::Plugin
     text = last_n_chat(m, 1)
 
     prompt = "'#{text}' A #{personality} response to that statement is:"
-    m.reply api_call(prompt, 32)
+    m.reply api_call(prompt, 128)
   end
 
   def ask(m)
     text = m.args.join(' ')
     prompt = "Q: #{text}\nA:"
-    m.reply api_call(prompt, 64)
+    m.reply api_call(prompt, 128)
   end
 
   def story(m)
