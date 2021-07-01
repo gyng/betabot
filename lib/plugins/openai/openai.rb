@@ -110,7 +110,9 @@ class Bot::Plugin::Openai < Bot::Plugin
     buf
   end
 
-  def api_call(prompt, max_tokens = 64, stop = ["\n"])
+  def api_call(prompt, max_tokens = 64, stop = ["\n"], retries = 1)
+    return 'There\'s no response.' if retries <= -1
+
     url = @s[:openai_api_endpoint]
     headers = {
       'Content-Type' => 'application/json',
@@ -118,7 +120,7 @@ class Bot::Plugin::Openai < Bot::Plugin
     }
 
     body = {
-      prompt: prompt.force_encoding("UTF-8"),
+      prompt: prompt.force_encoding('UTF-8'),
       temperature: 0.9,
       max_tokens: max_tokens,
       top_p: 1,
@@ -138,6 +140,6 @@ class Bot::Plugin::Openai < Bot::Plugin
     Bot.log.info "#{self.class.name} - Completing: #{res}"
 
     completion = res[:choices][0][:text]
-    completion
+    completion.blank? ? api_call(prompt, max_tokens, stop, retries - 1) : completion
   end
 end
