@@ -8,6 +8,7 @@ class Bot::Plugin::Openai < Bot::Plugin
         chatroom: [:chatroom, 0, 'chatroom [personality=cute anime girl]'],
         choose: [:choose, 0, 'choose <item list>'],
         quip: [:quip, 0, 'quip [personality=sensible]'],
+        story: [:story, 0, 'story <topic=last chat message>'],
         tldr: [:tldr, 0, 'tldr']
       },
       subscribe: true,
@@ -74,6 +75,20 @@ class Bot::Plugin::Openai < Bot::Plugin
     text = m.args.join(' ')
     prompt = "Q: #{text}\nA:"
     m.reply api_call(prompt, 64)
+  end
+
+  def story(m)
+    topic = m.args.join(' ').blank? ? last_n(m, 1) : m.args.join(' ')
+    topic ||= m.sender
+
+    prompt = "Topic: Breakfast\n" \
+    'Two-Sentence Horror Story: He always stops crying when I pour the milk on his cereal. '\
+    "I just have to remember not to let him see his face on the carton.\n" \
+    "###\n"\
+    "Topic: #{topic}" \
+    'Two-Sentence Horror Story:'
+
+    m.reply api_call(prompt, 128)
   end
 
   private
