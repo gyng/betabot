@@ -1,11 +1,12 @@
 # rubocop:disable Layout/LineLength
 # rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/ClassLength
 
 class Bot::Plugin::Openai < Bot::Plugin
   def initialize(bot)
     @s = {
       trigger: {
-        ai: [:ai, 0, 'ai <prompt name> <prompt>. "ai list" lists prompts.'],
+        ai: [:ai, 0, 'ai <prompt name> <prompt>. "ai list" for available prompt names.'],
         ask: [:ask, 0, 'ask <your question>'],
         chatroom: [:chatroom, 0, 'Takes last 3 lines and continues the conversation. chatroom [personality=cute anime girl]']
       },
@@ -33,7 +34,6 @@ class Bot::Plugin::Openai < Bot::Plugin
       prompt: ''.force_encoding('UTF-8'),
       temperature: 0.9,
       max_tokens: 100,
-      top_p: 1,
       frequency_penalty: 0.0,
       presence_penalty: 0.6,
       best_of: 2,
@@ -68,7 +68,10 @@ class Bot::Plugin::Openai < Bot::Plugin
       'code <purpose>',
       'wolfram <query>',
       'haiku <topic>',
-      'singlish <english>'
+      'singlish <english>',
+      'mtg <name>',
+      'jira <product>',
+      'changelog [topic=None]'
     ]
 
     text = m.args[1..-1].join(' ').force_encoding('UTF-8')
@@ -91,20 +94,19 @@ class Bot::Plugin::Openai < Bot::Plugin
       'Two-Sentence Horror Story:'
     in ['plot', *input]
       args[:prompt] = "Title: Your Lie in April\n" \
-      "Japanese Title: 四月は君の嘘\n"\
-      "Genres: Musical, romantic drama\n"\
-      "Plot: Piano prodigy Kōsei Arima dominates various music competitions and becomes famous among child musicians. When his mother Saki dies suddenly, he has a mental breakdown while performing at a piano recital; this results in him no longer being able to hear the sound of his piano even though his hearing is otherwise perfectly fine.\n\n" \
-      "Title: Neon Genesis Evangelion\n" \
-      "Japanese Title: 新世紀エヴァンゲリオン\n"\
-      "Genres: Apocalyptic, Mecha, Psychological drama\n" \
-      "Plot: In 2015, fifteen years after a global cataclysm known as the Second Impact, teenager Shinji Ikari is summoned to the futuristic city of Tokyo-3 by his estranged father Gendo Ikari, director of the special paramilitary force Nerv. Shinji witnesses United Nations forces battling an Angel, one of a race of giant monstrous beings whose awakening was foretold by the Dead Sea Scrolls.\n\n" \
-      "Title: Non Non Biyori\n"\
-      "Japanese Title: のんのんびより\n"\
-      "Genres: 	Comedy, slice of life\n" \
-      "Plot: The story takes place in the countryside small town village of Asahigaoka, a place lacking many of the conveniences that people from the city are accustomed to. The nearest stores are a few miles away and one of the local schools consists of only five students, each of whom is in a different grade of elementary or middle school. Hotaru Ichijo, a fifth grader from Tokyo, transfers into Asahigaoka Branch School and adjusts to countryside life with her new friends.\n\n" \
-      "Title: #{text}\n"\
+      "Japanese Title: 四月は君の嘘 | Genres: Musical, romantic drama\n"\
+      "Plot: Piano prodigy Kōsei Arima dominates various music competitions and becomes famous among child musicians. When his mother Saki dies suddenly, he has a mental breakdown while performing at a piano recital; this results in him no longer being able to hear the sound of his piano even though his hearing is otherwise perfectly fine.\n" \
+      "\nTitle: Neon Genesis Evangelion\n" \
+      "Japanese Title: 新世紀エヴァンゲリオン | Genres: Apocalyptic, Mecha, Psychological drama\n"\
+      "Plot: In 2015, fifteen years after a global cataclysm known as the Second Impact, teenager Shinji Ikari is summoned to the futuristic city of Tokyo-3 by his estranged father Gendo Ikari, director of the special paramilitary force Nerv. Shinji witnesses United Nations forces battling an Angel, one of a race of giant monstrous beings whose awakening was foretold by the Dead Sea Scrolls.\n" \
+      "\nTitle: Non Non Biyori\n"\
+      "Japanese Title: のんのんびより | Genres: Comedy, slice of life\n"\
+      "Plot: The story takes place in the countryside small town village of Asahigaoka, a place lacking many of the conveniences that people from the city are accustomed to. The nearest stores are a few miles away and one of the local schools consists of only five students, each of whom is in a different grade of elementary or middle school. Hotaru Ichijo, a fifth grader from Tokyo, transfers into Asahigaoka Branch School and adjusts to countryside life with her new friends.\n" \
+      "\nTitle: #{text}\n"\
       'Japanese Title:'
       args[:stop] = ['Title:']
+      args[:temperature] = 0.95
+      args[:max_tokens] = 128
     in ['chat', *input]
       args[:prompt] = "'#{text}'. A reply to that is:"
     in ['tldr', *input]
@@ -167,7 +169,60 @@ class Bot::Plugin::Openai < Bot::Plugin
 "Singlish: Can or not?\n"\
 "English: #{text}\n"\
 'Singlish:'
-    else
+    in ['mtg', *input]
+      args[:prompt] = "Name: {Moonglove Winnower}\n" \
+      "{3}{B} [elf facing left] 2/3 Creature — Elf Rogue\n" \
+      "Deathtouch (Any amount of damage this deals to a creature is enough to destroy it.)\n" \
+      "Winnowers live to eliminate eyeblights, creatures the elves deem too ugly to exist.\n" \
+      "###\n" \
+      "Name: {Arrow Storm}\n" \
+      "{3}{R}{R} [horse archers firing arrows] Sorcery\n" \
+      "Arrow Storm deals 4 damage to any target.\n" \
+      "Raid — If you attacked this turn, instead Arrow Storm deals 5 damage to that permanent or player and the damage can't be prevented.\n" \
+      "First the thunder, then the rain.\n" \
+      "###\n" \
+      "Name: {Basking Rootwalla}\n" \
+      "{G} [lizard on a branch] 1/1 Creature — Lizard\n" \
+      "{1}{G}: Basking Rootwalla gets +2/+2 until end of turn. Activate this ability only once each turn.\n" \
+      "Madness {0} (If you discard this card, discard it into exile. When you do, cast it for its madness cost or put it into your graveyard.)\n" \
+      "###\n" \
+      "Name: {#{text}}"
+      args[:stop] = ["\n\n", '###']
+      args[:top_p] = 1
+      in ['jira', *input]
+        # https://twitter.com/shituserstory
+        args[:prompt] = "For our app\n" \
+        "[JIRA-52] As a user, I want to be locked out of my current app version and forced to update, so that I can be protected from the old colour scheme\n" \
+        "\n"\
+        "For GMail\n"\
+        "[GMAL-5931] As a user, I want to have two small unlabelled oblong-shaped icons next to each other, representing commonly used interactions, the primary contrast being a 90° rotation, so that there is no ambiguity between choosing to attach a file or insert a link\n"\
+        "\n"\
+        "For Excel\n"\
+        "[EXC-1769] As a user, I want to have fractions automatically converted to dates so that I can spend 01-Oct of my day manually changing them back\n"\
+        "\n"\
+        "For Twitter\n"\
+        "[TWAT-86] As a user, I want to click on the ‘show more replies’ bar, so that when it disappears, revealing absolutely nothing, I can be disappointed I didn’t get to see a shit opinion from a dickhead\n"\
+        "\n"\
+        "For #{text || 'our app'}\n"
+        args[:stop] = ["\n\n"]
+      in ['changelog', *input]
+        # https://twitter.com/thestrangelog?lang=en
+        topic = text || '*'
+        args[:prompt] = "*: [FIX] Grandma now pays less if you have a prison tattoo\n"\
+        "*: [FIX] Colonist with a sick thought won't meditate at all.\n"\
+        "*: [CHANGE] Lowered wolf procreation slightly\n"\
+        "*: [FIX] Stomach is no longer a vital organ.\n"\
+        "*: [FIX] Corpses don't yell\n"\
+        "poop: [FIX] Fixed an issue where creatures would never poop once they had been scared by a predator\n"\
+        "penis: [FIX] Bug fix where penis would get bigger with each login\n"\
+        "pope: [FIX] The Pope is no longer likely to personally excommunicate you just because he slightly dislikes the look of your face\n"\
+        "bee: [FIX] Consuming a beehive will now cause you to ejaculate bees\n"\
+        "sacrifice: [FIX] No longer possible to sacrifice the same person to Satan multiple times\n"\
+        "goose: [FEAT] Goose simulator added. Geese will now fly between lakes and swim around acting like geese.\n"\
+        "friends: [FIX] you have no friends\n"\
+        "#{topic}:"
+        args[:stop] = ["\n"]
+      else
       args[:prompt] = text
     end
 
@@ -182,6 +237,8 @@ class Bot::Plugin::Openai < Bot::Plugin
       "I am #{personality} and will continue the conversation.\n\n" \
       "Me: Hello\n" \
       "#{buf}"
+    args[:stop] = nil
+    args[:max_tokens] = 48
     m.reply api_call(args)
   end
 
@@ -234,10 +291,11 @@ class Bot::Plugin::Openai < Bot::Plugin
 
     Bot.log.info "#{self.class.name} - Completing: #{res}"
 
-    completion = res[:choices][0][:text]
+    completion = res && res[:choices] && res[:choices][0] && res[:choices][0][:text]
     completion.blank? ? '[Empty response received from server]' : completion
   end
 end
 
+# rubocop:enable Metrics/ClassLength
 # rubocop:enable Metrics/MethodLength
 # rubocop:enable Layout/LineLength
