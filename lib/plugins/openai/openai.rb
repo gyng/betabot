@@ -93,15 +93,9 @@ class Bot::Plugin::Openai < Bot::Plugin
       "Topic: #{text}" \
       'Two-Sentence Horror Story:'
     in ['plot', *input]
-      args[:prompt] = "Title: Your Lie in April\n" \
-      "Japanese Title: 四月は君の嘘 | Genres: Musical, romantic drama\n"\
-      "Plot: Piano prodigy Kōsei Arima dominates various music competitions and becomes famous among child musicians. When his mother Saki dies suddenly, he has a mental breakdown while performing at a piano recital; this results in him no longer being able to hear the sound of his piano even though his hearing is otherwise perfectly fine.\n" \
-      "\nTitle: Neon Genesis Evangelion\n" \
+      args[:prompt] = "Title: Neon Genesis Evangelion\n" \
       "Japanese Title: 新世紀エヴァンゲリオン | Genres: Apocalyptic, Mecha, Psychological drama\n"\
       "Plot: In 2015, fifteen years after a global cataclysm known as the Second Impact, teenager Shinji Ikari is summoned to the futuristic city of Tokyo-3 by his estranged father Gendo Ikari, director of the special paramilitary force Nerv. Shinji witnesses United Nations forces battling an Angel, one of a race of giant monstrous beings whose awakening was foretold by the Dead Sea Scrolls.\n" \
-      "\nTitle: Non Non Biyori\n"\
-      "Japanese Title: のんのんびより | Genres: Comedy, slice of life\n"\
-      "Plot: The story takes place in the countryside small town village of Asahigaoka, a place lacking many of the conveniences that people from the city are accustomed to. The nearest stores are a few miles away and one of the local schools consists of only five students, each of whom is in a different grade of elementary or middle school. Hotaru Ichijo, a fifth grader from Tokyo, transfers into Asahigaoka Branch School and adjusts to countryside life with her new friends.\n" \
       "\nTitle: #{text}\n"\
       'Japanese Title:'
       args[:stop] = ['Title:']
@@ -123,8 +117,6 @@ class Bot::Plugin::Openai < Bot::Plugin
       "Emoji: 😀, 🤗, 😺\n" \
       "Usage: Metaphorical expressions related to fire, including the slang hot (“attractive”) and lit (“excellent”):\n" \
       "Emoji: 🔥\n" \
-      "Usage: Making money, loving wealth, being or feeling rich, and concepts of success and excellence\n" \
-      "Emoji: 🤑, 💰\n" \
       "Usage: #{input.join(' ')}\n" \
       'Emoji:'
       args[:stop] = ['Emoji:', 'Usage:', "\n"]
@@ -155,12 +147,6 @@ class Bot::Plugin::Openai < Bot::Plugin
 "Singlish: Cannot anyhow go like dat oe leh.\n"\
 "English: Why didn't you show up?\n"\
 "Singlish: How come never show up\n"\
-"English: I play badminton every weekend because I like it.\n"\
-"Singlish: I like badminton, dat's why I every weekend go pay.\n"\
-"English: You don't need to bring a camera tomorrow\n"\
-"Singlish: Tomorrow don't need bring camera.\n"\
-"English: Does your computer have a virus?\n"\
-"Singlish: Your computer got virus or not?\n"\
 "English: I am very naughty.\n"\
 "Singlish: I damn naughty.\n"\
 "English: Oh dear, I cannot wait any longer. I must leave immediately.\n"\
@@ -181,11 +167,6 @@ class Bot::Plugin::Openai < Bot::Plugin
       "Raid — If you attacked this turn, instead Arrow Storm deals 5 damage to that permanent or player and the damage can't be prevented.\n" \
       "First the thunder, then the rain.\n" \
       "###\n" \
-      "Name: {Basking Rootwalla}\n" \
-      "{G} [lizard on a branch] 1/1 Creature — Lizard\n" \
-      "{1}{G}: Basking Rootwalla gets +2/+2 until end of turn. Activate this ability only once each turn.\n" \
-      "Madness {0} (If you discard this card, discard it into exile. When you do, cast it for its madness cost or put it into your graveyard.)\n" \
-      "###\n" \
       "Name: {#{text}}"
       args[:stop] = ["\n\n", '###']
       args[:top_p] = 1
@@ -201,7 +182,8 @@ class Bot::Plugin::Openai < Bot::Plugin
         "[EXC-1769] As a user, I want to have fractions automatically converted to dates so that I can spend 01-Oct of my day manually changing them back\n"\
         "\n"\
         "For Twitter\n"\
-        "[TWAT-86] As a user, I want to click on the ‘show more replies’ bar, so that when it disappears, revealing absolutely nothing, I can be disappointed I didn’t get to see a shit opinion from a dickhead\n"\
+        "[TWAT-86]
+         As a user, I want to click on the ‘show more replies’ bar, so that when it disappears, revealing absolutely nothing, I can be disappointed I didn’t get to see a shit opinion from a dickhead\n"\
         "\n"\
         "For #{text || 'our app'}\n"
         args[:stop] = ["\n\n"]
@@ -211,12 +193,6 @@ class Bot::Plugin::Openai < Bot::Plugin
         args[:prompt] = "*: [FIX] Grandma now pays less if you have a prison tattoo\n"\
         "*: [FIX] Colonist with a sick thought won't meditate at all.\n"\
         "*: [CHANGE] Lowered wolf procreation slightly\n"\
-        "*: [FIX] Stomach is no longer a vital organ.\n"\
-        "*: [FIX] Corpses don't yell\n"\
-        "poop: [FIX] Fixed an issue where creatures would never poop once they had been scared by a predator\n"\
-        "penis: [FIX] Bug fix where penis would get bigger with each login\n"\
-        "pope: [FIX] The Pope is no longer likely to personally excommunicate you just because he slightly dislikes the look of your face\n"\
-        "bee: [FIX] Consuming a beehive will now cause you to ejaculate bees\n"\
         "sacrifice: [FIX] No longer possible to sacrifice the same person to Satan multiple times\n"\
         "goose: [FEAT] Goose simulator added. Geese will now fly between lakes and swim around acting like geese.\n"\
         "friends: [FIX] you have no friends\n"\
