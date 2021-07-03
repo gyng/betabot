@@ -36,7 +36,7 @@ class Bot::Plugin::Openai < Bot::Plugin
       max_tokens: 100,
       frequency_penalty: 0.0,
       presence_penalty: 0.6,
-      best_of: 2,
+      best_of: 1,
       stop: ["\n"]
     }
   end
