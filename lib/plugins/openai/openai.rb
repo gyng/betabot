@@ -198,6 +198,29 @@ class Bot::Plugin::Openai < Bot::Plugin
         "friends: [FIX] you have no friends\n"\
         "#{topic}:"
         args[:stop] = ["\n"]
+      in ['sc2', *input]
+        args[:prompt] = "Build name: 4 Gate All-in\n"\
+        '14 Pylon, '\
+        '15 Gateway, '\
+        '16 Assimilator, '\
+        '18 Pylon'\
+        "---\n"\
+        "Build name: 12 pool\n"\
+        '12 Spawning Pool, '\
+        '14 Overlord, '\
+        '14 Zergling x3, '\
+        '17 Zergling'\
+        "---\n"\
+        "Build name: 3 rax proxy reaper\n"\
+        '13 Supply Depot, '\
+        '13 Refinery, '\
+        '13 Barracks, '\
+        '13 Barracks, '\
+        '13 Barracks, '\
+        '13 Reaper, '\
+        "---\n"\
+        "Build name: #{input}"
+        args[:stop] = '---'
       else
       args[:prompt] = text
     end
