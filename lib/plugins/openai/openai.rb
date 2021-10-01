@@ -220,7 +220,7 @@ class Bot::Plugin::Openai < Bot::Plugin
         '13 Reaper, '\
         "---\n"\
         "Build name: #{input}"
-        args[:stop] = '---'
+        args[:stop] = 'Build name'
       else
       args[:prompt] = text
     end
