@@ -116,6 +116,10 @@ class Bot::Plugin::Entitle < Bot::Plugin
     meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
 
+    # Check special cases that need access to DOM
+    is_mastodon = doc.at_css('a[href$="https://docs.joinmastodon.org/"]')
+    return "#{meta_og_desc.gsub("\n", ' ↵ '.gray)} — #{meta_og_title}" if is_mastodon
+
     meta_og_title || meta_og_twitter_title || html_title || meta_desc || meta_og_desc
   end
 
