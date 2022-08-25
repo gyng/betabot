@@ -20,8 +20,11 @@ class Bot::Adapter::Irc::Handler < EM::Connection
     @reconnect_delay = 30
   end
 
+  def post_init
+    start_tls({ :sni_hostname => @s[:selected_hostname] }) if @s[:ssl]
+  end
+
   def connection_completed
-    start_tls if @s[:ssl]
     register(@s[:nick])
     keep_alive
     @state = :connected

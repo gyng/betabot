@@ -60,6 +60,7 @@ class Bot::Adapter::Irc < Bot::Adapter
 
     selected.each do |s|
       host = s[:hostname].sample
+      s[:selected_hostname] = host
       Bot.log.info "IRC: Connecting to #{host}..."
       @handler = EM.connect(host, s[:port], Handler, self, s)
       @connections[s[:name].to_sym] = @handler
