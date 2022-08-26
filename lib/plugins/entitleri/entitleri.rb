@@ -79,7 +79,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     }
     body = { uri: url }
     body = body.to_json
-    JSON.parse(RestClient.post('http://192.168.1.168:8080/infer', body, headers: headers), symbolize_names: true)
+    JSON.parse(RestClient.post(@s[:imginfer_infer_endpoint], body, headers:), symbolize_names: true)
   rescue StandardError => e
     Bot.log.info "Error in Entitleri#get_guess_imginfer: #{e} #{e.backtrace}"
     nil
