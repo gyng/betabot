@@ -73,13 +73,12 @@ class Bot::Plugin::Entitleri < Bot::Plugin
   def get_guess_imginfer(url)
     Bot.log.info "EntitleRI: Getting imginfer results for #{url}"
 
-    headers = {
-      'Content-Type' => 'application/json',
-      'Authorization' => "Bearer #{@s[:imginfer_key]}"
-    }
     body = { uri: url }
     body = body.to_json
-    JSON.parse(RestClient.post(@s[:imginfer_infer_endpoint], body, headers:), symbolize_names: true)
+    JSON.parse(RestClient.post(@s[:imginfer_infer_endpoint], body, {
+                                 'Content-Type' => 'application/json',
+                                 'Authorization' => "Bearer #{@s[:imginfer_key]}"
+                               }), symbolize_names: true)
   rescue StandardError => e
     Bot.log.info "Error in Entitleri#get_guess_imginfer: #{e} #{e.backtrace}"
     nil
