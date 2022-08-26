@@ -191,7 +191,7 @@ class Bot::Plugin::Image < Bot::Plugin
       # Grab file. TODO: setup a timeout
       begin
         File.open(temp_path, 'wb') do |f|
-          data = RestClient::Request.execute(method: :get, url: url, timeout: 300)
+          data = RestClient::Request.execute(method: :get, url:, timeout: 300)
           f.write(data)
         end
       rescue StandardError => e
@@ -205,13 +205,13 @@ class Bot::Plugin::Image < Bot::Plugin
       # Record image if new
       sha256 = Digest::SHA256.file(temp_path).to_s
 
-      if (matched_image = @db[:images].where(sha256: sha256)).to_a.empty?
+      if (matched_image = @db[:images].where(sha256:)).to_a.empty?
         # New image
         filetype = File.extname(URI.parse(url).path)
         image_path = File.join(*@s[:image_directory], "#{sha256}#{filetype}")
         FileUtils.mv(temp_path, image_path) if !File.file?(image_path)
         @db.from(:images).insert(
-          sha256: sha256,
+          sha256:,
           md5: Digest::MD5.file(image_path).to_s,
           path: image_path,
           google_description: '',
@@ -227,7 +227,7 @@ class Bot::Plugin::Image < Bot::Plugin
       @db.from(:sources).insert(
         image_id: matched_image.to_a.first[:id],
         timestamp: Time.now,
-        url: url,
+        url:,
         source_name: m.sender,
         context: m.text,
         filename: File.basename(URI.parse(url).path)

@@ -75,7 +75,7 @@ class Bot::Core::Authenticator
     salt = SecureRandom.hex(salt_length)
 
     @authentications[account_name] = {
-      salt: salt,
+      salt:,
       hash: make_hash(salt, password),
       auth_level: auth_level.to_i,
       generated: Time.now.utc,

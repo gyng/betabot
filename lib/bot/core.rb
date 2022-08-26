@@ -368,7 +368,7 @@ module Bot
         plugin: plugin.to_sym,
         method: method.to_sym,
         required_auth_level: required_auth_level.to_i,
-        help: help
+        help:
       }
     end
 

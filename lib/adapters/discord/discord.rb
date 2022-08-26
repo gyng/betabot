@@ -48,7 +48,7 @@ class Bot::Adapter::Discord < Bot::Adapter
   end
 
   def message(channel, text)
-    @client.message(channel: channel, text: text)
+    @client.message(channel:, text:)
   end
 
   def to_adapter_message(data)

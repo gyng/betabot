@@ -73,9 +73,9 @@ class Bot::Plugin::Trivia < Bot::Plugin
     @active[m.channel] = {
       time: Time.now,
       answer: q[:correct_answer],
-      answer_key: answer_key,
-      options: options,
-      timer: timer,
+      answer_key:,
+      options:,
+      timer:,
       answered: { m.hostname => -1 }
     }
     m.reply "⏲️ #{seconds}s #{q[:category]} – #{q[:question].bold}: #{options_string}"

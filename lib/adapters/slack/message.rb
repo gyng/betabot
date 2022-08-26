@@ -11,7 +11,7 @@ class Bot::Adapter::Slack::Message < Bot::Core::Message
   def reply(text)
     Bot.log.info "#{self.class.name} #{@channel}\n\t#{'->'.green} #{text}"
     @client.typing(channel: @channel)
-    @client.message(channel: @channel, text: text)
+    @client.message(channel: @channel, text:)
   end
 
   def args

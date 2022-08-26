@@ -315,11 +315,11 @@ class Bot::Plugin::Remind < Bot::Plugin
     hash = SecureRandom.hex(3) if @timers[hash]
 
     @timers[hash] = {
-      hash: hash,
-      user_id: user_id,
-      timer_handle: timer_handle,
-      subject: subject,
-      timestamp: timestamp
+      hash:,
+      user_id:,
+      timer_handle:,
+      subject:,
+      timestamp:
     }
     hash
   end
@@ -357,12 +357,12 @@ class Bot::Plugin::Remind < Bot::Plugin
               Time.now.utc
             end
       time_s = time_s.gsub(/^at /, '') # Chronic cannot parse "at 10pm tomorrow"
-      parsed = Chronic.parse(time_s, now: now)
+      parsed = Chronic.parse(time_s, now:)
 
       # Try to parse without last argument as it could be a tz
       if parsed.nil?
         time_s = time_s.split(' ')[0...-1].join(' ')
-        parsed = Chronic.parse(time_s, now: now)
+        parsed = Chronic.parse(time_s, now:)
       end
 
       parsed

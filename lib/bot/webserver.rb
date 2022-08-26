@@ -21,7 +21,7 @@ def start_sinatra(s, web_app)
 
   Rack::Server.start(
     app: dispatch,
-    server: server,
+    server:,
     Host: host,
     Port: port,
     signals: false

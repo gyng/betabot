@@ -105,7 +105,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     Bot.log.info('Entitle: handling as default URL type')
 
     user_agent = curl_needed?(url) ? @s[:curl_user_agent] : @s[:user_agent]
-    response = RestClient.get(url, user_agent: user_agent).body
+    response = RestClient.get(url, user_agent:).body
     doc = Nokogiri::HTML(response)
     doc.encoding = 'utf-8'
 
