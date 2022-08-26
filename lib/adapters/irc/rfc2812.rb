@@ -258,6 +258,7 @@ module Bot::Adapter::Irc::RFC2812
     send "WATCH #{nicknames}"
   end
 
+  # rubocop:disable Style/OptionalBooleanParameter
   def who(name, operators = false)
     if name.nil?
       send 'WHO'
@@ -265,6 +266,7 @@ module Bot::Adapter::Irc::RFC2812
       send "WHO #{name} #{operators ? 'o' : ''}"
     end
   end
+  # rubocop:enable Style/OptionalBooleanParameter
 
   def whois(nicknames, server = nil)
     nicknames = nicknames.join(',') if nicknames.is_a?(Array)

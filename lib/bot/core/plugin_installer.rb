@@ -28,12 +28,14 @@ rescue StandardError
 end
 
 # This method uses puts because Bot.log might not be loaded from the Rakefile.
+# rubocop: disable Style/OptionalBooleanParameter
 def plugin_install(manifest, update_if_exists = true, m = nil)
   if !manifest
     puts_or_reply 'Bad manifest, aborting install', m
     puts "Manifest: #{manifest.inspect}"
     return
   end
+  # rubocop: enable Style/OptionalBooleanParameter
 
   puts_or_reply "ℹ Installing plugin #{manifest[:name].bold.cyan}...", m
 

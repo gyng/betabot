@@ -348,9 +348,10 @@ class Bot::Plugin::Remind < Bot::Plugin
   def parse_time(time_s, tz)
     # Required Chronic hack.
     Time.use_zone('UTC') do
-      now = if tz.is_a?(TZInfo::Timezone)
+      now = case tz
+            when TZInfo::Timezone
               tz.utc_to_local(Time.now.utc)
-            elsif tz.is_a?(Numeric)
+            when Numeric
               Time.now.utc.change(offset: tz)
             else
               Time.now.utc

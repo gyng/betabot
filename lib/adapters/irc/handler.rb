@@ -3,12 +3,10 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   include Bot::Adapter::Irc::RFC2812
 
   attr_accessor :state
-  attr_reader :timeout
-  attr_reader :ping_interval
-  attr_reader :reconnect_delay
-  attr_reader :nick_reclaim_interval
+  attr_reader :timeout, :ping_interval, :reconnect_delay, :nick_reclaim_interval
 
   def initialize(adapter, s = Hash.new(false))
+    super
     @adapter = adapter
     @s = s
     @registered = false
@@ -21,7 +19,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
   end
 
   def post_init
-    start_tls({ :sni_hostname => @s[:selected_hostname] }) if @s[:ssl]
+    start_tls({ sni_hostname: @s[:selected_hostname] }) if @s[:ssl]
   end
 
   def connection_completed
@@ -40,7 +38,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
 
   def send_data(data)
     Bot.log.info "#{self.class.name} #{@s[:name]}\n\t#{'->'.green} #{data}"
-    super @adapter.format(data) + "\n"
+    super "#{@adapter.format(data)}\n"
   rescue StandardError => e
     Bot.log.error "#{self.class.name} #{@s[:name]}\n#{e}\n#{e.backtrace.join("\n")}}"
   end
@@ -123,7 +121,7 @@ class Bot::Adapter::Irc::Handler < EM::Connection
       @adapter.on_connect(self)
     when :"433"
       nick = m.raw.split(' ')[3]
-      register(nick + '_')
+      register("#{nick}_")
       EM.add_timer(@nick_reclaim_interval) { nick(@s[:nick]) } # Try to reclaim desired nick
     when :privmsg
       check_trigger(m)

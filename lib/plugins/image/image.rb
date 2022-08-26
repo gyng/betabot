@@ -1,4 +1,3 @@
-# rubocop:disable Metrics/ClassLength
 class Bot::Plugin::Image < Bot::Plugin
   # rubocop:disable Metrics/MethodLength
   def initialize(bot)
@@ -192,9 +191,8 @@ class Bot::Plugin::Image < Bot::Plugin
       # Grab file. TODO: setup a timeout
       begin
         File.open(temp_path, 'wb') do |f|
-          # rubocop:disable Security/Open
-          f.write(open(url).read)
-          # rubocop:enable Security/Open
+          data = RestClient::Request.execute(method: :get, url: url, timeout: 300)
+          f.write(data)
         end
       rescue StandardError => e
         Bot.log.info("Failed to open image #{url} #{e}")
@@ -216,7 +214,7 @@ class Bot::Plugin::Image < Bot::Plugin
           sha256: sha256,
           md5: Digest::MD5.file(image_path).to_s,
           path: image_path,
-          google_description: get_guess(url),
+          google_description: '',
           bytesize: File.size(image_path)
         )
       else
@@ -239,31 +237,4 @@ class Bot::Plugin::Image < Bot::Plugin
     end
     # rubocop:enable Metrics/BlockLength
   end
-
-  def get_guess(url)
-    if @s[:get_google_guess]
-      puts "Image: Getting best guess of #{url}"
-
-      query      = 'http://www.google.com/searchbyimage?&image_url='
-      selector   = '.qb-bmqc'
-      user_agent = 'Mozilla/5.0 (Windows NT 6.0; rv:20.0) Gecko/20100101 Firefox/20.0'
-
-      # Get redirect by spoofing User-Agent
-      # rubocop:disable Security/Open
-      html = open(
-        query + url,
-        'User-Agent' => user_agent,
-        allow_redirections: :all,
-        ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE
-      )
-      # rubocop:enable Security/Open
-
-      doc = Nokogiri::HTML(html.read)
-      doc.encoding = 'utf-8'
-      doc.css(selector).inner_text
-    else
-      ''
-    end
-  end
 end
-# rubocop:enable Metrics/ClassLength

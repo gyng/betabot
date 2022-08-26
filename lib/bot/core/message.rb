@@ -1,10 +1,6 @@
 class Bot::Core::Message
-  attr_accessor :adapter
-  attr_accessor :hostname
-  attr_accessor :internal_type # Server or client message, distinct from adapter's internal message :type
-  attr_accessor :sender
-  attr_accessor :text
-  attr_accessor :time
+  # Server or client message, distinct from adapter's internal message :type
+  attr_accessor :adapter, :hostname, :internal_type, :sender, :text, :time
 
   def initialize
     yield self if block_given?
@@ -12,7 +8,7 @@ class Bot::Core::Message
 
   # Base implementation, used for testing
   def args
-    [text.split(' ')[1..-1]].flatten
+    [text.split(' ')[1..]].flatten
   end
 
   def reply(*args); end

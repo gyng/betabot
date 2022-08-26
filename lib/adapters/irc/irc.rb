@@ -1,6 +1,5 @@
 class Bot::Adapter::Irc < Bot::Adapter
-  attr_accessor :latency
-  attr_accessor :handler
+  attr_accessor :latency, :handler
 
   def initialize(bot)
     require_relative 'message'

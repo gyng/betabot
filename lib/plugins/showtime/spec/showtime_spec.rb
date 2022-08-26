@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative '../showtime.rb'
+require_relative '../showtime'
 
 describe Bot::Plugin::Showtime do
   before(:each) do

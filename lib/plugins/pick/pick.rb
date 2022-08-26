@@ -16,7 +16,7 @@ class Bot::Plugin::Pick < Bot::Plugin
     picks = picks_arg ? m.args[0].to_i : 1
     picks = picks > 2_147_483_647 ? 2_147_483_647 : picks
     starting_index = numeric?(picks_arg) ? 1 : 0
-    m.reply m.args[starting_index..-1].join(' ').split(',').sample(picks).map(&:strip).join(', ')
+    m.reply m.args[starting_index..].join(' ').split(',').sample(picks).map(&:strip).join(', ')
   end
 
   def shuffle(m)

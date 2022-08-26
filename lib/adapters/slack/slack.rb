@@ -13,7 +13,7 @@ class Bot::Adapter::Slack < Bot::Adapter
     @reconnect_delay = 30
 
     # Avoid massive spam
-    @slack_logger = ::Logger.new(STDOUT)
+    @slack_logger = ::Logger.new($stdout)
     @slack_logger.level = Logger::INFO
 
     super
@@ -74,9 +74,5 @@ class Bot::Adapter::Slack < Bot::Adapter
       m.text     = ::Slack::Messages::Formatting.unescape(slack_data.text || '')
       m.user     = slack_data.user
     end
-  end
-
-  def trigger_plugin(trigger, m)
-    super(trigger, m)
   end
 end

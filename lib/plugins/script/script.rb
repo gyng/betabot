@@ -37,7 +37,7 @@ class Bot::Plugin::Script < Bot::Plugin
     case m.mode
     when 'add'
       trigger = m.args[1].to_sym
-      opts = [trigger, m.args[2], m.args[3..-1].join(' ').force_encoding('utf-8')]
+      opts = [trigger, m.args[2], m.args[3..].join(' ').force_encoding('utf-8')]
       @s[:macros][trigger] = opts
       register_trigger(trigger, opts)
       save_settings

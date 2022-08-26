@@ -2,6 +2,7 @@ class Bot::Plugin::Mpcsync::SyncListener < EventMachine::Connection
   require 'net/http'
 
   def initialize(plugin, m)
+    super
     @plugin = plugin
     @m = m
   end

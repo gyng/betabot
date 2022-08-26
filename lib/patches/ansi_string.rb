@@ -1,6 +1,6 @@
 # http://stackoverflow.com/questions/1489183/colorized-ruby-output/16363159#16363159
 
-# rubocop:disable Style/SingleLineMethods, Layout/EmptyLineBetweenDefs
+# rubocop:disable Style/SingleLineMethods
 class String
   def black;         "\033[30m#{self}\033[0m" end
   def red;           "\033[31m#{self}\033[0m" end
@@ -27,4 +27,4 @@ class String
     self
   end
 end
-# rubocop:enable Style/SingleLineMethods, Layout/EmptyLineBetweenDefs
+# rubocop:enable Style/SingleLineMethods

@@ -1,12 +1,8 @@
 class Bot::Adapter::Irc::Message < Bot::Core::Message
-  attr_accessor :real_name
-  attr_accessor :hostname
-  attr_accessor :type
-  attr_accessor :channel
-  attr_accessor :raw
-  attr_accessor :origin
+  attr_accessor :real_name, :hostname, :type, :channel, :raw, :origin
 
   def initialize
+    super
     yield self if block_given?
     @adapter = :irc
     @time = Time.now
@@ -42,9 +38,9 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
     # Extra space if called by name (!ping vs BotName: ping).
     # Assumes text is a String, wrap in array anyway if cannot split
     if @text =~ /^#{Bot::SHORT_TRIGGER}([^ ]*)/i
-      [@text.split(' ')[1..-1]].flatten
+      [@text.split(' ')[1..]].flatten
     else
-      [@text.split(' ')[2..-1]].flatten
+      [@text.split(' ')[2..]].flatten
     end
   end
 
@@ -52,7 +48,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
     args[0]
   end
 
-  def chunk(input, min_length, max_length)
+  def chunk(input, min_length, max_length, &block)
     # @param input [String]
     # @param min_length [Numeric] how long the string should be before starting to look-ahead for chopping
     # @param max_length [Numeric] how long can the line chopping look-ahead to
@@ -69,9 +65,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
         output_current += x + blank
       elsif max_length < output_current.bytesize + x.bytesize
         parts = split_on_grapheme(output_current + x, max_length).to_a
-        parts[0..-2].each do |part|
-          yield part
-        end
+        parts[0..-2].each(&block)
         output_current = parts[-1]
       else
         yield output_current.rstrip
@@ -79,7 +73,7 @@ class Bot::Adapter::Irc::Message < Bot::Core::Message
       end
     end
 
-    # Note: rstrip doesn't handle unicode blanks
+    # NOTE: rstrip doesn't handle unicode blanks
     yield output_current.rstrip if output_current.size.positive?
   end
 

@@ -46,9 +46,10 @@ class Bot::Plugin::Trivia < Bot::Plugin
     q = JSON.parse(res, symbolize_names: true)[:results][0]
 
     q.each do |k, v|
-      if v.is_a? Array
+      case v
+      when Array
         q[k] = v.map { |opt| CGI.unescape(opt).strip }
-      elsif v.is_a? String
+      when String
         q[k] = CGI.unescape(v).strip
       end
     end

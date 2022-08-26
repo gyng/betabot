@@ -49,7 +49,7 @@ class Bot::Plugin::Shipment < Bot::Plugin
   end
 
   def couriers(m)
-    query = m.args[1..-1].join(' ').downcase
+    query = m.args[1..].join(' ').downcase
     url = "#{@s[:aftership_endpoint]}/couriers/all"
     res = JSON.parse(RestClient.get(url, aftership_headers), symbolize_names: true)
     couriers = res[:data][:couriers]

@@ -1,4 +1,4 @@
-FROM ruby:2.7-alpine3.12
+FROM ruby:3.1.2-alpine3.16
 
 ARG PORT_SYNC_LISTENER=15555
 ARG PORT_WEB=80
@@ -14,11 +14,11 @@ RUN apk --update add --virtual build-dependencies \
     imagemagick \
     sqlite-libs \
     openssl \
-    git
+    git \
+    curl
 
 COPY Gemfile Gemfile.lock /app/
-RUN bundle config set without 'development test' \
-  && bundle install --jobs=3 --retry=3
+RUN bundle install --jobs=3 --retry=3
 
 ENV RACK_ENV production
 ENV LANG C.UTF-8

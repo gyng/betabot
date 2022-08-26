@@ -32,7 +32,7 @@ class Bot::Plugin::Showtime < Bot::Plugin
 
   def showtime(m)
     refresh_anilist_token if !valid_anilist_token?
-    query = m.args[0..-1].join(' ').force_encoding('UTF-8')
+    query = m.args[0..].join(' ').force_encoding('UTF-8')
     # rubocop:disable Lint/UriEscapeUnescape
     candidates_uri = URI.parse(URI.escape("#{@anilist[:endpoints][:search]}/#{query}"))
     # rubocop:enable Lint/UriEscapeUnescape
@@ -112,9 +112,9 @@ class Bot::Plugin::Showtime < Bot::Plugin
     h = h % 24
     s = s.floor
 
-    "#{d.to_s + 'd ' if d.positive?}" \
-    "#{h.to_s + 'h ' if h.positive?}" \
-    "#{m.to_s + 'm ' if m.positive?}" \
-    "#{s.to_s + 's' if s.positive?}"
+    "#{"#{d}d " if d.positive?}" \
+    "#{"#{h}h " if h.positive?}" \
+    "#{"#{m}m " if m.positive?}" \
+    "#{"#{s}s" if s.positive?}"
   end
 end

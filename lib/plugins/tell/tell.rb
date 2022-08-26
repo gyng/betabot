@@ -15,7 +15,7 @@ class Bot::Plugin::Tell < Bot::Plugin
 
   def tell(m)
     @stored_messages[m.args[0]] = [] if @stored_messages[m.args[0]].nil?
-    @stored_messages[m.args[0]].push(message: m.args[1..-1].join(' '), from: m.sender, at: Time.now.to_i)
+    @stored_messages[m.args[0]].push(message: m.args[1..].join(' '), from: m.sender, at: Time.now.to_i)
     m.reply('Okay!')
   end
 

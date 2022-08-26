@@ -11,13 +11,13 @@ task :make_user do
   authenticator = Bot::Core::Authenticator.new(path)
 
   puts 'Enter account name:'
-  account_name = STDIN.gets.chomp
+  account_name = $stdin.gets.chomp
   puts 'Enter authentication level (number 1-5, 5 being highest):'
-  auth_level = STDIN.gets.chomp.to_i
+  auth_level = $stdin.gets.chomp.to_i
   puts 'Enter password:'
-  password = STDIN.noecho(&:gets).chomp
+  password = $stdin.noecho(&:gets).chomp
   puts 'Enter password again:'
-  password_confirmation = STDIN.noecho(&:gets).chomp
+  password_confirmation = $stdin.noecho(&:gets).chomp
 
   if password != password_confirmation
     puts 'Password does not match confirmation, try again.'
@@ -49,11 +49,11 @@ task :make_plugin, :name do |_t, args|
   dir = File.join('lib', 'plugins', name)
   FileUtils.mkdir_p(dir)
   template = File.join('lib', 'plugins', 'ping', 'ping.rb')
-  plugin = File.join(dir, name + '.rb')
+  plugin = File.join(dir, "#{name}.rb")
   FileUtils.cp(template, plugin)
 
   to_edit = File.read(plugin)
-  name_sentence_case = name[0].upcase + name[1..-1]
+  name_sentence_case = name[0].upcase + name[1..]
   to_edit.gsub!('Ping', name_sentence_case)
   to_edit.gsub!('ping', name.downcase)
 

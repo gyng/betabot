@@ -55,11 +55,12 @@ module Bot::Core::ObjectLoader
   def accepted?(type, name, mode)
     mode = mode.to_sym
 
-    if mode == :all
+    case mode
+    when :all
       true
-    elsif mode == :whitelist
+    when :whitelist
       @s["#{type}s".to_sym][mode].include?(name)
-    elsif mode == :blacklist
+    when :blacklist
       !@s["#{type}s".to_sym][mode].include?(name)
     end
   end

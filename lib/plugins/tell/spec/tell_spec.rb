@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative '../tell.rb'
+require_relative '../tell'
 
 describe Bot::Plugin::Tell do
   before(:each) do

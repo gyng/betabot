@@ -74,7 +74,7 @@ class Bot::Plugin::Openai < Bot::Plugin
       'changelog [topic=None]'
     ]
 
-    text = m.args[1..-1].join(' ').force_encoding('UTF-8')
+    text = m.args[1..].join(' ').force_encoding('UTF-8')
 
     case m.args
     in ['list', *input]
@@ -141,20 +141,20 @@ class Bot::Plugin::Openai < Bot::Plugin
       'Haiku:'
       args[:stop] = ["\n", 'Topic:']
     in ['singlish', *input]
-   args[:prompt] = "English: This isn't good.\n"\
-"Singlish: No good lah.\n"\
-"English: You can't just go like that.\n"\
-"Singlish: Cannot anyhow go like dat oe leh.\n"\
-"English: Why didn't you show up?\n"\
-"Singlish: How come never show up\n"\
-"English: I am very naughty.\n"\
-"Singlish: I damn naughty.\n"\
-"English: Oh dear, I cannot wait any longer. I must leave immediately.\n"\
-"Singlish: Aiyah, cannot wait any more, must go already.\n"\
-"English: Is this possible?\n"\
-"Singlish: Can or not?\n"\
-"English: #{text}\n"\
-'Singlish:'
+      args[:prompt] = "English: This isn't good.\n"\
+   "Singlish: No good lah.\n"\
+   "English: You can't just go like that.\n"\
+   "Singlish: Cannot anyhow go like dat oe leh.\n"\
+   "English: Why didn't you show up?\n"\
+   "Singlish: How come never show up\n"\
+   "English: I am very naughty.\n"\
+   "Singlish: I damn naughty.\n"\
+   "English: Oh dear, I cannot wait any longer. I must leave immediately.\n"\
+   "Singlish: Aiyah, cannot wait any more, must go already.\n"\
+   "English: Is this possible?\n"\
+   "Singlish: Can or not?\n"\
+   "English: #{text}\n"\
+   'Singlish:'
     in ['mtg', *input]
       args[:prompt] = "Name: {Moonglove Winnower}\n" \
       "{3}{B} [elf facing left] 2/3 Creature — Elf Rogue\n" \
@@ -170,58 +170,58 @@ class Bot::Plugin::Openai < Bot::Plugin
       "Name: {#{text}}"
       args[:stop] = ["\n\n", '###']
       args[:top_p] = 1
-      in ['jira', *input]
-        # https://twitter.com/shituserstory
-        args[:prompt] = "For our app\n" \
-        "[JIRA-52] As a user, I want to be locked out of my current app version and forced to update, so that I can be protected from the old colour scheme\n" \
-        "\n"\
-        "For GMail\n"\
-        "[GMAL-5931] As a user, I want to have two small unlabelled oblong-shaped icons next to each other, representing commonly used interactions, the primary contrast being a 90° rotation, so that there is no ambiguity between choosing to attach a file or insert a link\n"\
-        "\n"\
-        "For Excel\n"\
-        "[EXC-1769] As a user, I want to have fractions automatically converted to dates so that I can spend 01-Oct of my day manually changing them back\n"\
-        "\n"\
-        "For Twitter\n"\
-        "[TWAT-86]
+    in ['jira', *input]
+      # https://twitter.com/shituserstory
+      args[:prompt] = "For our app\n" \
+      "[JIRA-52] As a user, I want to be locked out of my current app version and forced to update, so that I can be protected from the old colour scheme\n" \
+      "\n"\
+      "For GMail\n"\
+      "[GMAL-5931] As a user, I want to have two small unlabelled oblong-shaped icons next to each other, representing commonly used interactions, the primary contrast being a 90° rotation, so that there is no ambiguity between choosing to attach a file or insert a link\n"\
+      "\n"\
+      "For Excel\n"\
+      "[EXC-1769] As a user, I want to have fractions automatically converted to dates so that I can spend 01-Oct of my day manually changing them back\n"\
+      "\n"\
+      "For Twitter\n"\
+      "[TWAT-86]
          As a user, I want to click on the ‘show more replies’ bar, so that when it disappears, revealing absolutely nothing, I can be disappointed I didn’t get to see a shit opinion from a dickhead\n"\
-        "\n"\
-        "For #{text || 'our app'}\n"
-        args[:stop] = ["\n\n"]
-      in ['changelog', *input]
-        # https://twitter.com/thestrangelog?lang=en
-        topic = text || '*'
-        args[:prompt] = "*: [FIX] Grandma now pays less if you have a prison tattoo\n"\
-        "*: [FIX] Colonist with a sick thought won't meditate at all.\n"\
-        "*: [CHANGE] Lowered wolf procreation slightly\n"\
-        "sacrifice: [FIX] No longer possible to sacrifice the same person to Satan multiple times\n"\
-        "goose: [FEAT] Goose simulator added. Geese will now fly between lakes and swim around acting like geese.\n"\
-        "friends: [FIX] you have no friends\n"\
-        "#{topic}:"
-        args[:stop] = ["\n"]
-      in ['sc2', *input]
-        args[:prompt] = "Build name: 4 Gate All-in\n"\
-        '14 Pylon, '\
-        '15 Gateway, '\
-        '16 Assimilator, '\
-        '18 Pylon'\
-        "---\n"\
-        "Build name: 12 pool\n"\
-        '12 Spawning Pool, '\
-        '14 Overlord, '\
-        '14 Zergling x3, '\
-        '17 Zergling'\
-        "---\n"\
-        "Build name: 3 rax proxy reaper\n"\
-        '13 Supply Depot, '\
-        '13 Refinery, '\
-        '13 Barracks, '\
-        '13 Barracks, '\
-        '13 Barracks, '\
-        '13 Reaper, '\
-        "---\n"\
-        "Build name: #{input}"
-        args[:stop] = 'Build name'
-      else
+      "\n"\
+      "For #{text || 'our app'}\n"
+      args[:stop] = ["\n\n"]
+    in ['changelog', *input]
+      # https://twitter.com/thestrangelog?lang=en
+      topic = text || '*'
+      args[:prompt] = "*: [FIX] Grandma now pays less if you have a prison tattoo\n"\
+      "*: [FIX] Colonist with a sick thought won't meditate at all.\n"\
+      "*: [CHANGE] Lowered wolf procreation slightly\n"\
+      "sacrifice: [FIX] No longer possible to sacrifice the same person to Satan multiple times\n"\
+      "goose: [FEAT] Goose simulator added. Geese will now fly between lakes and swim around acting like geese.\n"\
+      "friends: [FIX] you have no friends\n"\
+      "#{topic}:"
+      args[:stop] = ["\n"]
+    in ['sc2', *input]
+      args[:prompt] = "Build name: 4 Gate All-in\n"\
+      '14 Pylon, '\
+      '15 Gateway, '\
+      '16 Assimilator, '\
+      '18 Pylon'\
+      "---\n"\
+      "Build name: 12 pool\n"\
+      '12 Spawning Pool, '\
+      '14 Overlord, '\
+      '14 Zergling x3, '\
+      '17 Zergling'\
+      "---\n"\
+      "Build name: 3 rax proxy reaper\n"\
+      '13 Supply Depot, '\
+      '13 Refinery, '\
+      '13 Barracks, '\
+      '13 Barracks, '\
+      '13 Barracks, '\
+      '13 Reaper, '\
+      "---\n"\
+      "Build name: #{input}"
+      args[:stop] = 'Build name'
+    else
       args[:prompt] = text
     end
 
@@ -247,17 +247,14 @@ class Bot::Plugin::Openai < Bot::Plugin
   def last_n_chat(m, n)
     curbuf = @chat_buf[m.channel] || []
 
-    buf = curbuf[0..n].reverse.map do |msg|
+    curbuf[0..n].reverse.map do |msg|
       "#{msg[:user]}: #{msg[:text]}"
     end.join("\n")
-
-    buf
   end
 
   def last_n(m, n)
     curbuf = @chat_buf[m.channel] || []
-    buf = curbuf[0..n].reverse
-    buf
+    curbuf[0..n].reverse
   end
 
   def api_call(args)

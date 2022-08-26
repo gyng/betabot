@@ -22,8 +22,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
       # https://dev.twitch.tv/console/apps, redirect to http://localhost
       twitch_client_id: ''
     }
-    @twitter_status_regex = %r{^(?:https?:\/\/)?(?:www\.|mobile\.)?twitter\.com\/([a-zA-Z0-9_]+)\/status\/(\d+)\/?}
-    @twitch_stream_regex = %r{^(?:https?:\/\/)?(?:www\.)?twitch\.tv\/([a-zA-Z0-9_]+)\/?}
+    @twitter_status_regex = %r{^(?:https?://)?(?:www\.|mobile\.)?twitter\.com/([a-zA-Z0-9_]+)/status/(\d+)/?}
+    @twitch_stream_regex = %r{^(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)/?}
     super(bot)
   end
 
@@ -140,8 +140,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
     tweet = doc.at_css('.twitter-tweet').text.gsub(/ *\n */, ' ').strip
     tweet = tweet.gsub('__BR__', " #{'↵'.gray} ")
-    tweet = tweet.gsub('__DASH__', ' — ')
-    tweet
+    tweet.gsub('__DASH__', ' — ')
   end
 
   def handle_twitch(url)
@@ -189,7 +188,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
   def curl_needed?(url)
     # Special handling needed for cerntain popular sites
     # https://stackoverflow.com/a/30795206
-    youtube_url_regex = %r{^(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com)}
+    youtube_url_regex = %r{^(?:https?://)?(?:youtu\.be/|(?:www\.|m\.)?youtube\.com)}
     is_youtube_url = url.match(youtube_url_regex)
     Bot.log.info('Entitle: this is a YouTube URL') if is_youtube_url
 

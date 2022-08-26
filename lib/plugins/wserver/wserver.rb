@@ -17,12 +17,12 @@ class Bot::Plugin::Wserver < Bot::Plugin
         http.read_timeout = 20
         res = http.head('/')
 
-        case res.class
-        when Net::HTTPRedirection, Net::HTTPMovedPermanently
-          rs = "#{host} redirects to #{res['location']} (#{res.code} #{res.message} - #{res['server']})"
-        else
-          rs = "#{host} (#{res.code} #{res.message} - #{res['server']})"
-        end
+        rs = case res.class
+             when Net::HTTPRedirection, Net::HTTPMovedPermanently
+               "#{host} redirects to #{res['location']} (#{res.code} #{res.message} - #{res['server']})"
+             else
+               "#{host} (#{res.code} #{res.message} - #{res['server']})"
+             end
 
         m.reply rs
       end

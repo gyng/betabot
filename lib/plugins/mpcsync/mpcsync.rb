@@ -47,8 +47,8 @@ class Bot::Plugin::Mpcsync < Bot::Plugin
     super(bot)
 
     @ui_addr      = @s[:web_ui_addr]
-    @command_addr = @ui_addr + '/command.html'
-    @control_addr = @ui_addr + '/controls.html'
+    @command_addr = "#{@ui_addr}/command.html"
+    @control_addr = "#{@ui_addr}/controls.html"
     @cock_state   = :uncocked
     @listen_sock  = nil
   end

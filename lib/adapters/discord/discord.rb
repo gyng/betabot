@@ -62,8 +62,4 @@ class Bot::Adapter::Discord < Bot::Adapter
       m.user     = data.message.author.name
     end
   end
-
-  def trigger_plugin(trigger, m)
-    super(trigger, m)
-  end
 end

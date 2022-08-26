@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative '../remind.rb'
+require_relative '../remind'
 
 describe Bot::Plugin::Remind do
   before(:each) do

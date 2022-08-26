@@ -21,6 +21,7 @@ module Bot
     include Bot::Util::Settings
 
     attr_reader :adapters, :plugins, :s, :shared_db
+
     START_TIME = Time.now
 
     def initialize(bot_settings_path)
@@ -39,7 +40,7 @@ module Bot
 
       if @s[:webserver][:enabled]
         Bot.log.info('Web server enabled, starting...')
-        require_relative 'webserver.rb'
+        require_relative 'webserver'
         start_web(@s[:webserver])
 
         # Add (example) default path
@@ -209,10 +210,10 @@ module Bot
           m.reply "Plugin #{m.args[0]} unblacklisted. Reload for this to take effect."
         # TODO: Blacklist external plugins
         when 'blacklist'
-          m.reply 'Adapters: ' + @s[:adapters][:blacklist].join(', ')
-          m.reply 'Plugins: ' + @s[:plugins][:blacklist].join(', ')
-          m.reply 'Users: ' + @s[:users][:blacklist].join(', ')
-          m.reply 'Content: ' + @s[:contents][:blacklist].join(', ')
+          m.reply "Adapters: #{@s[:adapters][:blacklist].join(', ')}"
+          m.reply "Plugins: #{@s[:plugins][:blacklist].join(', ')}"
+          m.reply "Users: #{@s[:users][:blacklist].join(', ')}"
+          m.reply "Content: #{@s[:contents][:blacklist].join(', ')}"
         when 'blacklist_user'
           blacklist(:user, m.args[0])
           m.reply "Ignoring user #{m.args[0]}."

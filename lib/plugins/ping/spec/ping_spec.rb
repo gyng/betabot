@@ -1,5 +1,5 @@
 require 'spec_helper'
-require_relative '../ping.rb'
+require_relative '../ping'
 
 describe Bot::Plugin::Ping do
   subject { Bot::Plugin::Ping.new(nil) }

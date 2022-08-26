@@ -2,8 +2,8 @@ module Bot
   class << self
     def log
       unless @log
-        STDOUT.sync = true
-        @log = Logger.new(STDOUT)
+        $stdout.sync = true
+        @log = Logger.new($stdout)
         @log.level = Logger::WARN if ENV['TEST'] # Set in spec_helper.rb
         @log.formatter = lambda do |severity, datetime, _progname, message|
           color_table = {
@@ -15,7 +15,7 @@ module Bot
             'UNKNOWN' => :gray
           }
           color = color_table[severity]
-          "#{(severity[0] + ' ' + datetime.to_s + ' | ').send(color)}#{message}\n"
+          "#{"#{severity[0]} #{datetime} | ".send(color)}#{message}\n"
         end
       end
       @log

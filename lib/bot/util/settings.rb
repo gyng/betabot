@@ -1,5 +1,6 @@
+# rubocop:disable Style/ClassAndModuleChildren
 module Bot::Util
-  module Settings
+  module Bot::Util::Settings
     def load_settings(path = @settings_path)
       # Save defaults if no settings file exists
       save_settings unless File.file?(path)
@@ -17,3 +18,4 @@ module Bot::Util
     end
   end
 end
+# rubocop:enable Style/ClassAndModuleChildren
