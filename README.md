@@ -97,7 +97,7 @@ logs can be followed with `docker log -f`, and the ID can be found using `docker
 
 #### Without Docker
 
-1. Requirements: [Ruby version >= 2.7](https://www.ruby-lang.org/en/downloads/), [Bundler](http://bundler.io/).
+1. Requirements: [Ruby version >= 3.1.2](https://www.ruby-lang.org/en/downloads/), [Bundler](http://bundler.io/).
 
 2. Install the gems with Bundler. You might need `sqlite-dev` and `imagemagick` packages installed on your system for gem installation.
 
@@ -171,7 +171,7 @@ For example: `!ping`, `MyBot: ping`
 
 * **image** &ndash; Saves all image links and records data about them in a database. Images are saved in `./public/i`. The image plugin also gives a random image link from the image database if the web server is running.
 * **entitle** &ndash; Echos titles of uninformative URLs.
-* **entitleri** &ndash; Uses Google reverse image search to guess the contents of image URLs.
+* **entitleri** &ndash; Uses [imginfer](https://github.com/gyng/imginfer) search to guess the contents of image URLs.
 * **shipment** &ndash; Tracks packages using Aftership *[requires setup of API keys](https://secure.aftership.com/#/settings/api)*
 * **mpcsync** &ndash; Synchronizes playing of video files in MPC. Requires configuration of MPC addresses.
 * **script/macro** &ndash; Script/Macro definition support.
