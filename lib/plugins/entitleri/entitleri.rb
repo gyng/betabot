@@ -7,7 +7,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       trigger: {
         entitleri: [
           :call, 0,
-          'Entitle Reverse Image uses Google to tell you what an image link is.'
+          'Entitle Reverse Image uses imginfer (https://github.com/gyng/imginfer)' \
+          'to tell you what an image link contains.'
         ]
       },
       subscribe: true,
@@ -20,9 +21,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         '(http.*webp(\/?\?.*)?$)'
       ],
       timeout: 20,
-      google_query: 'https://www.google.com/searchbyimage?&image_url=',
-      guess_selector: '.fKDtNb',
-      user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:55.0) Gecko/20100101 Firefox/55.0'
+      imginfer_key: '',
+      imginfer_infer_endpoint: 'http://localhost:8080/infer'
     }
 
     super(bot)
@@ -47,39 +47,41 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       tokens.each do |t|
         next if regex.match(t).nil?
 
-        operation = proc {
+        # imginfer
+        next unless @s[:imginfer_key]
+
+        imginfer_operation = proc {
           Timeout.timeout(@s[:timeout]) do
-            get_guess_google(t)
+            get_guess_imginfer(t)
           end
         }
-        callback = proc { |google_guess|
-          m.reply google_guess if !google_guess.nil? && !google_guess.empty?
+        imginfer_callback = proc { |imginfer_guess|
+          begin
+            if imginfer_guess && imginfer_guess[:yolov5][:results].length.positive?
+              m.reply imginfer_guess[:yolov5][:str_repr].split("\n")[0]
+            end
+          rescue StandardError
+            Bot.log.warn "EntitleRI: Failed to parse imginfer response #{imginfer_guess}"
+          end
         }
-        errback = proc { |e| Bot.log.info "EntitleRI: Failed to get guess #{e}" }
-        EM.defer(operation, callback, errback)
+        imginfer_errback = proc { |e| Bot.log.info "EntitleRI: Failed to get imginfer guess #{e}" }
+        EM.defer(imginfer_operation, imginfer_callback, imginfer_errback)
       end
     end
   end
 
-  def get_guess_google(url)
-    Bot.log.info "EntitleRI: Getting Google best guess of #{url}"
+  def get_guess_imginfer(url)
+    Bot.log.info "EntitleRI: Getting imginfer results for #{url}"
 
-    # Get redirect by spoofing User-Agent
-    # rubocop:disable Security/Open
-    html = open(@s[:google_query] + url,
-                'User-Agent' => @s[:user_agent],
-                allow_redirections: :all,
-                ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
-                read_timeout: @s[:timeout])
-    # rubocop:enable Security/Open
-
-    doc = Nokogiri::HTML(html.read)
-    doc.encoding = 'utf-8'
-    result = doc.css(@s[:guess_selector]).inner_text.strip
-    Bot.log.info "EntitleRI: Got Google guess: #{result}"
-    result.to_s.empty? ? nil : "Best guess for this image: #{result}"
+    headers = {
+      'Content-Type' => 'application/json',
+      'Authorization' => "Bearer #{@s[:imginfer_key]}"
+    }
+    body = { uri: url }
+    body = body.to_json
+    JSON.parse(RestClient.post('http://192.168.1.168:8080/infer', body, headers: headers), symbolize_names: true)
   rescue StandardError => e
-    Bot.log.info "Error in Entitleri#get_guess: #{e} #{e.backtrace}"
+    Bot.log.info "Error in Entitleri#get_guess_imginfer: #{e} #{e.backtrace}"
     nil
   end
 end
