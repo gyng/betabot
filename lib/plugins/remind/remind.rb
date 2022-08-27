@@ -2,6 +2,7 @@ require 'date'
 require 'tzinfo'
 require 'active_support/time'
 require 'securerandom'
+require 'chronic'
 
 # rubocop:disable Metrics/ClassLength
 class Bot::Plugin::Remind < Bot::Plugin
@@ -138,7 +139,7 @@ class Bot::Plugin::Remind < Bot::Plugin
   def timer(m)
     time_s = "in #{m.args.join(' ')}"
 
-    time = Time.use_zone('UTC') do
+    time = with_time_zone('UTC') do
       Chronic.parse(time_s, now: Time.now.utc)
     end
 
