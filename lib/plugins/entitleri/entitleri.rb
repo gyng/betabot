@@ -41,13 +41,12 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
     tokens = String.new(m.text).split(' ').uniq
 
+    # rubocop:disable Metrics/BlockLength
     @s[:filters].each do |regex_s|
       regex = Regexp.new(regex_s)
 
       tokens.each do |t|
         next if regex.match(t).nil?
-
-        # imginfer
         next unless @s[:imginfer_key]
 
         imginfer_operation = proc {
@@ -57,8 +56,13 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         }
         imginfer_callback = proc { |imginfer_guess|
           begin
-            if imginfer_guess && imginfer_guess[:yolov5][:results].length.positive?
-              m.reply imginfer_guess[:yolov5][:str_repr].split("\n")[0]
+            if imginfer_guess
+              if imginfer_guess[:yolov5][:results].length.positive?
+                m.reply "yolov5: #{imginfer_guess[:yolov5][:str_repr].split("\n")[0]}"
+              end
+              if imginfer_guess[:easyocr][:results].length.positive?
+                m.reply "easyocr: #{imginfer_guess[:easyocr][:str_repr].split(' ')[0..20].join(' ')}"
+              end
             end
           rescue StandardError
             Bot.log.warn "EntitleRI: Failed to parse imginfer response #{imginfer_guess}"
@@ -68,6 +72,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         EM.defer(imginfer_operation, imginfer_callback, imginfer_errback)
       end
     end
+    # rubocop:enable Metrics/BlockLength
   end
 
   def get_guess_imginfer(url)
