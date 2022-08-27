@@ -32,11 +32,11 @@ You can choose either to use or not to use Docker to run betabot.
 
 #### With Docker
 
-[Docker Hub](https://hub.docker.com/r/gyng/betabot/)
+[GitHub Packages](https://github.com/gyng?tab=packages&repo_name=betabot)
 
 0. Requirements: [Docker](https://www.docker.com/products/overview), [Docker Compose V2](https://docs.docker.com/compose/install/)
 
-1. Use the image: `docker pull gyng/betabot`, or
+1. Use the prebuilt image, or
 
 2. Build the image from source. You might need to configure the ports used by the webserver and plugins.
 
