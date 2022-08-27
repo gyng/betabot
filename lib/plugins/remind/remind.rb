@@ -3,13 +3,6 @@ require 'tzinfo'
 require 'active_support/time'
 require 'securerandom'
 
-# Chronic can't do timezones at all!
-module Chronic
-  def self.time_class
-    ::Time.zone
-  end
-end
-
 # rubocop:disable Metrics/ClassLength
 class Bot::Plugin::Remind < Bot::Plugin
   def initialize(bot)
@@ -345,18 +338,27 @@ class Bot::Plugin::Remind < Bot::Plugin
     @timers.filter { |_, v| v[:user_id] == user_id }
   end
 
+  def with_time_zone(tz_name)
+    prev_tz = ENV['TZ']
+    ENV['TZ'] = tz_name
+    yield
+  ensure
+    ENV['TZ'] = prev_tz
+  end
+
   def parse_time(time_s, tz)
     # Required Chronic hack.
-    Time.use_zone('UTC') do
-      now = case tz
-            when TZInfo::Timezone
-              tz.utc_to_local(Time.now.utc)
-            when Numeric
-              Time.now.utc.change(offset: tz)
-            else
-              Time.now.utc
-            end
-      time_s = time_s.gsub(/^at /, '') # Chronic cannot parse "at 10pm tomorrow"
+    now = case tz
+          when TZInfo::Timezone
+            tz.utc_to_local(Time.now.utc)
+          when Numeric
+            Time.now.utc.change(offset: tz)
+          else
+            Time.now.utc
+          end
+    time_s = time_s.gsub(/^at /, '') # Chronic cannot parse "at 10pm tomorrow"
+
+    with_time_zone('UTC') do
       parsed = Chronic.parse(time_s, now:)
 
       # Try to parse without last argument as it could be a tz
