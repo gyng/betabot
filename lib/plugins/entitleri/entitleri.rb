@@ -61,7 +61,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
                 m.reply "yolov5: #{imginfer_guess[:yolov5][:str_repr].split("\n")[0]}"
               end
               if imginfer_guess[:easyocr][:results].length.positive?
-                m.reply "easyocr: #{imginfer_guess[:easyocr][:str_repr].split(' ')[0..20].join(' ')}"
+                m.reply "easyocr: #{imginfer_guess[:easyocr][:str_repr].split(' ')[0..20].join(' ')[0..400]}"
               end
             end
           rescue StandardError
