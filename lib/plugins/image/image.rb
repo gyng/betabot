@@ -16,8 +16,10 @@ class Bot::Plugin::Image < Bot::Plugin
         '(http.*bmp(\/?\?.*)?$)',
         '(http.*webp(\/?\?.*)?$)',
         '(http.*webm(\/?\?.*)?$)',
-        '(http.*mp4(\/?\?.*)?$)'
+        '(http.*mp4(\/?\?.*)?$)',
+        "http.*format=(jpg|jpeg|png|bmp|gif).*"
       ],
+      check_content_type_filter: '^http.*',
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
       image_directory: ['lib', 'public', 'i'],
       get_google_guess: false

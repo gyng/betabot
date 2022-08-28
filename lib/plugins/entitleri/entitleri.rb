@@ -18,8 +18,11 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         '(http.*jpg(\/?\?.*)?$)',
         '(http.*jpeg(\/?\?.*)?$)',
         '(http.*bmp(\/?\?.*)?$)',
-        '(http.*webp(\/?\?.*)?$)'
+        '(http.*webp(\/?\?.*)?$)',
+        "http.*format=(jpg|jpeg|png|bmp|gif).*"
       ],
+      content_type_url_regex: '^http.*',
+      content_type_regex: 'image/.*',
       timeout: 20,
       imginfer_key: '',
       imginfer_infer_endpoint: 'http://localhost:8080/infer'
@@ -36,44 +39,72 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     check_filter(m)
   end
 
+  def valid_content_type?(url)
+    res = RestClient.head(url)
+    res.headers[:content_type] =~ Regexp.new(@s[:content_type_regex])
+  rescue StandardError => e
+    Bot.log.info "#{self.class.name} - failed to get HEAD for #{url}: #{e}"
+    false
+  end
+
   def check_filter(m)
     return if m.text.nil?
 
     tokens = String.new(m.text).split(' ').uniq
 
+    matches = []
+    checked_head = []
+
     # rubocop:disable Metrics/BlockLength
     @s[:filters].each do |regex_s|
       regex = Regexp.new(regex_s)
+      next unless @s[:imginfer_key]
 
       tokens.each do |t|
-        next if regex.match(t).nil?
-        next unless @s[:imginfer_key]
-
-        imginfer_operation = proc {
-          Timeout.timeout(@s[:timeout]) do
-            get_guess_imginfer(t)
-          end
-        }
-        imginfer_callback = proc { |imginfer_guess|
-          begin
-            if imginfer_guess
-              if imginfer_guess[:yolov5][:results].length.positive?
-                m.reply "yolov5: #{imginfer_guess[:yolov5][:str_repr].split("\n")[0]}"
-              end
-              if imginfer_guess[:easyocr][:results].length.positive?
-                m.reply "easyocr: #{imginfer_guess[:easyocr][:str_repr].split(' ')[0..20].join(' ')[0..400]}"
-              end
-              if imginfer_guess[:danbooru2018][:results].length.positive?
-                m.reply "danbooru2018: #{imginfer_guess[:danbooru2018][:str_repr].split(' ')[0..21].join(' ')[0..400]}"
-              end
+        next if checked_head.include?(t)
+        next if matches.include?(t)
+        # Check Content-Type via HEAD
+        if regex.match(t).nil?
+          if t =~ Regexp.new(@s[:content_type_url_regex])
+            if !valid_content_type?(t)
+              checked_head.append(t) 
+              next
             end
-          rescue StandardError
-            Bot.log.warn "EntitleRI: Failed to parse imginfer response #{imginfer_guess}"
+            Bot.log.info "#{self.class.name} - Image detected (content-type): #{t}"
+          else
+            next
           end
-        }
-        imginfer_errback = proc { |e| Bot.log.info "EntitleRI: Failed to get imginfer guess #{e}" }
-        EM.defer(imginfer_operation, imginfer_callback, imginfer_errback)
+        end
+        matches.append(t)
       end
+    end
+
+    matches.uniq.each do |match|
+      Bot.log.info "#{self.class.name} - Inferring: #{match}"
+      imginfer_operation = proc {
+        Timeout.timeout(@s[:timeout]) do
+          get_guess_imginfer(match)
+        end
+      }
+      imginfer_callback = proc { |imginfer_guess|
+        begin
+          if imginfer_guess
+            if imginfer_guess[:yolov5][:results].length.positive?
+              m.reply "yolov5: #{imginfer_guess[:yolov5][:str_repr].split("\n")[0]}"
+            end
+            if imginfer_guess[:easyocr][:results].length.positive?
+              m.reply "easyocr: #{imginfer_guess[:easyocr][:str_repr].split(' ')[0..20].join(' ')[0..400]}"
+            end
+            if imginfer_guess[:danbooru2018][:results].length.positive?
+              m.reply "danbooru2018: #{imginfer_guess[:danbooru2018][:str_repr].split(' ')[0..21].join(' ')[0..400]}"
+            end
+          end
+        rescue StandardError
+          Bot.log.warn "EntitleRI: Failed to parse imginfer response #{imginfer_guess}"
+        end
+      }
+      imginfer_errback = proc { |e| Bot.log.info "EntitleRI: Failed to get imginfer guess #{e}" }
+      EM.defer(imginfer_operation, imginfer_callback, imginfer_errback)
     end
     # rubocop:enable Metrics/BlockLength
   end
