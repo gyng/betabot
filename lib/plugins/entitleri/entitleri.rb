@@ -93,13 +93,23 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               m.reply "yolov5: #{imginfer_guess[:yolov5][:str_repr].split("\n")[0]}"
             end
             if imginfer_guess[:easyocr][:results].length.positive?
-              m.reply "easyocr: #{imginfer_guess[:easyocr][:str_repr].split(' ')[0..20].join(' ')[0..400]}"
+              str = imginfer_guess[:easyocr][:str_repr]
+                .split(' ')[0..20]
+                .join(' ')[0..400]
+              m.reply "easyocr: #{str}"
             end
             if imginfer_guess[:danbooru2018][:results].length.positive?
-              m.reply "danbooru2018: #{imginfer_guess[:danbooru2018][:str_repr].split(' ')[0..21].join(' ')[0..400]}"
+              str = imginfer_guess[:danbooru2018][:str_repr]
+                .split(' ')[0..21]
+                .join(' ')[0..400]
+                .gsub("age_rating_s", "age_rating_s".green)
+                .gsub("age_rating_q", "age_rating_q".brown)
+                .gsub("age_rating_e", "age_rating_e".red)
+              m.reply "danbooru2018: #{str}"
             end
           end
-        rescue StandardError
+        rescue StandardError => e
+          Bot.log.info "EntitleRI: Failed to parse imginfer response #{e} #{e.backtrace}"
           Bot.log.warn "EntitleRI: Failed to parse imginfer response #{imginfer_guess}"
         end
       }
