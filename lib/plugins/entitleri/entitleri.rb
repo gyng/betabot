@@ -63,6 +63,9 @@ class Bot::Plugin::Entitleri < Bot::Plugin
               if imginfer_guess[:easyocr][:results].length.positive?
                 m.reply "easyocr: #{imginfer_guess[:easyocr][:str_repr].split(' ')[0..20].join(' ')[0..400]}"
               end
+              if imginfer_guess[:danbooru2018][:results].length.positive?
+                m.reply "danbooru2018: #{imginfer_guess[:danbooru2018][:str_repr].split(' ')[0..21].join(' ')[0..400]}"
+              end
             end
           rescue StandardError
             Bot.log.warn "EntitleRI: Failed to parse imginfer response #{imginfer_guess}"
