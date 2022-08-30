@@ -23,7 +23,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       ],
       content_type_url_regex: '^http.*',
       content_type_regex: 'image/.*',
-      timeout: 20,
+      timeout: 30,
       imginfer_key: '',
       imginfer_infer_endpoint: 'http://localhost:8080/infer'
     }
