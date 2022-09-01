@@ -14,9 +14,7 @@ end
 
 def get_manifest(manifest_url, m = nil)
   puts_or_reply "ℹ Grabbing manifest from #{manifest_url.bold}…", m
-  # rubocop:disable Security/Open
-  manifest = open(manifest_url).read
-  # rubocop:enable Security/Open
+  manifest = RestClient.get(manifest_url).read
 
   puts 'ℹ Parsing manifest JSON…'
   parsed = JSON.parse(manifest, symbolize_names: true)

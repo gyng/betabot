@@ -19,7 +19,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         '(http.*jpeg(\/?\?.*)?$)',
         '(http.*bmp(\/?\?.*)?$)',
         '(http.*webp(\/?\?.*)?$)',
-        "http.*format=(jpg|jpeg|png|bmp|gif).*"
+        'http.*format=(jpg|jpeg|png|bmp|gif).*'
       ],
       content_type_url_regex: '^http.*',
       content_type_regex: 'image/.*',
@@ -63,11 +63,12 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       tokens.each do |t|
         next if checked_head.include?(t)
         next if matches.include?(t)
+
         # Check Content-Type via HEAD
         if regex.match(t).nil?
           if t =~ Regexp.new(@s[:content_type_url_regex])
             if !valid_content_type?(t)
-              checked_head.append(t) 
+              checked_head.append(t)
               next
             end
             Bot.log.info "#{self.class.name} - Image detected (content-type): #{t}"
@@ -94,17 +95,17 @@ class Bot::Plugin::Entitleri < Bot::Plugin
             end
             if imginfer_guess[:easyocr][:results].length.positive?
               str = imginfer_guess[:easyocr][:str_repr]
-                .split(' ')[0..20]
-                .join(' ')[0..400]
+                    .split(' ')[0..20]
+                    .join(' ')[0..400]
               m.reply "easyocr: #{str}"
             end
             if imginfer_guess[:danbooru2018][:results].length.positive?
               str = imginfer_guess[:danbooru2018][:str_repr]
-                .split(' ')[0..21]
-                .join(' ')[0..400]
-                .gsub("age_rating_s", "age_rating_s".green)
-                .gsub("age_rating_q", "age_rating_q".brown)
-                .gsub("age_rating_e", "age_rating_e".red)
+                    .split(' ')[0..21]
+                    .join(' ')[0..400]
+                    .gsub('age_rating_s', 'age_rating_s'.green)
+                    .gsub('age_rating_q', 'age_rating_q'.brown)
+                    .gsub('age_rating_e', 'age_rating_e'.red)
               m.reply "danbooru2018: #{str}"
             end
           end
