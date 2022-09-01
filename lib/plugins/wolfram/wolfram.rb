@@ -34,9 +34,8 @@ class Bot::Plugin::Wolfram < Bot::Plugin
 
     search_term = CGI.escape(search_term)
     url = "https://api.wolframalpha.com/v2/query?appid=#{@s[:api_key]}&format=plaintext&input=\'#{search_term}\'"
-    # rubocop:disable Security/Open
-    raw = Nokogiri::XML(open(url))
-    # rubocop:enable Security/Open
+    payload = RestClient.get(url).body
+    raw = Nokogiri::XML(payload)
     pods = raw.search("//pod['title']")
     results = []
 
