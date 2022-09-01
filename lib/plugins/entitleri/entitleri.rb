@@ -1,3 +1,8 @@
+# rubocop:disable Lint/MissingCopEnableDirective
+# rubocop:disable Metrics/BlockLength
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/PerceivedComplexity
 class Bot::Plugin::Entitleri < Bot::Plugin
   require 'nokogiri'
   require 'open-uri'
@@ -55,7 +60,6 @@ class Bot::Plugin::Entitleri < Bot::Plugin
     matches = []
     checked_head = []
 
-    # rubocop:disable Metrics/BlockLength
     @s[:filters].each do |regex_s|
       regex = Regexp.new(regex_s)
       next unless @s[:imginfer_key]
@@ -66,6 +70,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
         # Check Content-Type via HEAD
         if regex.match(t).nil?
+          # rubocop:disable Style/GuardClause
           if t =~ Regexp.new(@s[:content_type_url_regex])
             if !valid_content_type?(t)
               checked_head.append(t)
@@ -75,6 +80,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
           else
             next
           end
+          # rubocop:enable Style/GuardClause
         end
         matches.append(t)
       end
@@ -117,8 +123,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       imginfer_errback = proc { |e| Bot.log.info "EntitleRI: Failed to get imginfer guess #{e}" }
       EM.defer(imginfer_operation, imginfer_callback, imginfer_errback)
     end
-    # rubocop:enable Metrics/BlockLength
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
 
   def get_guess_imginfer(url)
     Bot.log.info "EntitleRI: Getting imginfer results for #{url}"

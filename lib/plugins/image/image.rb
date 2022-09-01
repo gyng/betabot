@@ -1,5 +1,7 @@
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/BlockLength
+# rubocop:disable Lint/MissingCopEnableDirective
 class Bot::Plugin::Image < Bot::Plugin
-  # rubocop:disable Metrics/MethodLength
   def initialize(bot)
     @s = {
       trigger: {
@@ -179,7 +181,6 @@ class Bot::Plugin::Image < Bot::Plugin
   end
 
   def record(url, m)
-    # rubocop:disable Metrics/BlockLength
     Thread.new do
       Bot.log.info("#{self.class.name} - Saving image #{url}...")
       temp_dir = File.join(*@s[:image_directory], 'temp')
