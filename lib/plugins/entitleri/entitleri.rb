@@ -24,7 +24,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
         '(http.*jpeg(\/?\?.*)?$)',
         '(http.*bmp(\/?\?.*)?$)',
         '(http.*webp(\/?\?.*)?$)',
-        'http.*format=(jpg|jpeg|png|bmp|gif).*'
+        'http.*format=(jpg|jpeg|png|bmp|gif|webp).*'
       ],
       content_type_url_regex: '^http.*',
       content_type_regex: 'image/.*',
@@ -96,9 +96,9 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       imginfer_callback = proc { |imginfer_guess|
         begin
           if imginfer_guess
-            if imginfer_guess[:yolov5][:results].length.positive?
-              m.reply "yolov5: #{imginfer_guess[:yolov5][:str_repr].split("\n")[0]}"
-            end
+            # if imginfer_guess[:yolov5][:results].length.positive?
+            #   m.reply "yolov5: #{imginfer_guess[:yolov5][:str_repr].split("\n")[0]}"
+            # end
             if imginfer_guess[:easyocr][:results].length.positive?
               str = imginfer_guess[:easyocr][:str_repr]
                     .split(' ')[0..20]

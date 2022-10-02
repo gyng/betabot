@@ -19,7 +19,7 @@ class Bot::Plugin::Image < Bot::Plugin
         '(http.*webp(\/?\?.*)?$)',
         '(http.*webm(\/?\?.*)?$)',
         '(http.*mp4(\/?\?.*)?$)',
-        'http.*format=(jpg|jpeg|png|bmp|gif).*'
+        'http.*format=(jpg|jpeg|png|bmp|gif|webp).*'
       ],
       check_content_type_filter: '^http.*',
       relative_database_path: ['lib', 'databases', 'images.sqlite3'],
