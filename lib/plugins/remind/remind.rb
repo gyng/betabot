@@ -125,7 +125,8 @@ class Bot::Plugin::Remind < Bot::Plugin
         start_time = period.start_transition.local_start_at
         end_offset = format_offset.call(period.end_transition.offset.std_offset)
         end_time = period.end_transition.local_end_at
-        reply += " #{start_offset} to #{end_offset}, #{z.strftime('%F', start_time)} to #{z.strftime('%F', end_time)}"
+        reply += " Now: #{start_offset}; next: #{end_offset}. " \
+          "#{z.strftime('%F', start_time)} to #{z.strftime('%F', end_time)}"
       end
 
       m.reply reply
