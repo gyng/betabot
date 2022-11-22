@@ -101,12 +101,15 @@ class Bot::Plugin::Entitle < Bot::Plugin
     end
   end
 
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/PerceivedComplexity
   def handle_default(url)
     Bot.log.info('Entitle: handling as default URL type')
 
     user_agent = curl_needed?(url) ? @s[:curl_user_agent] : @s[:user_agent]
-    response = RestClient.get(url, user_agent:).body
-    doc = Nokogiri::HTML(response)
+    response = RestClient.get(url, user_agent:)
+    body = response.body
+    doc = Nokogiri::HTML(body)
     doc.encoding = 'utf-8'
 
     # Resume regular web-citizen processing
@@ -117,11 +120,16 @@ class Bot::Plugin::Entitle < Bot::Plugin
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
 
     # Check special cases that need access to DOM
-    is_mastodon = doc.at_css('a[href$="https://docs.joinmastodon.org/"]')
-    return "#{meta_og_desc.gsub("\n", ' ↵ '.gray)} — #{meta_og_title}" if is_mastodon
+    is_mastodon = (response.headers[:server] || '').match(/^Mastodon/i)
+    if is_mastodon
+      Bot.log.info("Entitle: Actually handling #{url} as Mastodon URL")
+      return "#{meta_og_desc.gsub("\n", ' ↵ '.gray)} — #{meta_og_title}"
+    end
 
     meta_og_title || meta_og_twitter_title || html_title || meta_desc || meta_og_desc
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/PerceivedComplexity
 
   def handle_twitter(url)
     Bot.log.info('Entitle: handling as Twitter tweet')
