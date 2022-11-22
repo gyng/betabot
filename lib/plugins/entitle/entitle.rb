@@ -13,7 +13,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
         'Entitle looks for uninformative URLs and blurts their titles out.'
       ] },
       subscribe: true,
-      timeout: 10,
+      timeout: 20,
       filters: [
         'http.*'
       ],
