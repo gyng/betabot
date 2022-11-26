@@ -119,8 +119,10 @@ class Bot::Plugin::Entitle < Bot::Plugin
     meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
 
+    p doc.at_css('a[href$="https://joinmastodon.org"]')
+
     # Check special cases that need access to DOM
-    is_mastodon = (response.headers[:server] || '').match(/^Mastodon/i)
+    is_mastodon = (response.headers[:server] || '').match(/^Mastodon/i) || doc.at_css('.notranslate#mastodon')
     if is_mastodon
       Bot.log.info("Entitle: Actually handling #{url} as Mastodon URL")
       return "#{meta_og_desc.gsub("\n", ' ↵ '.gray)} — #{meta_og_title}"
