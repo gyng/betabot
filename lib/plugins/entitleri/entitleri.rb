@@ -30,7 +30,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       content_type_regex: 'image/.*',
       timeout: 30,
       imginfer_key: '',
-      imginfer_infer_endpoint: 'http://localhost:8080/infer'
+      imginfer_infer_endpoint: 'http://localhost:8080/infer',
+      openapi_key: ''
     }
 
     super(bot)
@@ -112,7 +113,23 @@ class Bot::Plugin::Entitleri < Bot::Plugin
                     .gsub('age_rating_s', 'age_rating_s'.green)
                     .gsub('age_rating_q', 'age_rating_q'.brown)
                     .gsub('age_rating_e', 'age_rating_e'.red)
-              m.reply "danbooru2018: #{str}"
+
+              # OpenAPI summary post processing
+              transcript = ""
+              if imginfer_guess[:easyocr][:results].length.positive?
+                transcript = imginfer_guess[:easyocr][:str_repr]
+                             .split(' ')[0..20]
+                             .join(' ')[0..400]
+              end
+
+              Bot.log.info "EntitleRI: Tags #{str}"
+
+              if @s[:openapi_key]
+                do_openapi(m, str, transcript)
+              else
+                # Don't reply unless openapi fails: do the reply in do_openapi instead
+                m.reply "danbooru2018: #{str}"
+              end
             end
           end
         rescue StandardError => e
@@ -123,6 +140,56 @@ class Bot::Plugin::Entitleri < Bot::Plugin
       imginfer_errback = proc { |e| Bot.log.info "EntitleRI: Failed to get imginfer guess #{e}" }
       EM.defer(imginfer_operation, imginfer_callback, imginfer_errback)
     end
+  end
+
+  def do_openapi(m, tags_s, text)
+    operation = proc {
+      Timeout.timeout(@s[:timeout]) do
+        Bot.log.info "EntitleRI: Getting openapi enhanced imginfer results for #{tags_s}"
+
+        prompt = "I have a creative writing class homework assignment I need your help with." \
+                 "Please analyze these image tags generated from an image by an image " \
+                 "classifier ML model trained on Danbooru and comment on any speculated " \
+                 "events happening in the image with context." \
+                 "Provide your answer in the style of a sardonic one-liner written by Bloomberg's Matt Levine. " \
+                 "Assume the tags provided are correct. " \
+                 "Assume the text transcript, if available, can have errors. "\
+                 "The text transcript is verified by a human to be relevant and related to the image. " \
+                 "Do not talk about the image classifier, tags, or transcript in the answer as it is supposed to " \
+                 "be a secret. " \
+                 "Put your actual answer in curly braces like this: {{answer}}\n\n" \
+                 "tags: #{tags_s} \n\n" \
+                 "text transcript: #{text ? text : "no text"}"
+
+        body = { "model": "gpt-3.5-turbo", "messages": [
+          { "role": "system", "content": "You are a helpful assistant." },
+          { "role": "user", "content": prompt }
+        ] }
+        body = body.to_json
+        res = JSON.parse(RestClient.post("https://api.openai.com/v1/chat/completions", body, {
+                                           'Content-Type' => 'application/json',
+                                           'Authorization' => "Bearer #{@s[:openapi_key]}"
+                                         }), symbolize_names: true)
+      end
+    }
+    callback = proc { |res|
+      begin
+        guess = res[:choices][0][:message][:content]
+        guess = guess.match(/(?<=\{\{).*?(?=\}\})/)[0]
+
+        if guess
+          m.reply "gpt-3.5-turbo: #{guess}"
+        end
+      rescue StandardError => e
+        m.reply "danbooru2018: #{tags_s}"
+        Bot.log.info "EntitleRI: Failed to parse openapi response #{e} #{e.backtrace}"
+      end
+    }
+    errback = proc { |e| Bot.log.info "EntitleRI: Failed to get openapi guess #{e}" }
+    EM.defer(operation, callback, errback)
+  rescue StandardError => e
+    Bot.log.info "EntitleRI: Failed to parse openapi response #{e} #{e.backtrace}"
+    Bot.log.warn "EntitleRI: Failed to parse openapi response #{imginfer_guess}"
   end
   # rubocop:enable Metrics/CyclomaticComplexity
 
