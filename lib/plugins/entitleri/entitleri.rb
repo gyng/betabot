@@ -116,7 +116,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
               # OpenAPI summary post processing
               transcript = ""
-              if imginfer_guess[:easyocr][:results].length.positive?
+              # Don't hardcode exclusion list
+              if imginfer_guess[:easyocr][:results].length.positive? && !match.include? "aibi"
                 transcript = imginfer_guess[:easyocr][:str_repr]
                              .split(' ')[0..20]
                              .join(' ')[0..400]
