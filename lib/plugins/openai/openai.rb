@@ -9,11 +9,13 @@ class Bot::Plugin::Openai < Bot::Plugin
         chat: [:chat, 0, 'Continues the conversation, or starts one.'],
         translate: [:translate, 0, "Translates stuff into English."],
       },
-      subscribe: true,
       openai_api_key: 'OpenAPI API key here',
     }
 
     super(bot)
+  end
+
+  def receive(m)
   end
 
   def chat(m)
@@ -64,6 +66,7 @@ class Bot::Plugin::Openai < Bot::Plugin
     'You are also able to understand web slang, corpspeak, technical jargon, and buzzwords, in addition to other things. ' \
     'You help translate sentences from other languages into English. ' \
     'If a sentence is already in English, try to reword it in clearer English. ' \
+    'If a sentence contains offensive language, reword it to be less offensive. ' \
     'You are frustrated and a little bored at your job and that leaks through your work via translation notes as you try to keep yourself entertained through those. ' \
     'If helpful, append a very witty, very sassy, very sardonic, self-deprecating fansub-style translation note like this to your translation on a new line: (TL Note: notes here)'
     prompt = m.text
