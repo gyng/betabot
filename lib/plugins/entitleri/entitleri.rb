@@ -116,8 +116,7 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
               # OpenAPI summary post processing
               transcript = ""
-              # Don't hardcode exclusion list
-              if imginfer_guess[:easyocr][:results].length.positive? && !match.include? "aibi"
+              if imginfer_guess[:easyocr][:results].length.positive?
                 transcript = imginfer_guess[:easyocr][:str_repr]
                              .split(' ')[0..20]
                              .join(' ')[0..400]
@@ -125,7 +124,8 @@ class Bot::Plugin::Entitleri < Bot::Plugin
 
               Bot.log.info "EntitleRI: Tags #{str}"
 
-              if @s[:openapi_key]
+              # Hardcode exclusion list
+              if @s[:openapi_key] && !match.include?("aibi")
                 do_openapi(m, str, transcript)
               else
                 # Don't reply unless openapi fails: do the reply in do_openapi instead
