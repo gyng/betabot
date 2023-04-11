@@ -233,20 +233,19 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
     return if transcript.length == 0
 
-    transcript = transcript[0..20].join("\n")[0..400]
+    transcript = transcript.join("\n")[0..500]
     # rubocop:disable Layout/LineLength
     operation = proc {
       Timeout.timeout(10) do
         prompt = "You are a very professional summarizer and can understand all human language, including slang." \
-        "Please masterfully, concisely, and with much sass and dry wit, summarise the contents of this YouTube video titled \"#{title}\" " \
+        "Please masterfully and concisely concisely summarise the contents of this video titled \"#{title}\" " \
         "given the as many lines of its transcript as feasible, with URL-encoded elements. " \
-        "Your answer should be a short sentence. " \
+        "Your answer should be a short sentence in a masterfully-done, dry-witty, and sardonic style. " \
         "The title is 100% guaranteed to be related to the transcript. " \
         "The transcript is guaranteed to be accurate. " \
         'If a sentence contains offensive language, reword it to be less offensive. ' \
-        'You are frustrated and a little bored at your job and that leaks through your work via notes as you try to keep yourself entertained through those. ' \
-        'If helpful, append a very witty, very sassy, very sardonic, very cynical, note to your summary on a new line like this: (Note: notes here). ' \
-        "Transcript follows\n###\n#{transcript}"
+        'You are frustrated and a little bored at your job and that leaks through your work as you try to keep yourself entertained. ' \
+        "Transcript follows\n###\n#{transcript}\n###\nSummary: "
         body = { "model": "gpt-3.5-turbo", "messages": [
           { "role": "system", "content": "You are a helpful assistant." },
           { "role": "user", "content": prompt }
