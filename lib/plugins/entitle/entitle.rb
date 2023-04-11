@@ -3,6 +3,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
   require 'nokogiri'
   require 'open-uri'
   require 'timeout'
+  require 'uri'
 
   def initialize(bot)
     @s = {
@@ -20,7 +21,8 @@ class Bot::Plugin::Entitle < Bot::Plugin
       user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
       curl_user_agent: 'curl/7.68.0',
       # https://dev.twitch.tv/console/apps, redirect to http://localhost
-      twitch_client_id: ''
+      twitch_client_id: '',
+      openai_api_key: ''
     }
     @twitter_status_regex = %r{^(?:https?://)?(?:www\.|mobile\.)?twitter\.com/([a-zA-Z0-9_]+)/status/(\d+)/?}
     @twitch_stream_regex = %r{^(?:https?://)?(?:www\.)?twitch\.tv/([a-zA-Z0-9_]+)/?}
@@ -76,8 +78,16 @@ class Bot::Plugin::Entitle < Bot::Plugin
           end
         }
         callback = proc { |title|
-          m.reply(title) if !title.nil? && !titles.include?(title)
-          titles.push(title)
+          if !titles.include?(title)
+            if !title.nil?
+              m.reply(title)
+
+              if is_youtube_url?(t)
+                handle_youtube_summary(m, t, title)
+              end
+              titles.push(title)
+            end
+          end
         }
         errback = proc { |e| Bot.log.info "Entitle: Failed to get title #{e}" }
         EM.defer(operation, callback, errback)
@@ -119,7 +129,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
     meta_og_desc = (doc.at("meta[property='og:description']") || {})['content']
     meta_og_twitter_title = (doc.at("meta[property='twitter:title']") || {})['content']
 
-    p doc.at_css('a[href$="https://joinmastodon.org"]')
+    title = meta_og_title || meta_og_twitter_title || html_title || meta_desc || meta_og_desc
 
     # Check special cases that need access to DOM
     is_mastodon = (response.headers[:server] || '').match(/^Mastodon/i) || doc.at_css('.notranslate#mastodon')
@@ -128,7 +138,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
       return "#{meta_og_desc.gsub("\n", ' ↵ '.gray)} — #{meta_og_title}"
     end
 
-    meta_og_title || meta_og_twitter_title || html_title || meta_desc || meta_og_desc
+    title
   end
   # rubocop:enable Metrics/CyclomaticComplexity
   # rubocop:enable Metrics/PerceivedComplexity
@@ -195,13 +205,87 @@ class Bot::Plugin::Entitle < Bot::Plugin
     end
   end
 
+  def handle_youtube_summary(m, url, title)
+    if !@s[:openai_api_key]
+      Bot.log.info("Entitle: OpenAI API key not set, skipping YT summary...")
+      return
+    end
+
+    Bot.log.info("Entitle: Getting youtube summary for #{url} / #{title}")
+
+    response = RestClient.get(url, user_agent: @s[:curl_user_agent])
+    base_url = response.body.match(/"baseUrl":"(https:\/\/www\.youtube\.com\/api\/timedtext[^"]*lang=..)/)
+    base_url = base_url.captures.first.gsub('\u0026', '&') if base_url
+
+    Bot.log.info "Entitle: YT timedtext URL: #{base_url}"
+
+    response = RestClient.get(base_url, user_agent: @s[:curl_user_agent])
+    doc = Nokogiri::XML(response)
+
+    transcript = []
+    doc.xpath('//text').each do |node|
+      # start = node.attribute('start').value
+      content = node.content.gsub('\u00A0', ' ').gsub('&amp;', '&')
+      transcript.push("#{content}")
+    end
+
+    Bot.log.info "Entitle: YT transcript: #{transcript}"
+
+    return if transcript.length == 0
+
+    transcript = transcript[0..15].join("\n")[0..400]
+    # rubocop:disable Layout/LineLength
+    operation = proc {
+      Timeout.timeout(10) do
+        prompt = "You are a very professional summarizer and can understand all human language, including slang." \
+        "Please masterfully, concisely, and with much sass and dry wit, summarise the contents of this YouTube video titled \"#{title}\" " \
+        "given the as many lines of its transcript as feasible, with URL-encoded elements. " \
+        "Your answer should be a short sentence. " \
+        "The title is 100% guaranteed to be related to the transcript. " \
+        "The transcript is guaranteed to be accurate. " \
+        'If a sentence contains offensive language, reword it to be less offensive. ' \
+        'You are frustrated and a little bored at your job and that leaks through your work via notes as you try to keep yourself entertained through those. ' \
+        'If helpful, append a very witty, very sassy, very sardonic, note to your summary on a new line like this: (Note: notes here). ' \
+        "Transcript follows\n###\n#{transcript}"
+        body = { "model": "gpt-3.5-turbo", "messages": [
+          { "role": "system", "content": "You are a helpful assistant." },
+          { "role": "user", "content": prompt }
+        ] }
+        body = body.to_json
+        res = JSON.parse(RestClient.post("https://api.openai.com/v1/chat/completions", body, {
+                                           'Content-Type' => 'application/json',
+                                           'Authorization' => "Bearer #{@s[:openai_api_key]}"
+                                         }), symbolize_names: true)
+      end
+    }
+    callback = proc { |res|
+      reply = res[:choices][0][:message][:content]
+      if reply.empty?
+        Bot.log.info("Entitle: Empty response from server")
+      elsif reply.include?("CANNOT DO IT") || reply.include?("I'm sorry, but")
+        Bot.log.info("Entitle: AI cannot summarise. #{reply}")
+      else
+        m.reply(reply)
+      end
+    }
+    errback = proc { |e| Bot.log.info "EntitleRI: Failed to get openapi guess #{e}" }
+    EM.defer(operation, callback, errback)
+  rescue StandardError => e
+    Bot.log.info "Entitle: Failed to parse openapi response #{e} #{e.backtrace}"
+  end
+  # rubocop:enable Layout/LineLength
+
   def curl_needed?(url)
-    # Special handling needed for cerntain popular sites
+    # Special handling needed for certain popular sites
+    is_youtube_url = is_youtube_url?(url)
+    Bot.log.info('Entitle: this is a YouTube URL') if is_youtube_url
+    is_youtube_url
+  end
+
+  def is_youtube_url?(url)
     # https://stackoverflow.com/a/30795206
     youtube_url_regex = %r{^(?:https?://)?(?:youtu\.be/|(?:www\.|m\.)?youtube\.com)}
     is_youtube_url = url.match(youtube_url_regex)
-    Bot.log.info('Entitle: this is a YouTube URL') if is_youtube_url
-
     is_youtube_url
   end
 end
