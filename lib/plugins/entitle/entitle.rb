@@ -233,7 +233,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
 
     return if transcript.length == 0
 
-    transcript = transcript[0..15].join("\n")[0..400]
+    transcript = transcript[0..20].join("\n")[0..400]
     # rubocop:disable Layout/LineLength
     operation = proc {
       Timeout.timeout(10) do
@@ -245,7 +245,7 @@ class Bot::Plugin::Entitle < Bot::Plugin
         "The transcript is guaranteed to be accurate. " \
         'If a sentence contains offensive language, reword it to be less offensive. ' \
         'You are frustrated and a little bored at your job and that leaks through your work via notes as you try to keep yourself entertained through those. ' \
-        'If helpful, append a very witty, very sassy, very sardonic, note to your summary on a new line like this: (Note: notes here). ' \
+        'If helpful, append a very witty, very sassy, very sardonic, very cynical, note to your summary on a new line like this: (Note: notes here). ' \
         "Transcript follows\n###\n#{transcript}"
         body = { "model": "gpt-3.5-turbo", "messages": [
           { "role": "system", "content": "You are a helpful assistant." },
