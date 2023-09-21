@@ -18,7 +18,7 @@ betabot is a bot that aims to be protocol agnostic, easy to deploy and simple to
 
 Features network adapters and plugin framework goodies (database ORM, web hooks, settings, install).
 
-Has full IRC and basic Slack and Discord support. Some useful plugins are also included. Not all included plugins support Slack and Discord right now.
+Has full IRC and basic Slack, Discord, and Matrix (unencrypted) support. Some useful plugins are also included. Not all included plugins support Slack, Discord, or Matrix right now.
 
 ## Installation
 
@@ -32,7 +32,7 @@ You can choose either to use or not to use Docker to run betabot.
 
 #### With Docker
 
-[GitHub Packages](https://github.com/gyng?tab=packages&repo_name=betabot)
+[GitHub Packages](https://github.com/gyng/betabot/pkgs/container/betabot)
 
 0. Requirements: [Docker](https://www.docker.com/products/overview), [Docker Compose V2](https://docs.docker.com/compose/install/)
 
@@ -263,7 +263,7 @@ See: [Plugin development](PLUGINS.md)
 
 Docker: `docker-compose -f docker-compose.test.yml up --build
 
-Tests can be run with `bundle exec rspec`. Current test coverage is very limited. Ruocop can be run with `bundle exec rubocop`.
+Tests can be run with `bundle exec rspec`. Current test coverage is very limited. Rubocop can be run with `bundle exec rubocop`.
 
 The EventMachine reactor has to be set up and torn down for most specs so there is a helper method `with_em(&block)` included in `spec_helper.rb`.
 
